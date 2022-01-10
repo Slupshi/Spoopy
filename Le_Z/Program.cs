@@ -42,9 +42,9 @@ namespace Le_Z
 
         private async Task HandleCommandAsync(SocketMessage msg)
         {
+            
             var message = (SocketUserMessage)msg;
             if (message == null) return;
-            
             int argPos = 0;
             if (!message.HasCharPrefix('!', ref argPos)) return;
             var context = new SocketCommandContext(_client, message);

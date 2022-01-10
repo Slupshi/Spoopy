@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -16,16 +17,34 @@ namespace Le_Z.Modules
 		// ~!say hello world -> hello world
 		[Command("say")]
 		[Summary("Echoes a message.")]
+		
 		public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
-			=> ReplyAsync(echo);
+        {
+			Context.Message.DeleteAsync();
+			return ReplyAsync(echo);
+		}
+			
+			
 		// ReplyAsync is a method on ModuleBase 
 
 		[Command("wakeup")]
 		public Task WakeUpAsync()
 			=> ReplyAsync("Ta gueule je dors");
 
-		
-	}
+		[Command("avatar")]
+		public Task GetLargerAvatarAsync(SocketUser user,ushort size = 512)
+        {
+			if (!(size == 16 || size == 32 || size == 64 || size == 128 || size == 256 || size == 512))
+			{
+				ReplyAsync("Nique ta mère la taille est pas valide");
+				return Task.CompletedTask;
+			}
+			ulong userID = user.Id;
+			string avatarID = user.AvatarId;
+			return ReplyAsync(CDN.GetUserAvatarUrl(userID, avatarID, size, ImageFormat.Auto));
+		}
+		       
+    }
 
 	
 }
