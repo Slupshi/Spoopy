@@ -19,16 +19,18 @@ namespace Le_Z
         public async Task RunBotAsync()
         {
             _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel= LogSeverity.Debug });
-                     
+            _client.Log += Log;
+
+            commands = new CommandService();
+            await InstallCommandsAsync();
+
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
             
             await _client.StartAsync();
             await Task.Delay(-1);
 
-            _client.Log += Log;
-
-            commands = new CommandService();
+                     
                     
         }
 
@@ -42,6 +44,7 @@ namespace Le_Z
         {
             var message = (SocketUserMessage)msg;
             if (message == null) return;
+            
             int argPos = 0;
             if (!message.HasCharPrefix('!', ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
