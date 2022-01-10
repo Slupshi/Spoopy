@@ -43,8 +43,15 @@ namespace Le_Z.Modules
 			string avatarID = user.AvatarId;
 			return ReplyAsync(CDN.GetUserAvatarUrl(userID, avatarID, size, ImageFormat.Auto));
 		}
-		       
-    }
+
+		[Command("zeub")]
+		public Task ZeubAsync()
+        {
+			throw new NotImplementedException();
+        }
+
+
+	}
 
 	
 }
