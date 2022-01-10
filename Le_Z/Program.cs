@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Le_Z
@@ -25,9 +26,28 @@ namespace Le_Z
             await _client.StartAsync();
             await Task.Delay(-1);
 
-
             _client.Log += Log;
+
+            commands = new CommandService();
                     
+        }
+
+        public async Task InstallCommandsAsync()
+        {
+            _client.MessageReceived += HandleCommandAsync;
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+        }
+
+        private async Task HandleCommandAsync(SocketMessage msg)
+        {
+            var message = (SocketUserMessage)msg;
+            if (message == null) return;
+            int argPos = 0;
+            if (!message.HasCharPrefix('!', ref argPos)) return;
+            var context = new SocketCommandContext(_client, message);
+            var result = await commands.ExecuteAsync(context, argPos, null);
+            if (!result.IsSuccess) await context.Channel.SendMessageAsync(result.ErrorReason);
+
         }
 
         private Task Log(LogMessage msg)
