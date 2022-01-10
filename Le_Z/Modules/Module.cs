@@ -55,4 +55,14 @@ namespace Le_Z.Modules
 			await ReplyAsync($"{userInfo.Username}#{userInfo.Discriminator}");
 		}
 	}
+	[Group("say")]
+	public class SayModule : ModuleBase<SocketCommandContext>
+	{
+		
+		[Command("say")]
+		public async Task SayAsync(string echo)
+		{
+			await Context.Channel.SendMessageAsync(echo);
+		}
+	}
 }
