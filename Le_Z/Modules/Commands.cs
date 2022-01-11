@@ -104,7 +104,12 @@ namespace Le_Z.Modules
 			Context.Message.DeleteAsync();
 			user.CreateDMChannelAsync();
 			msg = Format.Bold(msg);
-			ReplyAsync($"**{user.Nickname} est entrain de se faire bully**");
+			string userName = (user.Nickname == null) switch
+			{
+				false => user.Nickname,
+				true => user.Username,
+			};
+			ReplyAsync($"**{userName} est entrain de se faire bully**");
 			return user.SendMessageAsync(msg);
         }
 
