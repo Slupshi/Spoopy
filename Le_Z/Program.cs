@@ -62,7 +62,7 @@ namespace Le_Z
             }
             //
             int argPos = 0;
-            if (!message.HasCharPrefix('!', ref argPos)) return;
+            if (!message.HasStringPrefix("z!", ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
             await context.Guild.DownloadUsersAsync();
             var result = await commands.ExecuteAsync(context, argPos, null);
