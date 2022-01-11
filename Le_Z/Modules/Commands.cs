@@ -14,23 +14,22 @@ namespace Le_Z.Modules
 	// Create a module with no prefix
 	public class Commands : ModuleBase<SocketCommandContext>
 	{
+		//!help
 		[Command("help")]
 		public Task HelpAsync() 
 			=> ReplyAsync("**Tu as vraiment cru que j'allais t'aider ?**");
 
-		
-
 		// !say hello world -> **hello world**
 		[Command("say")]
 		[Summary("Echoes a message.")]
-		
 		public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
         {
 			Context.Message.DeleteAsync();
 			var boldEcho = Format.Bold(echo);
 			return ReplyAsync(boldEcho);
 		}
-		// !wakeup -> **Ta gueule je dors**		
+
+		// !wakeup 	
 		[Command("wakeup")]
 		public Task WakeUpAsync()
 		{
@@ -38,7 +37,8 @@ namespace Le_Z.Modules
 			Context.Message.AddReactionAsync(emoji);
 			return ReplyAsync("**Ta gueule je dors**");
 		}
-		// !avatar @user [size] -> l'url de l'avatar avec la size choisi
+
+		// !avatar @user [size]
 		[Command("avatar")]
 		public Task GetAndResizeAvatarAsync(SocketUser user,ushort size = 512)
         {
@@ -53,31 +53,63 @@ namespace Le_Z.Modules
 			return ReplyAsync(CDN.GetUserAvatarUrl(userID, avatarID, size, ImageFormat.Auto));
 		}
 
+		// !status @user
 		[Command("status")]
-		public Task StatusAsync(SocketUser user)
-			=>ReplyAsync($"{user.Username} is {user.Status}");
-
-		[Command("clear")]
-		public Task ClearAsync(int messageCount)
-		{
-			throw new NotImplementedException();
+		public Task StatusAsync(SocketGuildUser user = null)
+        {
+			
+			if (user == null) return ReplyAsync("**Précise le nom de quelqu'un**");
+			var userStatus = user.Status switch
+			{
+				UserStatus.Online => $"{user.Nickname} est en ligne",
+				UserStatus.Offline => $"{user.Nickname} est hors ligne",
+				UserStatus.Invisible => $"{user.Nickname} se cache comme une pute",
+				UserStatus.DoNotDisturb => $"{user.Nickname} coule un bronze",
+				UserStatus.Idle => $"{user.Nickname} est entrain de pisser",
+				_ => "Nan franchement même moi je sais pas"
+			};
+			userStatus = Format.Bold(userStatus);
+			return ReplyAsync($"{userStatus}");
 		}
+			
+		// !clear [count]
+		[Command("clear")]
+		public async Task ClearAsync(int messageCount=1)
+		{
+			int count = 0;
+			var msgToDelete = Context.Channel.GetMessagesAsync().TakeLast(messageCount);
+            await foreach (var msg in msgToDelete)
+            {
+				foreach(var msgBis in msg)
+                {
+					if (count == messageCount) return;
+					await msgBis.DeleteAsync();
+					count++;
+                }
+			}
+		} 	
 
-		//[Command("spam")]
-		//public Task SpamAsync(int spamCount, string msgToSpam)
-		//{
-		//	for (int i = 0; i < spamCount; i++) ReplyAsync(msgToSpam);
-		//	return Task.CompletedTask;
-		//}
+		// !spam count message
+        [Command("spam")]
+        public Task SpamAsync(int spamCount, [Remainder] string msgToSpam)
+        {
+			for (int i = 0; i < spamCount; i++) ReplyAsync(msgToSpam);
+			return Task.CompletedTask;
+        }
 
-		//[Command("bully")]
-		//public Task TestAsync(SocketUser user)
-		//{
-		//    return user.SendMessageAsync("Salut pd");
-		//}
+		// !bully @user message
+        [Command("bully")]
+        public Task TestAsync(SocketGuildUser user, [Remainder] string msg)
+        {
+			Context.Message.DeleteAsync();
+			user.CreateDMChannelAsync();
+			msg = Format.Bold(msg);
+			ReplyAsync($"**{user.Nickname} est entrain de se faire bully**");
+			return user.SendMessageAsync(msg);
+        }
 
 
-	}
+    }
 
 	
 }

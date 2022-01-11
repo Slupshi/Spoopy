@@ -18,13 +18,14 @@ namespace Le_Z
 
         public async Task RunBotAsync()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel= LogSeverity.Debug });
+            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel= LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
             _client.Log += Log;
 
             commands = new CommandService();
             await InstallCommandsAsync();
 
             await _client.SetGameAsync("Te pète le fiak");
+            
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
@@ -44,7 +45,6 @@ namespace Le_Z
 
         private async Task HandleCommandAsync(SocketMessage msg)
         {
-            
             var message = (SocketUserMessage)msg;
             if (message == null) return;
             if (message.Content.Contains("http")) return;
@@ -64,6 +64,7 @@ namespace Le_Z
             int argPos = 0;
             if (!message.HasCharPrefix('!', ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
+            await context.Guild.DownloadUsersAsync();
             var result = await commands.ExecuteAsync(context, argPos, null);
             if (!result.IsSuccess)
             {
