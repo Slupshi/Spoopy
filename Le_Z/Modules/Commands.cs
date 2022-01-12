@@ -91,7 +91,8 @@ namespace Le_Z.Modules
 				}
 			}
 			userPresenceStatus = Format.Bold(userPresenceStatus);
-			bool isPlaying = false;
+			bool isActive = false;
+			//bool isPlaying = false;
 			bool isOnSpotify = false;
 			//bool isStreaming = false;
 			string userPlayingStatus = " ";
@@ -99,14 +100,31 @@ namespace Le_Z.Modules
 			var userStatus = $"{userPresenceStatus}";
 			if (user.Activities.Count > 0)
             {
-				isPlaying = true;
+				isActive = true;
 				var userPlaying = user.Activities.First();
-                if(userPlaying.Type == ActivityType.CustomStatus)
+                if(userPlaying.Type == ActivityType.CustomStatus && user.Activities.Count > 1)
                 {
 					userPlaying = user.Activities.ElementAt(1);
-                }
-				userPlayingStatus = $"Joue à \"{userPlaying.Name}\"";
-				if (userPlaying.Details != null) userPlayingStatus = $"{userPlayingStatus} {userPlaying.Details}";
+                }                
+				if (userPlaying.Type == ActivityType.Playing)
+                {
+					if (userPlaying is Game gameInfo)
+					{
+						userPlayingStatus = $"Joue à \"{gameInfo.Name}\"";
+					}
+					if (userPlaying is RichGame richGameInfo)
+                    {
+						//isPlaying = true;
+						var userPlayingTime= (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
+						userPlayingStatus = $"Joue à \"{richGameInfo.Name}\" depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
+                        if (richGameInfo.Details != null && richGameInfo.State != null)
+                        {
+							userPlayingStatus = $"Joue à \"{richGameInfo.Name}\"" +
+								$"\n	{richGameInfo.Details}" +
+								$"\n	{richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";							
+						}
+					}
+				}								
 				if (userPlaying.Type == ActivityType.Listening)
                 {
 					if(userPlaying is SpotifyGame spotifyInfo)
@@ -124,14 +142,15 @@ namespace Le_Z.Modules
 				}
 				if(userPlaying.Type == ActivityType.Streaming)
                 {
-					//isStreaming = true;
-					userPlayingStatus = "Est en Stream";
+					if (userPlaying is StreamingGame streamInfo)
+						//isStreaming = true;
+						userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
 
 				}
 			}
 			userPresenceStatus = Format.Bold(userPresenceStatus);
 			userPlayingStatus = Format.Bold(userPlayingStatus);			
-			if(isPlaying && !isOnSpotify)
+			if(isActive && !isOnSpotify)
             {
 				userStatus = $"{userPresenceStatus}\n{userPlayingStatus}";
 			}
@@ -189,9 +208,5 @@ namespace Le_Z.Modules
 			ReplyAsync("https://tenor.com/view/zemmour-1825-jvc-menace-rigole-gif-23505307");		
 			return user.SendMessageAsync(msg);
         }
-
-
-    }
-
-	
+    }	
 }
