@@ -18,6 +18,8 @@ namespace Le_Z.Modules
 		public Task HelpAsync() 
 			=> ReplyAsync("**Tu as vraiment cru que j'allais t'aider ?**");
 
+		//=============================================================================================================================================================//
+
 		// !say hello world -> **hello world**
 		[Command("say")]
 		[Summary("Echoes a message.")]
@@ -28,6 +30,8 @@ namespace Le_Z.Modules
 			return ReplyAsync(boldEcho);
 		}
 
+		//=============================================================================================================================================================//
+
 		// !wakeup 	
 		[Command("wakeup")]
 		public Task WakeUpAsync()
@@ -36,6 +40,8 @@ namespace Le_Z.Modules
 			Context.Message.AddReactionAsync(emoji);
 			return ReplyAsync("**Ta gueule je dors**");
 		}
+
+		//=============================================================================================================================================================//
 
 		// !avatar @user [size]
 		[Command("avatar")]
@@ -51,6 +57,8 @@ namespace Le_Z.Modules
 			string avatarID = user.AvatarId;
 			return ReplyAsync(CDN.GetUserAvatarUrl(userID, avatarID, size, ImageFormat.Auto));
 		}
+
+		//=============================================================================================================================================================//
 
 		// !status @user
 		[Command("status")]
@@ -71,6 +79,18 @@ namespace Le_Z.Modules
 				UserStatus.Idle => $"{userName} est entrain de pisser",
 				_ => "Nan franchement même moi je sais pas"
 			};
+            if (!user.IsBot)
+            {
+				if (user.ActiveClients.First().ToString() == "Mobile")
+				{
+					userPresenceStatus = $"{userPresenceStatus} sur son téléphone";
+				}
+				if (user.ActiveClients.First().ToString() == "Web")
+				{
+					userPresenceStatus = $"{userPresenceStatus} sur Web, car trop pauvre pour download l'appli";
+				}
+			}
+			userPresenceStatus = Format.Bold(userPresenceStatus);
 			bool isPlaying = false;
 			bool isOnSpotify = false;
 			//bool isStreaming = false;
@@ -81,14 +101,26 @@ namespace Le_Z.Modules
             {
 				isPlaying = true;
 				var userPlaying = user.Activities.First();
+                if(userPlaying.Type == ActivityType.CustomStatus)
+                {
+					userPlaying = user.Activities.ElementAt(1);
+                }
 				userPlayingStatus = $"Joue à \"{userPlaying.Name}\"";
+				if (userPlaying.Details != null) userPlayingStatus = $"{userPlayingStatus} {userPlaying.Details}";
 				if (userPlaying.Type == ActivityType.Listening)
                 {
-					isOnSpotify = true;
-					userPlayingStatus = "Ecoute de la musique";
-					userListeningStatus = $"{userPlaying}";
-					string[] spotifyInfo = userListeningStatus.Split(' ');
-					userListeningStatus = $"\n	Artiste : {spotifyInfo[0]}\n	Titre : {spotifyInfo[2]} ";
+					if(userPlaying is SpotifyGame spotifyInfo)
+                    {
+						isOnSpotify = true;
+						userPlayingStatus = "Ecoute de la musique";
+						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;						
+						userListeningStatus = $"" +
+							$"\n	**Artiste : {spotifyInfo.Artists.First()}**" +
+							$"\n	**Titre : {spotifyInfo.TrackTitle}**" +
+							$"\n	**Album : {spotifyInfo.AlbumTitle}**" +
+							$"\n	**Durée : {spotifyInfoDuration.ToString(@"mm\:ss")}**" +
+							$"\n	**Lien :** {spotifyInfo.TrackUrl}";
+					}					
 				}
 				if(userPlaying.Type == ActivityType.Streaming)
                 {
@@ -97,21 +129,21 @@ namespace Le_Z.Modules
 
 				}
 			}
-            if (isPlaying && !isOnSpotify)
+			userPresenceStatus = Format.Bold(userPresenceStatus);
+			userPlayingStatus = Format.Bold(userPlayingStatus);			
+			if(isPlaying && !isOnSpotify)
             {
 				userStatus = $"{userPresenceStatus}\n{userPlayingStatus}";
 			}
-			if (isOnSpotify)
+			if(isOnSpotify)
             {
-				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} || {userListeningStatus}";
-			}
-				
-
-
-			userStatus = Format.Bold(userStatus);
+				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} **||** {userListeningStatus}";
+			}				
 			return ReplyAsync($"{userStatus}");
 		}
-			
+
+		//=============================================================================================================================================================//
+
 		// !clear [count]
 		[Command("clear")]
 		public async Task ClearAsync(int messageCount=1)
@@ -127,18 +159,22 @@ namespace Le_Z.Modules
 					count++;
 				}
 			}
-		} 	
+		}
+
+		//=============================================================================================================================================================//
 
 		// !spam count message
-        [Command("spam")]
+		[Command("spam")]
         public Task SpamAsync(int spamCount, [Remainder] string msgToSpam)
         {
 			for (int i = 0; i < spamCount; i++) ReplyAsync(msgToSpam);
 			return Task.CompletedTask;
         }
 
+		//=============================================================================================================================================================//
+
 		// !bully @user message
-        [Command("bully")]
+		[Command("bully")]
         public Task TestAsync(SocketGuildUser user, [Remainder] string msg)
         {
 			Context.Message.DeleteAsync();
@@ -150,6 +186,7 @@ namespace Le_Z.Modules
 				true => user.Username,
 			};
 			ReplyAsync($"**{userName} est entrain de se faire bully**");
+			ReplyAsync("https://tenor.com/view/zemmour-1825-jvc-menace-rigole-gif-23505307");		
 			return user.SendMessageAsync(msg);
         }
 
