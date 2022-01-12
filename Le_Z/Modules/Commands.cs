@@ -11,7 +11,6 @@ namespace Le_Z.Modules
 {
 	// Keep in mind your module **must** be public and inherit ModuleBase.
 	// If it isn't, it will not be discovered by AddModulesAsync!
-	// Create a module with no prefix
 	public class Commands : ModuleBase<SocketCommandContext>
 	{
 		//!help
@@ -57,17 +56,58 @@ namespace Le_Z.Modules
 		[Command("status")]
 		public Task StatusAsync(SocketGuildUser user = null)
         {
-			
 			if (user == null) return ReplyAsync("**Précise le nom de quelqu'un**");
-			var userStatus = user.Status switch
+			string userName = (user.Nickname == null) switch
 			{
-				UserStatus.Online => $"{user.Nickname} est en ligne",
-				UserStatus.Offline => $"{user.Nickname} est hors ligne",
-				UserStatus.Invisible => $"{user.Nickname} se cache comme une pute",
-				UserStatus.DoNotDisturb => $"{user.Nickname} coule un bronze",
-				UserStatus.Idle => $"{user.Nickname} est entrain de pisser",
+				false => user.Nickname,
+				true => user.Username,
+			};
+			string userPresenceStatus = user.Status switch
+			{
+				UserStatus.Online => $"{userName} est en ligne",
+				UserStatus.Offline => $"{userName} est hors ligne",
+				UserStatus.Invisible => $"{userName} se cache comme une pute",
+				UserStatus.DoNotDisturb => $"{userName} coule un bronze",
+				UserStatus.Idle => $"{userName} est entrain de pisser",
 				_ => "Nan franchement même moi je sais pas"
 			};
+			bool isPlaying = false;
+			bool isOnSpotify = false;
+			//bool isStreaming = false;
+			string userPlayingStatus = " ";
+			string userListeningStatus = " ";
+			var userStatus = $"{userPresenceStatus}";
+			if (user.Activities.Count > 0)
+            {
+				isPlaying = true;
+				var userPlaying = user.Activities.First();
+				userPlayingStatus = $"Joue à \"{userPlaying.Name}\"";
+				if (userPlaying.Type == ActivityType.Listening)
+                {
+					isOnSpotify = true;
+					userPlayingStatus = "Ecoute de la musique";
+					userListeningStatus = $"{userPlaying}";
+					string[] spotifyInfo = userListeningStatus.Split(' ');
+					userListeningStatus = $"\n	Artiste : {spotifyInfo[0]}\n	Titre : {spotifyInfo[2]} ";
+				}
+				if(userPlaying.Type == ActivityType.Streaming)
+                {
+					//isStreaming = true;
+					userPlayingStatus = "Est en Stream";
+
+				}
+			}
+            if (isPlaying && !isOnSpotify)
+            {
+				userStatus = $"{userPresenceStatus}\n{userPlayingStatus}";
+			}
+			if (isOnSpotify)
+            {
+				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} || {userListeningStatus}";
+			}
+				
+
+
 			userStatus = Format.Bold(userStatus);
 			return ReplyAsync($"{userStatus}");
 		}
@@ -85,7 +125,7 @@ namespace Le_Z.Modules
 					if (count == messageCount) return;
 					await msgBis.DeleteAsync();
 					count++;
-                }
+				}
 			}
 		} 	
 
