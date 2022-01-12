@@ -90,7 +90,7 @@ namespace Le_Z.Modules
 					userPresenceStatus = $"{userPresenceStatus} sur Web, car trop pauvre pour download l'appli";
 				}
 			}
-			userPresenceStatus = Format.Bold(userPresenceStatus);
+			userPresenceStatus = Format.Bold(userPresenceStatus);			
 			bool isActive = false;
 			//bool isPlaying = false;
 			bool isOnSpotify = false;
@@ -110,18 +110,24 @@ namespace Le_Z.Modules
                 {
 					if (userPlaying is Game gameInfo)
 					{
-						userPlayingStatus = $"Joue à \"{gameInfo.Name}\"";
+						userPlayingStatus = $"• Joue à \"{gameInfo.Name}\"";
 					}
 					if (userPlaying is RichGame richGameInfo)
                     {
 						//isPlaying = true;
 						var userPlayingTime= (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
-						userPlayingStatus = $"Joue à \"{richGameInfo.Name}\" depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
+						userPlayingStatus = $"• Joue à {richGameInfo.Name} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
                         if (richGameInfo.Details != null && richGameInfo.State != null)
                         {
-							userPlayingStatus = $"Joue à \"{richGameInfo.Name}\"" +
-								$"\n	{richGameInfo.Details}" +
-								$"\n	{richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";							
+							userPlayingStatus = $"• Joue à {richGameInfo.Name}" +
+								$"\n	► {richGameInfo.Details}" +
+								$"\n	► {richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
+							if (richGameInfo.LargeAsset.Text != null)
+                            {
+								userPlayingStatus = $"• Joue à {richGameInfo.Name}" +
+								$"\n	► {richGameInfo.Details}" +
+								$"\n	► {richGameInfo.LargeAsset.Text} | {richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
+							}								
 						}
 					}
 				}								
@@ -130,14 +136,14 @@ namespace Le_Z.Modules
 					if(userPlaying is SpotifyGame spotifyInfo)
                     {
 						isOnSpotify = true;
-						userPlayingStatus = "Ecoute de la musique";
+						userPlayingStatus = "• Ecoute de la musique";
 						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;						
 						userListeningStatus = $"" +
-							$"\n	**Artiste : {spotifyInfo.Artists.First()}**" +
-							$"\n	**Titre : {spotifyInfo.TrackTitle}**" +
-							$"\n	**Album : {spotifyInfo.AlbumTitle}**" +
-							$"\n	**Durée : {spotifyInfoDuration.ToString(@"mm\:ss")}**" +
-							$"\n	**Lien :** {spotifyInfo.TrackUrl}";
+							$"\n	**► Artiste : {spotifyInfo.Artists.First()}**" +
+							$"\n	**► Titre : {spotifyInfo.TrackTitle}**" +
+							$"\n	**► Album : {spotifyInfo.AlbumTitle}**" +
+							$"\n	**► Durée : {spotifyInfoDuration.ToString(@"mm\:ss")}**" +
+							$"\n	**► Lien :** {spotifyInfo.TrackUrl}";
 					}					
 				}
 				if(userPlaying.Type == ActivityType.Streaming)
@@ -148,7 +154,7 @@ namespace Le_Z.Modules
 
 				}
 			}
-			userPresenceStatus = Format.Bold(userPresenceStatus);
+			userPresenceStatus = Format.Bold(userPresenceStatus);			
 			userPlayingStatus = Format.Bold(userPlayingStatus);			
 			if(isActive && !isOnSpotify)
             {
@@ -156,7 +162,7 @@ namespace Le_Z.Modules
 			}
 			if(isOnSpotify)
             {
-				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} **||** {userListeningStatus}";
+				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} {userListeningStatus}";
 			}				
 			return ReplyAsync($"{userStatus}");
 		}
