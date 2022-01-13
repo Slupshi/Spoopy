@@ -62,7 +62,7 @@ namespace Le_Z.Modules
 
 		// !status @user
 		[Command("status")]
-		public Task StatusAsync(SocketGuildUser user = null)
+		public Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
 			if (user == null) return ReplyAsync("**Précise le nom de quelqu'un**");
 			string userName = (user.Nickname == null) switch
@@ -70,6 +70,7 @@ namespace Le_Z.Modules
 				false => user.Nickname,
 				true => user.Username,
 			};
+
 			string userPresenceStatus = user.Status switch
 			{
 				UserStatus.Online => $"{userName} est en ligne",
@@ -90,80 +91,85 @@ namespace Le_Z.Modules
 					userPresenceStatus = $"{userPresenceStatus} sur Web, car trop pauvre pour download l'appli";
 				}
 			}
-			userPresenceStatus = Format.Bold(userPresenceStatus);			
-			bool isActive = false;
-			//bool isPlaying = false;
-			bool isOnSpotify = false;
-			//bool isStreaming = false;
-			string userPlayingStatus = " ";
-			string userListeningStatus = " ";
+			userPresenceStatus = Format.Bold(userPresenceStatus);	
+			
+								
+			string userPlayingStatus = " ";			
 			var userStatus = $"{userPresenceStatus}";
+
 			if (user.Activities.Count > 0)
-            {
-				isActive = true;
+            {				
 				var userPlaying = user.Activities.First();
+
                 if(userPlaying.Type == ActivityType.CustomStatus && user.Activities.Count > 1)
                 {
 					userPlaying = user.Activities.ElementAt(1);
-                }                
+                }   
+				
 				if (userPlaying.Type == ActivityType.Playing)
                 {
-					if (userPlaying is Game gameInfo)
+					var embedGame = new EmbedBuilder();
+
+					if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
 					{
-						userPlayingStatus = $"• Joue à \"{gameInfo.Name}\"";
+						embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");		
+						ReplyAsync(userPresenceStatus);
+						return ReplyAsync(embed: embedGame.Build());
 					}
 					if (userPlaying is RichGame richGameInfo)
                     {
-						//isPlaying = true;
-						var userPlayingTime= (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
-						userPlayingStatus = $"• Joue à {richGameInfo.Name} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
-                        if (richGameInfo.Details != null && richGameInfo.State != null)
+						var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
+						embedGame.WithTitle($"Joue à {richGameInfo.Name}")
+							.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+						if (richGameInfo.Details != null && richGameInfo.State != null)
                         {
-							userPlayingStatus = $"• Joue à {richGameInfo.Name}" +
-								$"\n	► {richGameInfo.Details}" +
-								$"\n	► {richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
 							if (richGameInfo.LargeAsset.Text != null)
                             {
-								userPlayingStatus = $"• Joue à {richGameInfo.Name}" +
-								$"\n	► {richGameInfo.Details}" +
-								$"\n	► {richGameInfo.LargeAsset.Text} | {richGameInfo.State} depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}";
-							}								
+								embedGame.AddField(richGameInfo.Details, richGameInfo.LargeAsset.Text)
+									 .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+							}
+                            else
+                            {
+								embedGame.AddField(richGameInfo.Details, ".")
+									 .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+							}															
 						}
+						if (richGameInfo.SmallAsset != null)
+							embedGame.WithThumbnailUrl($"{richGameInfo.SmallAsset.GetImageUrl()}");
+						if (richGameInfo.LargeAsset != null) 
+							embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
+						ReplyAsync(userPresenceStatus);
+						return ReplyAsync(embed: embedGame.Build());		
 					}
-				}								
+				}		
+				
 				if (userPlaying.Type == ActivityType.Listening)
                 {
 					if(userPlaying is SpotifyGame spotifyInfo)
-                    {
-						isOnSpotify = true;
-						userPlayingStatus = "• Ecoute de la musique";
-						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;						
-						userListeningStatus = $"" +
-							$"\n	**► Artiste : {spotifyInfo.Artists.First()}**" +
-							$"\n	**► Titre : {spotifyInfo.TrackTitle}**" +
-							$"\n	**► Album : {spotifyInfo.AlbumTitle}**" +
-							$"\n	**► Durée : {spotifyInfoDuration.ToString(@"mm\:ss")}**" +
-							$"\n	**► Lien :** {spotifyInfo.TrackUrl}";
+                    {												
+						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;
+
+						var embedSpotify = new EmbedBuilder();										
+						embedSpotify.AddField("Titre :", spotifyInfo.TrackTitle)
+							.AddField("Auteur :", spotifyInfo.Artists.First())
+							.AddField("Album :", spotifyInfo.AlbumTitle)
+							.AddField("Durée :", spotifyInfoDuration.ToString(@"mm\:ss"))							
+							.WithColor(Color.DarkGreen)
+							.WithTitle("Ecoute de la musique")
+							.WithUrl(spotifyInfo.TrackUrl)
+							.WithThumbnailUrl(spotifyInfo.AlbumArtUrl);
+						
+						ReplyAsync(userPresenceStatus);
+						return ReplyAsync(embed: embedSpotify.Build());
 					}					
 				}
+
 				if(userPlaying.Type == ActivityType.Streaming)
                 {
-					if (userPlaying is StreamingGame streamInfo)
-						//isStreaming = true;
+					if (userPlaying is StreamingGame streamInfo)						
 						userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
-
 				}
-			}
-			userPresenceStatus = Format.Bold(userPresenceStatus);			
-			userPlayingStatus = Format.Bold(userPlayingStatus);			
-			if(isActive && !isOnSpotify)
-            {
-				userStatus = $"{userPresenceStatus}\n{userPlayingStatus}";
-			}
-			if(isOnSpotify)
-            {
-				userStatus = $"{userPresenceStatus}\n{userPlayingStatus} {userListeningStatus}";
-			}				
+			}			
 			return ReplyAsync($"{userStatus}");
 		}
 
@@ -174,7 +180,7 @@ namespace Le_Z.Modules
 		public async Task ClearAsync(int messageCount=1)
 		{
 			int count = 0;
-			var msgToDelete = Context.Channel.GetMessagesAsync().TakeLast(messageCount);
+			var msgToDelete = Context.Channel.GetMessagesAsync().TakeLast(messageCount+1);
             await foreach (var msg in msgToDelete)
             {
 				foreach(var msgBis in msg)
