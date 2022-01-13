@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Audio;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -13,14 +14,14 @@ namespace Le_Z.Modules
 	// If it isn't, it will not be discovered by AddModulesAsync!
 	public class Commands : ModuleBase<SocketCommandContext>
 	{
-		//!help
+		// z!help
 		[Command("help")]
 		public Task HelpAsync() 
 			=> ReplyAsync("**Tu as vraiment cru que j'allais t'aider ?**");
 
 		//=============================================================================================================================================================//
 
-		// !say hello world -> **hello world**
+		// z!say hello world -> **hello world**
 		[Command("say")]
 		[Summary("Echoes a message.")]
 		public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
@@ -32,7 +33,7 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// !wakeup 	
+		// z!wakeup 	
 		[Command("wakeup")]
 		public Task WakeUpAsync()
 		{
@@ -43,7 +44,7 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// !avatar @user [size]
+		// z!avatar @user [size]
 		[Command("avatar")]
 		public Task GetAndResizeAvatarAsync(SocketUser user,ushort size = 512)
         {
@@ -60,7 +61,7 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// !status @user
+		// z!status @user
 		[Command("status")]
 		public Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
@@ -90,12 +91,18 @@ namespace Le_Z.Modules
 				{
 					userPresenceStatus = $"{userPresenceStatus} sur Web, car trop pauvre pour download l'appli";
 				}
-			}
-			userPresenceStatus = Format.Bold(userPresenceStatus);	
-			
-								
+			}					
+            				
 			string userPlayingStatus = " ";			
 			var userStatus = $"{userPresenceStatus}";
+
+			if (user.VoiceChannel != null)
+			{
+				var userVoicePresenceStatus = $"Se trouve dans \"{user.VoiceChannel}\" dans \"{user.VoiceChannel.Category}\"";				
+				userStatus = $"{userStatus}\n{userVoicePresenceStatus}";				
+			}
+
+			userStatus = Format.Bold(userStatus);
 
 			if (user.Activities.Count > 0)
             {				
@@ -113,7 +120,7 @@ namespace Le_Z.Modules
 					if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
 					{
 						embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");		
-						ReplyAsync(userPresenceStatus);
+						ReplyAsync(userStatus);
 						return ReplyAsync(embed: embedGame.Build());
 					}
 					if (userPlaying is RichGame richGameInfo)
@@ -133,12 +140,11 @@ namespace Le_Z.Modules
 								embedGame.AddField(richGameInfo.Details, ".")
 									 .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
 							}															
-						}
-						if (richGameInfo.SmallAsset != null)
-							embedGame.WithThumbnailUrl($"{richGameInfo.SmallAsset.GetImageUrl()}");
+						}						
 						if (richGameInfo.LargeAsset != null) 
 							embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
-						ReplyAsync(userPresenceStatus);
+						ReplyAsync(userStatus);
+						Task.Delay(10);
 						return ReplyAsync(embed: embedGame.Build());		
 					}
 				}		
@@ -148,34 +154,80 @@ namespace Le_Z.Modules
 					if(userPlaying is SpotifyGame spotifyInfo)
                     {												
 						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;
-
-						var embedSpotify = new EmbedBuilder();										
-						embedSpotify.AddField("Titre :", spotifyInfo.TrackTitle)
-							.AddField("Auteur :", spotifyInfo.Artists.First())
-							.AddField("Album :", spotifyInfo.AlbumTitle)
-							.AddField("Durée :", spotifyInfoDuration.ToString(@"mm\:ss"))							
-							.WithColor(Color.DarkGreen)
+						var spotifyInfoElapsed = (TimeSpan)spotifyInfo.Elapsed;
+						var embedSpotify = new EmbedBuilder();
+						embedSpotify.WithColor(Color.DarkGreen)
 							.WithTitle("Ecoute de la musique")
 							.WithUrl(spotifyInfo.TrackUrl)
-							.WithThumbnailUrl(spotifyInfo.AlbumArtUrl);
-						
-						ReplyAsync(userPresenceStatus);
+							.WithThumbnailUrl(spotifyInfo.AlbumArtUrl)
+							.AddField("Titre :", spotifyInfo.TrackTitle)
+							.AddField("Auteur :", spotifyInfo.Artists.First())
+							.AddField("Album :", spotifyInfo.AlbumTitle);
+
+						var elapsed = spotifyInfoElapsed / spotifyInfoDuration;						
+                        string elapsedBar = elapsed switch
+                        {
+                            < 0.02857142857142857142857142857143 => "-----------------------------------",
+                            < 0.05714285714285714285714285714286 => "=----------------------------------",
+                            < 0.08571428571428571428571428571429 => "==---------------------------------",
+                            < 0.11428571428571428571428571428571 => "===--------------------------------",
+							< 0.14285714285714285714285714285714 => "====-------------------------------",
+                            < 0.17142857142857142857142857142857 => "=====------------------------------",
+                            < 0.2 => "======-----------------------------",
+                            < 0.22857142857142857142857142857143 => "=======----------------------------",
+                            < 0.25714285714285714285714285714286 => "========---------------------------",
+                            < 0.28571428571428571428571428571429 => "=========---------------------------",
+                            < 0.31428571428571428571428571428571 => "==========-------------------------",
+                            < 0.34285714285714285714285714285714 => "===========------------------------",
+                            < 0.37142857142857142857142857142857 => "============-----------------------",
+                            < 0.4 => "=============----------------------",
+                            < 0.42857142857142857142857142857143 => "==============---------------------",
+							< 0.45714285714285714285714285714286 => "===============--------------------",
+							< 0.48571428571428571428571428571429 => "================-------------------",
+							< 0.51428571428571428571428571428571 => "=================------------------",
+							< 0.54285714285714285714285714285714 => "==================-----------------",
+							< 0.57142857142857142857142857142857 => "===================----------------",
+							< 0.6 => "====================---------------",
+							< 0.62857142857142857142857142857143 => "=====================--------------",
+							< 0.65714285714285714285714285714286 => "======================-------------",
+							< 0.68571428571428571428571428571429 => "=======================------------",
+							< 0.71428571428571428571428571428571 => "========================-----------",
+							< 0.74285714285714285714285714285714 => "=========================----------",
+							< 0.77142857142857142857142857142857 => "==========================---------",
+							< 0.8 => "===========================--------",
+							< 0.82857142857142857142857142857143 => "============================-------",
+							< 0.85714285714285714285714285714286 => "=============================------",
+							< 0.88571428571428571428571428571429 => "==============================-----",
+							< 0.91428571428571428571428571428571 => "===============================----",
+							< 0.94285714285714285714285714285714 => "================================---",
+							< 0.97142857142857142857142857142857 => "=================================--",
+							< 1 => "==================================-",
+							_ => "===================================",
+                        };
+                        embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
+						ReplyAsync(userStatus);
+						Task.Delay(10);
 						return ReplyAsync(embed: embedSpotify.Build());
 					}					
 				}
 
 				if(userPlaying.Type == ActivityType.Streaming)
                 {
-					if (userPlaying is StreamingGame streamInfo)						
+					if (userPlaying is StreamingGame streamInfo)
+                    {
 						userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
+						userPlayingStatus = Format.Bold(userPlayingStatus);
+						userStatus = $"{userStatus}\n{userPlayingStatus}";
+						return ReplyAsync($"{userStatus}");
+					}	
 				}
-			}			
+			}
 			return ReplyAsync($"{userStatus}");
 		}
 
 		//=============================================================================================================================================================//
 
-		// !clear [count]
+		// z!clear [count]
 		[Command("clear")]
 		public async Task ClearAsync(int messageCount=1)
 		{
@@ -194,7 +246,7 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// !spam count message
+		// z!spam count message
 		[Command("spam")]
         public Task SpamAsync(int spamCount, [Remainder] string msgToSpam)
         {
@@ -204,7 +256,7 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// !bully @user message
+		// z!bully @user message
 		[Command("bully")]
         public Task TestAsync(SocketGuildUser user, [Remainder] string msg)
         {
@@ -220,5 +272,19 @@ namespace Le_Z.Modules
 			ReplyAsync("https://tenor.com/view/zemmour-1825-jvc-menace-rigole-gif-23505307");		
 			return user.SendMessageAsync(msg);
         }
-    }	
+
+		// z!connect
+		[Command("connect")]
+		public Task connectAsync()
+		{			
+			var user = (SocketGuildUser)Context.User;
+			if (user.VoiceChannel == null) return ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
+			user.VoiceChannel.ConnectAsync(selfDeaf: true);
+			//ReplyAsync("**Me voici !**");
+			//ReplyAsync("**Adios !**");
+			return user.VoiceChannel.DisconnectAsync();
+			 
+		}
+
+	}	
 }

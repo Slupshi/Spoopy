@@ -47,20 +47,49 @@ namespace Le_Z
         {
             var message = (SocketUserMessage)msg;
             if (message == null) return;
-            if (message.Content.Contains("http")) return;
-            if (message.Content.Contains("zeub"))
-            {
-                var emoji = new Emoji("🍆");
-                await message.AddReactionAsync(emoji);
-                await message.Channel.SendMessageAsync("https://tenor.com/view/penis-standing-erect-erection-smile-gif-15812844");
-                return;
-            }
-            if (message.Content == "ah" || message.Content=="ahh")
+            if (message.Content.Contains("http")) return;            
+            if (message.Content.ToLower() == "ah" || message.Content.ToLower() == "ahh")
             {
                 await message.Channel.SendMessageAsync("https://tenor.com/view/ah-denis-brognart-tf1-koh-lanta-gif-7256068");
                 return;
             }
-            //
+            if (message.Content.ToLower() == "ils sont là" || message.Content.ToLower() == "ils sont la")
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/marine-le-pen-le-pen-gif-8538154");
+                return;
+            }
+            if (message.Content.ToLower() == "salut mon pote")
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/salut-mon-pote-hi-buddy-michel-drucker-gif-16070000");
+                return;
+            }
+            if (message.Content.ToLower().Contains("zeub") || message.Content.ToLower().Contains("zob"))
+            {
+                var emoji = new Emoji("🍆");
+                await message.AddReactionAsync(emoji);
+                await message.Channel.SendMessageAsync("https://tenor.com/view/penis-standing-erect-erection-smile-gif-15812844");
+
+            }
+            if (message.Content.ToUpper().Contains("DEMARRER") || message.Content.ToUpper().Contains("DEMARRE"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/je-vais-le-d%C3%A9marrer-cet-gif-19154207");
+                
+            }
+            if (message.Content.ToUpper().Contains("PHILIPPE"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/philippe-cobra-hitman-gif-13748655");
+                
+            }
+            if (message.Content.ToUpper().Contains("ENORME"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/%C3%A9norme-jamy-pas-sorcier-huge-gif-14277967");
+
+            }
+            if (message.Content.ToUpper().Contains("PARCOUR")|| message.Content.ToUpper().Contains("PARCOURS") || message.Content.ToUpper().Contains("PARKOUR")|| message.Content.ToUpper().Contains("PARKOURS"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/parkour-theoffice-freerunning-gif-5128248");
+
+            }
             int argPos = 0;
             if (!message.HasStringPrefix("z!", ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
