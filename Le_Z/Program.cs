@@ -5,8 +5,11 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
 using System.Reflection;
 using System.Threading.Tasks;
+using TwitterSharp.Response.RTweet;
+using TwitterSharp.Client;
 
 namespace Le_Z
 {
@@ -29,19 +32,15 @@ namespace Le_Z
 
             await _client.SetGameAsync("Te pète le fiak");
 
-            var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
+           
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
-
-            // Update port # in the following line.
-            APIclient.BaseAddress = new Uri("http://localhost:5000/");
-            APIclient.DefaultRequestHeaders.Accept.Clear();
-            APIclient.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            
 
 
+
+            //Starting the bot
             await _client.StartAsync();
-
             await Task.Delay(-1);
 
             
@@ -121,25 +120,6 @@ namespace Le_Z
 			Console.WriteLine(msg.ToString());
 			return Task.CompletedTask;
 		}
-
-        public class Tweets
-        {
-            public string TweetId { get; set; }
-            public string TweetAuthorName { get; set; }
-            public string TweetContent { get; set; }
-        }
-
-
-        static async Task<Tweets> GetProductAsync(string path)
-        {
-            Tweets tweet = null;
-            HttpResponseMessage response = await APIclient.GetAsync(path);
-            if (response.IsSuccessStatusCode)
-            {
-                tweet = await response.Content.ReadAsAsync<Tweets>();
-            }
-            return tweet;
-        }
 
 
     }

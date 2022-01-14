@@ -5,6 +5,9 @@ using Discord;
 using Discord.Audio;
 using Discord.Commands;
 using Discord.WebSocket;
+using TwitterSharp.Client;
+using TwitterSharp.Request.AdvancedSearch;
+using TwitterSharp.Response.RTweet;
 
 namespace Le_Z.Modules
 {
@@ -28,7 +31,7 @@ namespace Le_Z.Modules
 			var boldEcho = Format.Bold(echo);
 			return ReplyAsync(boldEcho);
 		}
-
+		
 		//=============================================================================================================================================================//
 
 		// z!wakeup 	
@@ -280,10 +283,32 @@ namespace Le_Z.Modules
 			var user = (SocketGuildUser)Context.User;
 			if (user.VoiceChannel == null) return ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
 			user.VoiceChannel.ConnectAsync(selfDeaf: true);
-			//ReplyAsync("**Me voici !**");
-			//ReplyAsync("**Adios !**");
-			return user.VoiceChannel.DisconnectAsync();
-			 
+			
+			return user.VoiceChannel.DisconnectAsync();			
+		}
+
+		//=============================================================================================================================================================//
+
+		// z!test
+		[Command("test")]
+		public async Task TestAsync()
+		{
+			var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
+			TwitterClient twitterClient = new TwitterClient(bearerToken);
+
+			string id = "1480205926485405696";
+			//TweetOption[] tweetOption = TweetOption.Created_At | TweetOption.Attachments;
+			Tweet tweet = await twitterClient.GetTweetAsync(id/*, tweetOptions: tweetOption*/);
+			var embedTweet = new EmbedBuilder();
+			embedTweet.WithColor(Color.DarkBlue)
+				.WithTitle("Nouveau Tweet")
+				.WithUrl("https://twitter.com/"+ tweet.Author + $"/status/{tweet.Id}");
+
+
+
+
+			//ReplyAsync(embed: embedTweet.Build());
+			await ReplyAsync(tweet.Author.ToString());
 		}
 
 		//=============================================================================================================================================================//
