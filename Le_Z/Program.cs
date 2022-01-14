@@ -2,7 +2,9 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -10,6 +12,7 @@ namespace Le_Z
 {
 	public class Program
 	{
+        static HttpClient APIclient = new HttpClient();
         private DiscordSocketClient _client;
         private CommandService commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
@@ -17,7 +20,7 @@ namespace Le_Z
         
 
         public async Task RunBotAsync()
-        {
+        {           
             _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel= LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
             _client.Log += Log;
 
@@ -25,16 +28,23 @@ namespace Le_Z
             await InstallCommandsAsync();
 
             await _client.SetGameAsync("Te pète le fiak");
-            
 
+            var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
-            
+
+            // Update port # in the following line.
+            APIclient.BaseAddress = new Uri("http://localhost:5000/");
+            APIclient.DefaultRequestHeaders.Accept.Clear();
+            APIclient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
+
             await _client.StartAsync();
+
             await Task.Delay(-1);
 
             
-                    
         }
 
         public async Task InstallCommandsAsync()
@@ -46,6 +56,7 @@ namespace Le_Z
         private async Task HandleCommandAsync(SocketMessage msg)
         {
             var message = (SocketUserMessage)msg;
+            #region TriggerWords
             if (message == null) return;
             if (message.Content.Contains("http")) return;            
             if (message.Content.ToLower() == "ah" || message.Content.ToLower() == "ahh")
@@ -90,6 +101,7 @@ namespace Le_Z
                 await message.Channel.SendMessageAsync("https://tenor.com/view/parkour-theoffice-freerunning-gif-5128248");
 
             }
+            #endregion TriggerWords
             int argPos = 0;
             if (!message.HasStringPrefix("z!", ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
@@ -110,6 +122,25 @@ namespace Le_Z
 			return Task.CompletedTask;
 		}
 
+        public class Tweets
+        {
+            public string TweetId { get; set; }
+            public string TweetAuthorName { get; set; }
+            public string TweetContent { get; set; }
+        }
 
-	}
+
+        static async Task<Tweets> GetProductAsync(string path)
+        {
+            Tweets tweet = null;
+            HttpResponseMessage response = await APIclient.GetAsync(path);
+            if (response.IsSuccessStatusCode)
+            {
+                tweet = await response.Content.ReadAsAsync<Tweets>();
+            }
+            return tweet;
+        }
+
+
+    }
 }

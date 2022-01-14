@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
@@ -258,7 +256,7 @@ namespace Le_Z.Modules
 
 		// z!bully @user message
 		[Command("bully")]
-        public Task TestAsync(SocketGuildUser user, [Remainder] string msg)
+        public Task BullyAsync(SocketGuildUser user, [Remainder] string msg)
         {
 			Context.Message.DeleteAsync();
 			user.CreateDMChannelAsync();
@@ -273,9 +271,11 @@ namespace Le_Z.Modules
 			return user.SendMessageAsync(msg);
         }
 
+		//=============================================================================================================================================================//
+
 		// z!connect
 		[Command("connect")]
-		public Task connectAsync()
+		public Task ConnectAsync()
 		{			
 			var user = (SocketGuildUser)Context.User;
 			if (user.VoiceChannel == null) return ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
@@ -285,6 +285,8 @@ namespace Le_Z.Modules
 			return user.VoiceChannel.DisconnectAsync();
 			 
 		}
+
+		//=============================================================================================================================================================//
 
 	}	
 }
