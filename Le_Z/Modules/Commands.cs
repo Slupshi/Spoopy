@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using TwitterSharp.Client;
 using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
+using TwitterSharp.Response.RUser;
 
 namespace Le_Z.Modules
 {
@@ -290,26 +291,159 @@ namespace Le_Z.Modules
 		//=============================================================================================================================================================//
 
 		// z!test
-		[Command("test")]
-		public async Task TestAsync()
+		[Command("tweetbyid")]
+		public async Task TweetByIDAsync(string id)
 		{
 			var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
 			TwitterClient twitterClient = new TwitterClient(bearerToken);
+			TweetOption[] everyTweetOptions = (TweetOption[])Enum.GetValues(typeof(TweetOption));
+			TweetOption[] tweetOption = new TweetOption[2];
+			UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
+			UserOption[] userOption = new UserOption[2];
+			MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
+			MediaOption[] mediaOption = new MediaOption[2];			
 
-			string id = "1480205926485405696";
-			//TweetOption[] tweetOption = TweetOption.Created_At | TweetOption.Attachments;
-			Tweet tweet = await twitterClient.GetTweetAsync(id/*, tweetOptions: tweetOption*/);
+			tweetOption[0] =everyTweetOptions[1];
+			tweetOption[1] = everyTweetOptions[10];			
+
+			userOption[0] = everyUserOptions[5];
+			userOption[1] = everyUserOptions[8];
+
+			mediaOption[0] = everyMediaOptions[4];
+			mediaOption[1] = everyMediaOptions[3];
+
+
+			Tweet tweet = await twitterClient.GetTweetAsync(id, tweetOptions: tweetOption, userOptions : userOption, mediaOptions : mediaOption);			
+			
+			string upperName = tweet.Author.Name.ToUpper();		
+			
+
 			var embedTweet = new EmbedBuilder();
 			embedTweet.WithColor(Color.DarkBlue)
-				.WithTitle("Nouveau Tweet")
-				.WithUrl("https://twitter.com/"+ tweet.Author + $"/status/{tweet.Id}");
+				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
+				.WithTitle($"Nouveau Tweet de {tweet.Author.Name}")
+				.WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
+				.WithThumbnailUrl(tweet.Author.ProfileImageUrl)				
+				.WithDescription(tweet.Text)				
+				.WithFooter($"{tweet.CreatedAt.Value.TimeOfDay.ToString(@"hh\:mm")} UTC • {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy")} ");
+			if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
+			{
+				embedTweet.WithTitle($"Nouveau Tweet d'{tweet.Author.Name}");
+			}
+			if (tweet.Attachments != null)
+            {
+				if (tweet.Attachments.Media[0].Url != null)
+					embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
+				if (tweet.Attachments.Media[0].PreviewImageUrl != null)
+					embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
+			}
+			
+			
 
 
-
-
-			//ReplyAsync(embed: embedTweet.Build());
-			await ReplyAsync(tweet.Author.ToString());
+			await ReplyAsync(embed: embedTweet.Build());
+						
 		}
+
+		//=============================================================================================================================================================//
+
+		[Command("tweet")]
+		public async Task LastTweetAsync([Remainder] string username)
+		{
+			var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
+			TwitterClient twitterClient = new TwitterClient(bearerToken);
+			TweetOption[] everyTweetOptions = (TweetOption[])Enum.GetValues(typeof(TweetOption));
+			TweetOption[] tweetOption = new TweetOption[4];
+			UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
+			UserOption[] userOption = new UserOption[3];
+			MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
+			MediaOption[] mediaOption = new MediaOption[2];	
+
+			tweetOption[0] = everyTweetOptions[1];
+			tweetOption[1] = everyTweetOptions[10];
+			tweetOption[2] = everyTweetOptions[3];
+			tweetOption[3] = everyTweetOptions[7];
+
+			userOption[0] = everyUserOptions[5];
+			userOption[1] = everyUserOptions[8];
+			userOption[2] = everyUserOptions[6];
+
+			mediaOption[0] = everyMediaOptions[4];
+			mediaOption[1] = everyMediaOptions[3];			
+
+			User user = await twitterClient.GetUserAsync(username);			
+			if(user == null)
+            {
+				await ReplyAsync("**Utilisateur introuvable**");
+				return;
+			}
+            if (user.IsProtected != null)
+            {
+				if ((bool)user.IsProtected)
+				{
+					await ReplyAsync("**L'utilisateur restreint l'accès à son compte**");
+					return;
+				}
+			}            
+			string upperName = user.Name.ToUpper();
+
+			Tweet[] tweets = await twitterClient.GetTweetsFromUserIdAsync(user.Id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+			if(tweets.Length == 0)
+            {
+				await ReplyAsync("**L'utilisateur n'a aucun tweet disponible**");
+				return;
+			}
+			Tweet tweet = tweets.First(tweetos =>  tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
+			
+			
+			var embedTweet = new EmbedBuilder();
+			embedTweet.WithColor(Color.Blue)
+				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
+				.WithTitle($"Dernier Tweet de {tweet.Author.Name}")
+				.WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
+				.WithThumbnailUrl(tweet.Author.ProfileImageUrl)
+				.WithDescription(tweet.Text)
+				.WithFooter($"{tweet.CreatedAt.Value.TimeOfDay.ToString(@"hh\:mm")} UTC • {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy")} ");
+			if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
+			{
+				embedTweet.WithTitle($"Dernier Tweet d'{tweet.Author.Name}");
+			}
+			if (tweet.Attachments != null)
+			{
+				if (tweet.Attachments.Media[0].Url != null)
+					embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
+				if (tweet.Attachments.Media[0].PreviewImageUrl != null)
+                {
+					embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
+					if (tweet.Attachments.Media[0].Url!=null)
+						embedTweet.AddField("Lien de la vidéo : ", tweet.Attachments.Media[0].Url, inline:true);					
+				}
+					
+			}
+			if(tweet.ReferencedTweets != null)
+            {
+				if(tweet.ReferencedTweets.First().Type == ReferenceType.Quoted)
+                {
+					ReferencedTweet referencedTweet = tweet.ReferencedTweets.First();
+					Tweet quoteTweet = await twitterClient.GetTweetAsync(referencedTweet.Id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+					embedTweet.AddField($"Cité de {quoteTweet.Author.Name} @{quoteTweet.Author.Username}", quoteTweet.Text);
+					if(quoteTweet.Attachments !=null && tweet.Attachments == null)
+                    {
+						if (quoteTweet.Attachments.Media[0].Url != null)
+							embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].Url);
+						if (quoteTweet.Attachments.Media[0].PreviewImageUrl != null)
+							embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].PreviewImageUrl);
+					}
+                }
+            }
+
+
+
+
+			await ReplyAsync(embed: embedTweet.Build());
+
+		}
+
 
 		//=============================================================================================================================================================//
 
