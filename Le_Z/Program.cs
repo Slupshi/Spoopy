@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Client;
+using Le_Z.Modules;
 
 namespace Le_Z
 {
@@ -34,9 +35,7 @@ namespace Le_Z
 
            
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
-            await _client.LoginAsync(TokenType.Bot, token);
-            
-
+            await _client.LoginAsync(TokenType.Bot, token);       
 
 
             //Starting the bot
