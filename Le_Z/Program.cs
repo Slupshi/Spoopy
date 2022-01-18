@@ -109,7 +109,8 @@ namespace Le_Z
             {
                 var emoji1 = new Emoji("🖕🏼");
                 await message.AddReactionAsync(emoji1);
-                await context.Channel.SendMessageAsync("**Je connais pas ta commande batard**");
+                MessageReference messageRef = new MessageReference(messageId: message.Id);
+                await context.Channel.SendMessageAsync("**Je connais pas ta commande batard**", messageReference: messageRef);
             }
 
         }

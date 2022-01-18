@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
 using Discord.Commands;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using TwitterSharp.Client;
 using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
@@ -68,7 +72,9 @@ namespace Le_Z.Modules
 		[Command("status")]
 		public Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
-			if (user == null) return ReplyAsync("**Précise le nom de quelqu'un**");
+			if (user == null)			
+				user = (SocketGuildUser)Context.User;	
+						
 			string userName = (user.Nickname == null) switch
 			{
 				false => user.Nickname,
@@ -169,52 +175,13 @@ namespace Le_Z.Modules
 
                         var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
 
-                        //int elalpsedBarLenght = (int)(35 * elapsed);
-                        //string elapsedBar = "";
-                        //for (int i = 0; i <= elalpsedBarLenght; i++)
-                        //    elapsedBar += "=";
-                        //for (int i = 0; i <= 35 - elalpsedBarLenght; i++)
-                        //    elapsedBar += "-";
-
-                        string elapsedBar = elapsed switch
-                        {
-                            < 0.02857142857142857142857142857143 => "-----------------------------------",
-                            < 0.05714285714285714285714285714286 => "=----------------------------------",
-                            < 0.08571428571428571428571428571429 => "==---------------------------------",
-                            < 0.11428571428571428571428571428571 => "===--------------------------------",
-                            < 0.14285714285714285714285714285714 => "====-------------------------------",
-                            < 0.17142857142857142857142857142857 => "=====------------------------------",
-                            < 0.2 => "======-----------------------------",
-                            < 0.22857142857142857142857142857143 => "=======----------------------------",
-                            < 0.25714285714285714285714285714286 => "========---------------------------",
-                            < 0.28571428571428571428571428571429 => "=========---------------------------",
-                            < 0.31428571428571428571428571428571 => "==========-------------------------",
-                            < 0.34285714285714285714285714285714 => "===========------------------------",
-                            < 0.37142857142857142857142857142857 => "============-----------------------",
-                            < 0.4 => "=============----------------------",
-                            < 0.42857142857142857142857142857143 => "==============---------------------",
-                            < 0.45714285714285714285714285714286 => "===============--------------------",
-                            < 0.48571428571428571428571428571429 => "================-------------------",
-                            < 0.51428571428571428571428571428571 => "=================------------------",
-                            < 0.54285714285714285714285714285714 => "==================-----------------",
-                            < 0.57142857142857142857142857142857 => "===================----------------",
-                            < 0.6 => "====================---------------",
-                            < 0.62857142857142857142857142857143 => "=====================--------------",
-                            < 0.65714285714285714285714285714286 => "======================-------------",
-                            < 0.68571428571428571428571428571429 => "=======================------------",
-                            < 0.71428571428571428571428571428571 => "========================-----------",
-                            < 0.74285714285714285714285714285714 => "=========================----------",
-                            < 0.77142857142857142857142857142857 => "==========================---------",
-                            < 0.8 => "===========================--------",
-                            < 0.82857142857142857142857142857143 => "============================-------",
-                            < 0.85714285714285714285714285714286 => "=============================------",
-                            < 0.88571428571428571428571428571429 => "==============================-----",
-                            < 0.91428571428571428571428571428571 => "===============================----",
-                            < 0.94285714285714285714285714285714 => "================================---",
-                            < 0.97142857142857142857142857142857 => "=================================--",
-                            < 1 => "==================================-",
-                            _ => "===================================",
-                        };
+                        int elalpsedBarLenght = (int)(30 * elapsed);
+                        string elapsedBar = "";
+                        for (int i = 0; i <= elalpsedBarLenght; i++)
+                            elapsedBar += "\u25A0";
+                        for (int i = 0; i <= 30 - elalpsedBarLenght; i++)
+                            elapsedBar += "\u25A1";
+                        
                         embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
 						ReplyAsync(userStatus);
 						Task.Delay(10);
@@ -324,12 +291,12 @@ namespace Le_Z.Modules
 
 			Tweet tweet = await twitterClient.GetTweetAsync(id, tweetOptions: tweetOption, userOptions : userOption, mediaOptions : mediaOption);			
 			
-			string upperName = tweet.Author.Name.ToUpper();		
-			
+			string upperName = tweet.Author.Name.ToUpper();
+			string twitterIconUrl = "https://i0.wp.com/fredericgschneider.com/wp-content/uploads/2017/11/twitter-bird-white-on-blue.png?w=405&ssl=1";
 
 			var embedTweet = new EmbedBuilder();
 			embedTweet.WithColor(Color.DarkBlue)
-				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
+				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}", iconUrl: twitterIconUrl, url: "https://twitter.com/"+ tweet.Author.Username)
 				.WithTitle($"Nouveau Tweet de {tweet.Author.Name}")
 				.WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
 				.WithThumbnailUrl(tweet.Author.ProfileImageUrl)				
@@ -449,16 +416,61 @@ namespace Le_Z.Modules
 		}
 
 		//=============================================================================================================================================================//
+		
+		public class JoursFeries
+        {
+			public short Année { get; set; }
+			public string Zone { get; set; }
+        }
+		public class JoursFeriesResponse
+        {
+			//public JoursFériés();
+			public string Date { get; set; }
+			public string Nom { get; set; }
+		}
+
+		public enum Zone
+        {
+			alsacemoselle, guadeloupe, guyane, lareunion, martinique, mayotte, metropole, nouvellecaledonie, polynesiefrancaise, saintbarthelemy, saintmartin, saintpierreetmiquelon, wallisetfutuna
+        }
 
 		[Command("testapi")]
-		public Task TestAPIAsync()
+		public async Task TestAPIAsync()
         {
 			HttpClient clientAPI = new HttpClient();
+			clientAPI.BaseAddress = new Uri("http://calendrier.api.gouv.fr/jours-feries/");
+			clientAPI.DefaultRequestHeaders.Accept.Clear();
+			clientAPI.DefaultRequestHeaders.Accept.Add(
+				new MediaTypeWithQualityHeaderValue("application/json"));
 
+			var toto = await GetJoursAsync("metropole/2022.json", clientAPI);
+
+
+			await ReplyAsync(toto.ToString());
 			
-
-			return Task.CompletedTask;
         }
+
+		static async Task<IEnumerable<JoursFeriesResponse>> GetJoursAsync(string path, HttpClient clientAPI)
+		{		
+			HttpResponseMessage response = await clientAPI.GetAsync(path);
+			response.EnsureSuccessStatusCode();	
 			
+			var responseText = await response.Content.ReadAsStringAsync();
+			var jours = JsonConvert.DeserializeObject<IEnumerable<JoursFeriesResponse>>(responseText);
+
+			foreach(var jour in jours)
+            {
+				Console.WriteLine(jour);
+            }
+			//var responseObject = await JsonSerializer.DeserializeAsync<JoursFeriesResponse>(responseStream);
+
+			;
+		}
+
+
+
+
+
+
 	}	
 }
