@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -18,13 +20,26 @@ using TwitterSharp.Response.RUser;
 namespace Le_Z.Modules
 {
 	// Keep in mind your module **must** be public and inherit ModuleBase.
-	// If it isn't, it will not be discovered by AddModulesAsync!
+	// If it isn't, it will not be discovered by AddModulesAsync!	
 	public class Commands : ModuleBase<SocketCommandContext>
 	{
 		// z!help
 		[Command("help")]
-		public Task HelpAsync() 
-			=> ReplyAsync("**Tu as vraiment cru que j'allais t'aider ?**");
+		public Task HelpAsync()
+        {
+			Random random = new Random();
+			double rand = random.NextDouble();
+			string message = rand switch
+			{
+				< 0.25 => "Tu as vraiment cru que j'allais t'aider ?",
+				< 0.5 => "Qu'espérais-tu ? De l'aide peut-être ?",
+				< 0.75 => "C'est beau de rêver",
+				_ => "Encore un pigeon tombé dans le panneau"
+			};
+			message = Format.Bold(message);
+			return ReplyAsync(message);
+		}
+			
 
 		//=============================================================================================================================================================//
 
@@ -119,7 +134,6 @@ namespace Le_Z.Modules
 
                 if(userPlaying.Type == ActivityType.CustomStatus && user.Activities.Count > 1)
                 {
-					userPlaying = user.Activities.ElementAt(1);
                 }   
 				
 				if (userPlaying.Type == ActivityType.Playing)
@@ -136,7 +150,8 @@ namespace Le_Z.Modules
                     {
 						var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
 						embedGame.WithTitle($"Joue à {richGameInfo.Name}")
-							.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+							.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}")
+							.WithFooter($"{DateTime.Now.ToString(@"hh\:mm")} UTC • {DateTime.Now.ToString("dd MMMM, yyyy")} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
 						if (richGameInfo.Details != null && richGameInfo.State != null)
                         {
 							if (richGameInfo.LargeAsset.Text != null)
@@ -151,7 +166,7 @@ namespace Le_Z.Modules
 							}															
 						}						
 						if (richGameInfo.LargeAsset != null) 
-							embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
+							embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");						
 						ReplyAsync(userStatus);
 						Task.Delay(10);
 						return ReplyAsync(embed: embedGame.Build());		
@@ -171,11 +186,10 @@ namespace Le_Z.Modules
 							.WithThumbnailUrl(spotifyInfo.AlbumArtUrl)
 							.AddField("Titre :", spotifyInfo.TrackTitle)
 							.AddField("Auteur :", spotifyInfo.Artists.First())
-							.AddField("Album :", spotifyInfo.AlbumTitle);
-
-                        var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
-
-                        int elalpsedBarLenght = (int)(30 * elapsed);
+							.AddField("Album :", spotifyInfo.AlbumTitle)
+							.WithFooter($"{DateTime.Now.ToString(@"hh\:mm")} UTC • {DateTime.Now.ToString("dd MMMM, yyyy")} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");						
+						var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
+						int elalpsedBarLenght = (int)(30 * elapsed);
                         string elapsedBar = "";
                         for (int i = 0; i <= elalpsedBarLenght; i++)
                             elapsedBar += "\u25A0";
@@ -253,76 +267,6 @@ namespace Le_Z.Modules
 
 		//=============================================================================================================================================================//
 
-		// z!connect
-		[Command("connect")]
-		public Task ConnectAsync()
-		{			
-			var user = (SocketGuildUser)Context.User;
-			if (user.VoiceChannel == null) return ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
-			user.VoiceChannel.ConnectAsync(selfDeaf: true);
-			
-			return user.VoiceChannel.DisconnectAsync();			
-		}
-
-		//=============================================================================================================================================================//
-
-		// z!test
-		[Command("tweetbyid")]
-		public async Task TweetByIDAsync(string id)
-		{
-			var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
-			TwitterClient twitterClient = new TwitterClient(bearerToken);
-			TweetOption[] everyTweetOptions = (TweetOption[])Enum.GetValues(typeof(TweetOption));
-			TweetOption[] tweetOption = new TweetOption[2];
-			UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
-			UserOption[] userOption = new UserOption[2];
-			MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
-			MediaOption[] mediaOption = new MediaOption[2];			
-
-			tweetOption[0] =everyTweetOptions[1];
-			tweetOption[1] = everyTweetOptions[10];			
-
-			userOption[0] = everyUserOptions[5];
-			userOption[1] = everyUserOptions[8];
-
-			mediaOption[0] = everyMediaOptions[4];
-			mediaOption[1] = everyMediaOptions[3];
-
-
-			Tweet tweet = await twitterClient.GetTweetAsync(id, tweetOptions: tweetOption, userOptions : userOption, mediaOptions : mediaOption);			
-			
-			string upperName = tweet.Author.Name.ToUpper();
-			string twitterIconUrl = "https://i0.wp.com/fredericgschneider.com/wp-content/uploads/2017/11/twitter-bird-white-on-blue.png?w=405&ssl=1";
-
-			var embedTweet = new EmbedBuilder();
-			embedTweet.WithColor(Color.DarkBlue)
-				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}", iconUrl: twitterIconUrl, url: "https://twitter.com/"+ tweet.Author.Username)
-				.WithTitle($"Nouveau Tweet de {tweet.Author.Name}")
-				.WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
-				.WithThumbnailUrl(tweet.Author.ProfileImageUrl)				
-				.WithDescription(tweet.Text)				
-				.WithFooter($"{tweet.CreatedAt.Value.TimeOfDay.ToString(@"hh\:mm")} UTC • {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy")} ");
-			if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
-			{
-				embedTweet.WithTitle($"Nouveau Tweet d'{tweet.Author.Name}");
-			}
-			if (tweet.Attachments != null)
-            {
-				if (tweet.Attachments.Media[0].Url != null)
-					embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
-				if (tweet.Attachments.Media[0].PreviewImageUrl != null)
-					embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
-			}
-			
-			
-
-
-			await ReplyAsync(embed: embedTweet.Build());
-						
-		}
-
-		//=============================================================================================================================================================//
-
 		[Command("tweet")]
 		public async Task LastTweetAsync([Remainder] string username)
 		{
@@ -370,8 +314,8 @@ namespace Le_Z.Modules
 				return;
 			}
 			Tweet tweet = tweets.First(tweetos =>  tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
-			
-			
+
+			CultureInfo culture = new CultureInfo("fr-FR");
 			var embedTweet = new EmbedBuilder();
 			embedTweet.WithColor(Color.Blue)
 				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
@@ -379,7 +323,7 @@ namespace Le_Z.Modules
 				.WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
 				.WithThumbnailUrl(tweet.Author.ProfileImageUrl)
 				.WithDescription(tweet.Text)
-				.WithFooter($"{tweet.CreatedAt.Value.TimeOfDay.ToString(@"hh\:mm")} UTC • {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy")} ");
+				.WithFooter($"Publié à {tweet.CreatedAt.Value.TimeOfDay.ToString(@"hh\:mm")} (UTC) le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png");
 			if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
 			{
 				embedTweet.WithTitle($"Dernier Tweet d'{tweet.Author.Name}");
@@ -388,13 +332,8 @@ namespace Le_Z.Modules
 			{
 				if (tweet.Attachments.Media[0].Url != null)
 					embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
-				if (tweet.Attachments.Media[0].PreviewImageUrl != null)
-                {
-					embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
-					if (tweet.Attachments.Media[0].Url!=null)
-						embedTweet.AddField("Lien de la vidéo : ", tweet.Attachments.Media[0].Url, inline:true);					
-				}
-					
+				if (tweet.Attachments.Media[0].PreviewImageUrl != null)                
+					embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);										
 			}
 			if(tweet.ReferencedTweets != null)
             {
@@ -411,61 +350,139 @@ namespace Le_Z.Modules
 							embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].PreviewImageUrl);
 					}
                 }
-            }
-			await ReplyAsync(embed: embedTweet.Build());
+            }			
+			var lastMessageBot = await ReplyAsync(embed: embedTweet.Build());			
 		}
 
-		//=============================================================================================================================================================//
-		
-		public class JoursFeries
-        {
-			public short Année { get; set; }
+		//=============================================================================================================================================================//		
+
+		[Command("repos")]		
+		public async Task ReposMainAsync(string codePostal = null , bool twoYear = false)
+		{			
+			if(codePostal == null)
+            {
+				await ReplyAsync("**Précise un code postal**");
+				return;
+			}
+				
+			int annee = DateTime.Now.Year;
+			string zone = GetZone(codePostal);
+			JoursFeriesModel joursFeriesModel = new JoursFeriesModel { Année = annee, Zone = zone };
+			Embed[] embeds = await ReposAsync(joursFeriesModel, codePostal);
+			await ReplyAsync(embed: embeds[0]);
+			if(twoYear)
+				await ReplyAsync(embed: embeds[1]);
+		}
+
+		public class JoursFeriesModel
+		{
+			public int Année { get; set; }
 			public string Zone { get; set; }
-        }
-		public class JoursFeriesResponse
-        {
-			//public JoursFériés();
-			public string Date { get; set; }
+		}
+		public class JoursFeriesResponseModel
+		{
+			public DateTime Date { get; set; }
 			public string Nom { get; set; }
 		}
 
-		public enum Zone
-        {
-			alsacemoselle, guadeloupe, guyane, lareunion, martinique, mayotte, metropole, nouvellecaledonie, polynesiefrancaise, saintbarthelemy, saintmartin, saintpierreetmiquelon, wallisetfutuna
-        }
+		public static string GetZone(string codePostal)
+		{
+			char[] codePostalSplit = codePostal.ToCharArray();
+			string codePostalStart = $"{codePostalSplit[0]}{codePostalSplit[1]}";
+			string codePostalStartCOM = $"{codePostalSplit[0]}{codePostalSplit[1]}{codePostalSplit[2]}";
 
-		[Command("testapi")]
-		public async Task TestAPIAsync()
-        {
+
+			string zone = null;
+			if (codePostalStart == "57" || codePostalStart == "67" || codePostalStart == "68") zone = "alsace-moselle";
+			else if (codePostalStart == "97")
+			{
+				if (codePostalStartCOM == "971") zone = "guadeloupe";
+				else if (codePostalStartCOM == "972") zone = "martinique";
+				else if (codePostalStartCOM == "973") zone = "guyane";
+				else if (codePostalStartCOM == "974") zone = "la -reunion";
+				else if (codePostalStartCOM == "975") zone = "saint -pierre-et-miquelon";
+				else if (codePostalStartCOM == "976") zone = "mayotte";
+				else if (codePostalStartCOM == "977") zone = "saint -barthelemy";
+				else if (codePostalStartCOM == "978") zone = "saint -martin";
+			}
+			else if (codePostalStart == "98")
+			{
+				if (codePostalStartCOM == "986") zone = "wallis -et-futuna";
+				else if (codePostalStartCOM == "987") zone = "polynesie -francaise";
+				else if (codePostalStartCOM == "988") zone = "nouvelle -caledonie";
+			}
+			else zone = "metropole";
+
+			return zone;
+		}
+		public static async Task<Embed[]> ReposAsync(JoursFeriesModel joursFeries, string codePostal)
+		{
 			HttpClient clientAPI = new HttpClient();
 			clientAPI.BaseAddress = new Uri("http://calendrier.api.gouv.fr/jours-feries/");
-			clientAPI.DefaultRequestHeaders.Accept.Clear();
-			clientAPI.DefaultRequestHeaders.Accept.Add(
-				new MediaTypeWithQualityHeaderValue("application/json"));
 
-			var toto = await GetJoursAsync("metropole/2022.json", clientAPI);
+			var jours = await GetJoursFeriesAsync($"{joursFeries.Zone}/{joursFeries.Année}.json", clientAPI);
+			var joursn1 = await GetJoursFeriesAsync($"{joursFeries.Zone}/{joursFeries.Année + 1}.json", clientAPI);
 
+			List<JoursFeriesResponseModel> joursFeriesCurrentYear = new List<JoursFeriesResponseModel>();
+			List<JoursFeriesResponseModel> joursFeriesNextYear = new List<JoursFeriesResponseModel>();
 
-			await ReplyAsync(toto.ToString());
-			
-        }
+			foreach (var jour in jours)
+			{
+				JoursFeriesResponseModel jourFerie = new JoursFeriesResponseModel { Date = DateTime.Parse(jour.Key), Nom = jour.Value };
+				joursFeriesCurrentYear.Add(jourFerie);
+			}
+			foreach (var jour in joursn1)
+			{
+				JoursFeriesResponseModel jourFerie = new JoursFeriesResponseModel { Date = DateTime.Parse(jour.Key), Nom = jour.Value };
+				joursFeriesNextYear.Add(jourFerie);
+			}
+			var embedJourFerie1 = new EmbedBuilder();
+			embedJourFerie1.WithTitle($"Jours fériés de l'année {joursFeries.Année} pour le code postal {codePostal} :");
+			var embedJourFerie2 = new EmbedBuilder();
+			embedJourFerie2.WithTitle($"Jours fériés de l'année {joursFeries.Année+1} pour le code postal {codePostal} :");
 
-		static async Task<IEnumerable<JoursFeriesResponse>> GetJoursAsync(string path, HttpClient clientAPI)
-		{		
-			HttpResponseMessage response = await clientAPI.GetAsync(path);
-			response.EnsureSuccessStatusCode();	
-			
-			var responseText = await response.Content.ReadAsStringAsync();
-			var jours = JsonConvert.DeserializeObject<IEnumerable<JoursFeriesResponse>>(responseText);
-
-			foreach(var jour in jours)
+            foreach (var jour in joursFeriesCurrentYear)
             {
-				Console.WriteLine(jour);
-            }
-			//var responseObject = await JsonSerializer.DeserializeAsync<JoursFeriesResponse>(responseStream);
-
-			;
+				embedJourFerie1.AddField($"{jour.Date.ToString("dd MMMM yyyy")} :", $"{jour.Nom}");
+			}
+            
+            foreach (var jour in joursFeriesNextYear)
+            {
+				embedJourFerie2.AddField($"{jour.Date.ToString("dd MMMM yyyy")} :", $"{jour.Nom}");
+			}
+			Embed[] embeds = new Embed[2];
+			embeds[0] = embedJourFerie1.Build();
+			embeds[1] = embedJourFerie2.Build();
+			return embeds;			
 		}
+		public static async Task<Dictionary<string, string>> GetJoursFeriesAsync(string path, HttpClient clientAPI)
+		{
+			HttpResponseMessage response = await clientAPI.GetAsync(path);
+			response.EnsureSuccessStatusCode();
+
+			var responseText = await response.Content.ReadAsStringAsync();
+			var jours = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
+
+			return jours;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

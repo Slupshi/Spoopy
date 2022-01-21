@@ -21,8 +21,6 @@ namespace Le_Z
         private CommandService commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
 
-        
-
         public async Task RunBotAsync()
         {           
             _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel= LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
@@ -77,28 +75,28 @@ namespace Le_Z
                 var emoji = new Emoji("🍆");
                 await message.AddReactionAsync(emoji);
                 await message.Channel.SendMessageAsync("https://tenor.com/view/penis-standing-erect-erection-smile-gif-15812844");
-
             }
             if (message.Content.ToUpper().Contains("DEMARRER") || message.Content.ToUpper().Contains("DEMARRE"))
             {
-                await message.Channel.SendMessageAsync("https://tenor.com/view/je-vais-le-d%C3%A9marrer-cet-gif-19154207");
-                
+                await message.Channel.SendMessageAsync("https://tenor.com/view/je-vais-le-d%C3%A9marrer-cet-gif-19154207");                
             }
             if (message.Content.ToUpper().Contains("PHILIPPE"))
             {
-                await message.Channel.SendMessageAsync("https://tenor.com/view/philippe-cobra-hitman-gif-13748655");
-                
+                await message.Channel.SendMessageAsync("https://tenor.com/view/philippe-cobra-hitman-gif-13748655");                
             }
-            if (message.Content.ToUpper().Contains("ENORME"))
+            if (message.Content.ToLower().Contains("enorme")|| message.Content.ToLower().Contains("énorme"))
             {
                 await message.Channel.SendMessageAsync("https://tenor.com/view/%C3%A9norme-jamy-pas-sorcier-huge-gif-14277967");
-
             }
             if (message.Content.ToUpper().Contains("PARCOUR")|| message.Content.ToUpper().Contains("PARCOURS") || message.Content.ToUpper().Contains("PARKOUR")|| message.Content.ToUpper().Contains("PARKOURS"))
             {
                 await message.Channel.SendMessageAsync("https://tenor.com/view/parkour-theoffice-freerunning-gif-5128248");
-
             }
+            if (message.Content.ToUpper().Contains("EXPLOSION"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/explosion-megumin-konusoba-magic-destruction-gif-7559841");
+            }
+            //
             #endregion TriggerWords
             int argPos = 0;
             if (!message.HasStringPrefix("z!", ref argPos)) return;
