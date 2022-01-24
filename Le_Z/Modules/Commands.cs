@@ -87,6 +87,8 @@ namespace Le_Z.Modules
 		[Command("status")]
 		public Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
+			CultureInfo culture = new CultureInfo("fr-FR");
+
 			if (user == null)			
 				user = (SocketGuildUser)Context.User;	
 						
@@ -100,9 +102,9 @@ namespace Le_Z.Modules
 			{
 				UserStatus.Online => $"{userName} est en ligne",
 				UserStatus.Offline => $"{userName} est hors ligne",
-				UserStatus.Invisible => $"{userName} se cache comme une pute",
-				UserStatus.DoNotDisturb => $"{userName} coule un bronze",
-				UserStatus.Idle => $"{userName} est entrain de pisser",
+				UserStatus.Invisible => $"{userName} se cache",
+				UserStatus.DoNotDisturb => $"{userName} n\'est pas dispo",
+				UserStatus.Idle => $"{userName} n\'est pas dispo",
 				_ => "Nan franchement même moi je sais pas"
 			};
             if (!user.IsBot)
@@ -139,7 +141,7 @@ namespace Le_Z.Modules
 				if (userPlaying.Type == ActivityType.Playing)
                 {
 					var embedGame = new EmbedBuilder();
-
+					bool showingTimespan = false;
 					if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
 					{
 						embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");		
@@ -150,21 +152,38 @@ namespace Le_Z.Modules
                     {
 						var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
 						embedGame.WithTitle($"Joue à {richGameInfo.Name}")
-							.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}")
-							.WithFooter($"{DateTime.Now.ToString(@"hh\:mm")} UTC • {DateTime.Now.ToString("dd MMMM, yyyy")} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
-						if (richGameInfo.Details != null && richGameInfo.State != null)
+							
+							.WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
+						
+						if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
                         {
-							if (richGameInfo.LargeAsset.Text != null)
+                            if (richGameInfo.LargeAsset.Text != null)
                             {
 								embedGame.AddField(richGameInfo.Details, richGameInfo.LargeAsset.Text)
 									 .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
-							}
-                            else
-                            {
-								embedGame.AddField(richGameInfo.Details, ".")
+								showingTimespan = true;
+							}								
+						}
+                        else if(richGameInfo.Details != null && richGameInfo.State != null)
+                        {
+							embedGame.AddField(richGameInfo.Details, ".")
 									 .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
-							}															
-						}						
+							showingTimespan = true;
+						}
+						else if(richGameInfo.Details != null && richGameInfo.State == null)
+                        {
+							embedGame.AddField(richGameInfo.Details, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+							showingTimespan = true;
+						}
+						else if (richGameInfo.Details == null && richGameInfo.State != null)
+						{
+							embedGame.AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+							showingTimespan = true;
+						}
+
+						if(!showingTimespan)
+							embedGame.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+
 						if (richGameInfo.LargeAsset != null) 
 							embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");						
 						ReplyAsync(userStatus);
@@ -179,15 +198,15 @@ namespace Le_Z.Modules
                     {												
 						var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;
 						var spotifyInfoElapsed = (TimeSpan)spotifyInfo.Elapsed;
-						var embedSpotify = new EmbedBuilder();
+						var embedSpotify = new EmbedBuilder();						
 						embedSpotify.WithColor(Color.DarkGreen)
 							.WithTitle("Ecoute de la musique")
 							.WithUrl(spotifyInfo.TrackUrl)
 							.WithThumbnailUrl(spotifyInfo.AlbumArtUrl)
-							.AddField("Titre :", spotifyInfo.TrackTitle)
-							.AddField("Auteur :", spotifyInfo.Artists.First())
-							.AddField("Album :", spotifyInfo.AlbumTitle)
-							.WithFooter($"{DateTime.Now.ToString(@"hh\:mm")} UTC • {DateTime.Now.ToString("dd MMMM, yyyy")} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");						
+							.AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
+							.AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
+							.AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
+							.WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");						
 						var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
 						int elalpsedBarLenght = (int)(30 * elapsed);
                         string elapsedBar = "";
@@ -196,7 +215,7 @@ namespace Le_Z.Modules
                         for (int i = 0; i <= 30 - elalpsedBarLenght; i++)
                             elapsedBar += "\u25A1";
                         
-                        embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
+                        embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");						
 						ReplyAsync(userStatus);
 						Task.Delay(10);
 						return ReplyAsync(embed: embedSpotify.Build());
@@ -316,7 +335,7 @@ namespace Le_Z.Modules
 			Tweet tweet = tweets.First(tweetos =>  tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
 
 			CultureInfo culture = new CultureInfo("fr-FR");
-			var embedTweet = new EmbedBuilder();
+			var embedTweet = new EmbedBuilder();			
 			embedTweet.WithColor(Color.Blue)
 				.WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
 				.WithTitle($"Dernier Tweet de {tweet.Author.Name}")
@@ -353,6 +372,28 @@ namespace Le_Z.Modules
             }			
 			var lastMessageBot = await ReplyAsync(embed: embedTweet.Build());			
 		}
+
+		//private class TimeZoneModel
+  //      {
+		//	public string UTC_offset { get; set; }
+  //      }
+
+		//private static async Task<int> GetParisTimeZone()
+  //      {
+		//	using (HttpClient client = new HttpClient())
+  //          {
+		//		string path = "http://worldtimeapi.org/api/timezone/Europe/Paris";
+		//		HttpResponseMessage response = await client.GetAsync(path);
+		//		response.EnsureSuccessStatusCode();
+		//		var responseText = await response.Content.ReadAsStringAsync();
+		//		TimeZoneModel timeZone = JsonConvert.DeserializeObject<TimeZoneModel>(responseText);
+
+		//		if (timeZone.UTC_offset == "+01:00") return 1;
+		//		else return 2;
+				
+		//	}
+  //      }
+
 
 		//=============================================================================================================================================================//		
 
