@@ -27,7 +27,10 @@ namespace Le_Z.Modules
 
         #region Help     	
 
-        // z!help
+        /// <summary>
+        /// Si ceci s'affiche veuillez contacter Slupshi car c'est pas normal
+        /// </summary>
+        /// <returns></returns>
         [Command("help")]
         public Task HelpAsync()
         {
@@ -45,21 +48,21 @@ namespace Le_Z.Modules
 #endif
             if (message == "Voici de l'aide jeune Padawan")
             {
-                var botUser = Context.Client.CurrentUser;
+                var commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
+                commandsList.RemoveAt(0);
+
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline(message))
                          .WithColor(Color.DarkBlue)
                          .WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '{' sont obligatoires, celles avec des '[' sont optionnelles")
-                         .WithFooter("Surement pas à jour", iconUrl: "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png")
-                         .AddField(name: "`avatar {Pseudo discord ou @} [taille]`", "Renvoie l'avatar d'un user à la taille choisie", inline: false)
-                         .AddField(name: "`bully {Pseudo discord ou @} {Ton Message}`", "Envoie un message en mp à un user", inline: false)
-                         .AddField(name: "`clear [Nombre à delete]`", "Supprime des messages dans le channel où est exécutée la commande", inline: false)
-                         .AddField(name: "`repos {code postal FR} [true/false]`", "Renvoie la liste des Jours férié de l'année en cours, true pour l'année suivante", inline: false)
-                         .AddField(name: "`say {Ton message}`", "Fait parler Le_Z", inline: false)
-                         .AddField(name: "`spam {Nombre à spam} {Ton Message}`", "Spam un message dans le channel où est exécutée la commande", inline: false)
-                         .AddField(name: "`status [Pseudo discord ou @]`", "Renvoie le status de l'user", inline: false)
-                         .AddField(name: "`tweet {Username Tweeter}`", "Affiche le dernier tweet du compte", inline: false)
-                         .AddField(name: "`wakeup`", "Répond une insulte gratuite", inline: false);
+                         .WithFooter("Surement pas à jour", iconUrl: "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png");
+                foreach (var command in commandsList)
+                {
+                    var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
+                    commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
+                    var commandName = command.CustomAttributes.Last().ConstructorArguments.First();
+                    embedHelp.AddField(name: $"`{commandName} {string.Join(" ", commandsSummaryList.Skip(1).ToList())}`", value: commandsSummaryList.First());
+                }
                 return ReplyAsync(embed: embedHelp.Build());
             }
             else
@@ -69,28 +72,17 @@ namespace Le_Z.Modules
             }
         }
 
-        public enum Commandes
-        {
-            Help,
-            Say,
-            Wakeup,
-            Avatar,
-            Status,
-            Clear,
-            Spam,
-            Bully,
-            Tweet,
-            Repos,
-        }
-
         #endregion Help
 
         #region Say
 
-        // z!say hello world -> **hello world**
+        /// <summary>
+        /// Fait parler Le_Z
+        /// </summary>
+        /// <param name="echo">{Ton message}</param>
+        /// <returns></returns>
         [Command("say")]
-        [Summary("Echoes a message.")]
-        public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
+        public Task SayAsync([Remainder] string echo)
         {
             Context.Message.DeleteAsync();
             var boldEcho = Format.Bold(echo);
@@ -101,13 +93,13 @@ namespace Le_Z.Modules
 
         #region Wakeup
 
-        // z!wakeup 	
+        /// <summary>
+        /// Répond une insulte gratuite
+        /// </summary>
+        /// <returns></returns>
         [Command("wakeup")]
         public Task WakeUpAsync()
         {
-            var commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
-            string summary = commandsList[3].GetXmlDocsSummary();
-
             var emoji = new Emoji("🖕🏼");
             Context.Message.AddReactionAsync(emoji);
             return ReplyAsync("**Ta gueule je dors**");
@@ -120,8 +112,8 @@ namespace Le_Z.Modules
         /// <summary>
         /// Renvoie l'avatar d'un user à la taille choisie
         /// </summary>
-        /// <param name="user">Pseudo discord ou @</param>
-        /// <param name="size">Taille</param>
+        /// <param name="user">{Pseudo discord ou @}</param>
+        /// <param name="size">[Taille]</param>
         /// <returns></returns>
         [Command("avatar")]
         public Task GetAndResizeAvatarAsync(SocketUser user, ushort size = 512)
@@ -142,7 +134,11 @@ namespace Le_Z.Modules
 
         #region Status
 
-        // z!status @user
+        /// <summary>
+        /// Renvoie le status de l'user
+        /// </summary>
+        /// <param name="user">[Pseudo discord ou @]</param>
+        /// <returns></returns>
         [Command("status")]
         public Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
@@ -297,7 +293,11 @@ namespace Le_Z.Modules
 
         #region Clear
 
-        // z!clear [count]
+        /// <summary>
+        /// Supprime des messages dans le channel où est exécutée la commande
+        /// </summary>
+        /// <param name="messageCount">[Nombre à delete]</param>
+        /// <returns></returns>
         [Command("clear")]
         public async Task ClearAsync(int messageCount = 1)
         {
@@ -318,7 +318,12 @@ namespace Le_Z.Modules
 
         #region Spam
 
-        // z!spam count message
+        /// <summary>
+        /// Spam un message dans le channel où est exécutée la commande
+        /// </summary>
+        /// <param name="spamCount">{Nombre à spam}</param>
+        /// <param name="msgToSpam">{Ton Message}</param>
+        /// <returns></returns>
         [Command("spam")]
         public Task SpamAsync(int spamCount, [Remainder] string msgToSpam)
         {
@@ -330,7 +335,12 @@ namespace Le_Z.Modules
 
         #region Bully
 
-        // z!bully @user message
+        /// <summary>
+        /// Envoie un message en mp à un user
+        /// </summary>
+        /// <param name="user">{Pseudo discord ou @}</param>
+        /// <param name="msg">{Ton Message}</param>
+        /// <returns></returns>
         [Command("bully")]
         public Task BullyAsync(SocketGuildUser user, [Remainder] string msg)
         {
@@ -351,7 +361,11 @@ namespace Le_Z.Modules
 
         #region Tweet
 
-        // z!tweet @TwitterUserName
+        /// <summary>
+        /// Affiche le dernier tweet du compte
+        /// </summary>
+        /// <param name="username">{@Pseudo Tweeter}</param>
+        /// <returns></returns>
         [Command("tweet")]
         public async Task LastTweetAsync([Remainder] string username)
         {
@@ -466,7 +480,12 @@ namespace Le_Z.Modules
 
         #region Repos
 
-        // z!repos codepostal [true]
+        /// <summary>
+        /// Renvoie la liste des Jours férié de l'année en cours, true pour l'année suivante
+        /// </summary>
+        /// <param name="codePostal">{code postal FR}</param>
+        /// <param name="twoYear">[true]</param>
+        /// <returns></returns>
         [Command("repos")]
         public async Task ReposMainAsync(string codePostal = null, bool twoYear = false)
         {
