@@ -1,17 +1,13 @@
 ﻿using Discord.Audio;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Le_Z.Modules
 {
-    public class AudioCommands : ModuleBase<SocketCommandContext>
-    {	
+	public class AudioCommands : ModuleBase<SocketCommandContext>
+	{	
 
 		// z!connect
 		[Command("connect", RunMode = RunMode.Async)]
@@ -24,7 +20,7 @@ namespace Le_Z.Modules
 				return;
 			}
 			var audioClient = await user.VoiceChannel.ConnectAsync(selfDeaf: true);			
-			await SendAsync(audioClient, "https://www.youtube.com/watch?v=Ri7GzCUTC5s&ab_channel=KhaledFreak");
+			await SendAsync(audioClient, "testaudio.mp4");
 		}
 
 		private Process CreateStream(string path)
@@ -46,11 +42,28 @@ namespace Le_Z.Modules
 			{
 				try
 				{
-					await output.CopyToAsync(discord);
-					await client.SetSpeakingAsync(true);
+					await output.CopyToAsync(discord);					
 				}
 				finally { await discord.FlushAsync(); }
 			}
 		}
+
+		[Command("connect2")]
+		public async Task Connect2Async()
+		{
+			var user = (SocketGuildUser)Context.User;
+			if (user.VoiceChannel == null)
+			{
+				await ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
+				return;
+			}
+			var audioClient = await user.VoiceChannel.ConnectAsync(selfDeaf: true);
+			await SendAsync(audioClient, "testaudio.mp4");
+		}
+
+
+
+
+
 	}
 }
