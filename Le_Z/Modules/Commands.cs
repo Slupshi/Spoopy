@@ -76,7 +76,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -101,7 +101,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -125,10 +125,9 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
-
         #endregion Wakeup
 
         #region Avatar
@@ -158,7 +157,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -329,7 +328,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -363,6 +362,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
 
         }
@@ -391,6 +391,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
             return ReplyAsync(msgToReturn);
         }
@@ -418,6 +419,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -451,7 +453,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return Task.CompletedTask;
+                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -469,28 +471,12 @@ namespace Le_Z.Modules
         {
             try
             {
-                var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
-                TwitterClient twitterClient = new TwitterClient(bearerToken);
-                TweetOption[] everyTweetOptions = (TweetOption[])Enum.GetValues(typeof(TweetOption));
-                TweetOption[] tweetOption = new TweetOption[4];
-                UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
-                UserOption[] userOption = new UserOption[3];
-                MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
-                MediaOption[] mediaOption = new MediaOption[2];
-
-                tweetOption[0] = everyTweetOptions[1];
-                tweetOption[1] = everyTweetOptions[10];
-                tweetOption[2] = everyTweetOptions[3];
-                tweetOption[3] = everyTweetOptions[7];
-
-                userOption[0] = everyUserOptions[5];
-                userOption[1] = everyUserOptions[8];
-                userOption[2] = everyUserOptions[6];
-
-                mediaOption[0] = everyMediaOptions[4];
-                mediaOption[1] = everyMediaOptions[3];
-
-                User user = await twitterClient.GetUserAsync(username);
+                if (username.Contains(" "))
+                {
+                    await ReplyAsync("**Les Pseudos Twitter ne contiennent pas d'espaces**");
+                    return;
+                }
+                User user = (User)await UseTwitterClientAsync(TwitterClientMethod.GetUser, username: username);
                 if (user == null)
                 {
                     await ReplyAsync("**Utilisateur introuvable**");
@@ -504,59 +490,21 @@ namespace Le_Z.Modules
                         return;
                     }
                 }
-                string upperName = user.Name.ToUpper();
 
-                Tweet[] tweets = await twitterClient.GetTweetsFromUserIdAsync(user.Id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
-                if (tweets.Length == 0)
+                Tweet tweet = (Tweet)await UseTwitterClientAsync(TwitterClientMethod.GetTweets, id: user.Id);
+                if (tweet == null)
                 {
-                    await ReplyAsync("**L'utilisateur n'a aucun tweet disponible**");
+                    await ReplyAsync("**L'utilisateur n'a aucun tweet de disponible**");
                     return;
                 }
-                Tweet tweet = tweets.First(tweetos => tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
 
-                var embedTweet = new EmbedBuilder();
-                TimeSpan tweetosTime = tweet.CreatedAt.Value.TimeOfDay;
-                int tweetosTimeHour = tweetosTime.Hours + await GetParisTimeZone();
-                TimeSpan tweetTime = new TimeSpan(tweetosTimeHour, tweetosTime.Minutes, tweetosTime.Seconds);
-                embedTweet.WithColor(Color.Blue)
-                    .WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
-                    .WithTitle($"Dernier Tweet de {tweet.Author.Name}")
-                    .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
-                    .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
-                    .WithDescription(DeleteUrlFromText(tweet.Text))
-                    .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png");
-                if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
-                {
-                    embedTweet.WithTitle($"Dernier Tweet d'{tweet.Author.Name}");
-                }
-                if (tweet.Attachments != null)
-                {
-                    if (tweet.Attachments.Media[0].Url != null)
-                        embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
-                    if (tweet.Attachments.Media[0].PreviewImageUrl != null)
-                        embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
-                }
-                if (tweet.ReferencedTweets != null)
-                {
-                    if (tweet.ReferencedTweets.First().Type == ReferenceType.Quoted)
-                    {
-                        ReferencedTweet referencedTweet = tweet.ReferencedTweets.First();
-                        Tweet quoteTweet = await twitterClient.GetTweetAsync(referencedTweet.Id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
-                        embedTweet.AddField($"Cité de {quoteTweet.Author.Name} @{quoteTweet.Author.Username}", quoteTweet.Text);
-                        if (quoteTweet.Attachments != null && tweet.Attachments == null)
-                        {
-                            if (quoteTweet.Attachments.Media[0].Url != null)
-                                embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].Url);
-                            if (quoteTweet.Attachments.Media[0].PreviewImageUrl != null)
-                                embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].PreviewImageUrl);
-                        }
-                    }
-                }
+                var embedTweet = await CreateTweetEmbedAsync(tweet, title: "Dernier Tweet");
                 await ReplyAsync(embed: embedTweet.Build());
             }
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
         }
 
@@ -565,7 +513,7 @@ namespace Le_Z.Modules
             public string UTC_offset { get; set; }
         }
 
-        private static async Task<int> GetParisTimeZone()
+        private static async Task<int> GetParisTimeZoneAsync()
         {
             using (HttpClient httpClient = new HttpClient())
             {
@@ -583,11 +531,132 @@ namespace Le_Z.Modules
 
         private static string DeleteUrlFromText(string text)
         {
-            List<string> words = text.Split(" ").ToList();
-            words.RemoveAll(i => i.Contains("http"));
+            List<string> words = text.Split("http").ToList();
+            words.RemoveAll(i => i.Contains("://"));
             string textToReturn = string.Join(" ", words);
             return textToReturn;
         }
+
+        public static async Task<EmbedBuilder> CreateTweetEmbedAsync(Tweet tweet, string title)
+        {
+            TimeSpan tweetosTime = tweet.CreatedAt.Value.TimeOfDay;
+            int tweetosTimeHour = tweetosTime.Hours + await GetParisTimeZoneAsync();
+            TimeSpan tweetTime = new TimeSpan(tweetosTimeHour, tweetosTime.Minutes, tweetosTime.Seconds);
+
+            var embedTweet = new EmbedBuilder();
+            embedTweet.WithColor(Color.Blue)
+                .WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
+                .WithTitle($"{title} de {tweet.Author.Name}")
+                .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
+                .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
+                .WithDescription(DeleteUrlFromText(tweet.Text))
+                .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png")
+                .AddField("Replys : ", $"`{tweet.PublicMetrics.ReplyCount}`", inline: true)
+                .AddField("RTs : ", $"`{tweet.PublicMetrics.RetweetCount}`", inline: true)
+                .AddField("Likes : ", $"`{tweet.PublicMetrics.LikeCount}`", inline: true);
+
+            string upperName = tweet.Author.Name.ToUpper();
+            if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
+            {
+                embedTweet.WithTitle($"{title} d'{tweet.Author.Name}");
+            }
+            if (tweet.Attachments != null)
+            {
+                if (tweet.Attachments.Media[0].Url != null)
+                    embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
+                if (tweet.Attachments.Media[0].PreviewImageUrl != null)
+                    embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
+            }
+            if (tweet.ReferencedTweets != null)
+            {
+                if (tweet.ReferencedTweets.First().Type == ReferenceType.Quoted)
+                {
+                    ReferencedTweet referencedTweet = tweet.ReferencedTweets.First();
+                    Tweet quoteTweet = (Tweet)await UseTwitterClientAsync(method: TwitterClientMethod.GetTweet, id: referencedTweet.Id);
+                    embedTweet.AddField($"__Cité de {quoteTweet.Author.Name} @{quoteTweet.Author.Username}__", DeleteUrlFromText(quoteTweet.Text));
+                    if (quoteTweet.Attachments != null && tweet.Attachments == null)
+                    {
+                        if (quoteTweet.Attachments.Media[0].Url != null)
+                            embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].Url);
+                        if (quoteTweet.Attachments.Media[0].PreviewImageUrl != null)
+                            embedTweet.WithImageUrl(quoteTweet.Attachments.Media[0].PreviewImageUrl);
+                    }
+                }
+            }
+
+            return embedTweet;
+        }
+
+        public enum TwitterClientMethod
+        {
+            GetUser, GetTweet, GetTweets,
+        }
+
+        public static async Task<object> UseTwitterClientAsync(TwitterClientMethod method, string id = null, string username = null)
+        {
+            var bearerToken = Environment.GetEnvironmentVariable("Bearer_Token_Spoopy", EnvironmentVariableTarget.User);
+            TwitterClient twitterClient = new TwitterClient(bearerToken);
+
+            if (method == TwitterClientMethod.GetTweet)
+            {
+                Tweet tweet = await GetTweetWithCustomSearchAsync(twitterClient, TwitterClientMethod.GetTweet, id);
+                return tweet;
+            }
+            else if (method == TwitterClientMethod.GetTweets)
+            {
+                Tweet tweet = await GetTweetWithCustomSearchAsync(twitterClient, TwitterClientMethod.GetTweets, id);
+                return tweet;
+            }
+            else
+            {
+                User user = await GetTwitterUser(twitterClient, username);
+                return user;
+            }
+
+        }
+
+        private static async Task<User> GetTwitterUser(TwitterClient twitterClient, string username)
+        {
+            User user = await twitterClient.GetUserAsync(username);
+            return user;
+        }
+
+        private static async Task<Tweet> GetTweetWithCustomSearchAsync(TwitterClient twitterClient, TwitterClientMethod method, string id)
+        {
+            TweetOption[] everyTweetOptions = (TweetOption[])Enum.GetValues(typeof(TweetOption));
+            TweetOption[] tweetOption = new TweetOption[5];
+            UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
+            UserOption[] userOption = new UserOption[3];
+            MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
+            MediaOption[] mediaOption = new MediaOption[2];
+
+            tweetOption[0] = everyTweetOptions[1];  // Date de publication
+            tweetOption[1] = everyTweetOptions[10]; // Attachments
+            tweetOption[2] = everyTweetOptions[3];  // In Reply to Tweet
+            tweetOption[3] = everyTweetOptions[7];  // Referenced Tweet
+            tweetOption[4] = everyTweetOptions[6];  // RT, Likes, Quote, Reply Counts
+
+            userOption[0] = everyUserOptions[5];    // Profile Image Url
+            userOption[1] = everyUserOptions[8];    // Url
+            userOption[2] = everyUserOptions[6];    // Protected
+
+            mediaOption[0] = everyMediaOptions[4];  // Image Preview Url
+            mediaOption[1] = everyMediaOptions[3];  // Url
+
+            Tweet tweet;
+
+            if (method == TwitterClientMethod.GetTweet)
+            {
+                tweet = await twitterClient.GetTweetAsync(id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+            }
+            else
+            {
+                Tweet[] tweets = await twitterClient.GetTweetsFromUserIdAsync(id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+                tweet = tweets.FirstOrDefault(tweetos => tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
+            }
+            return tweet;
+        }
+
 
         #endregion Tweet
 
@@ -620,6 +689,7 @@ namespace Le_Z.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
 
         }

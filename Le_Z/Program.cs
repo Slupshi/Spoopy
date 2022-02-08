@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Le_Z.Modules;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
-
+using TwitterSharp.Response.RTweet;
 
 namespace Le_Z
 {
@@ -93,6 +94,16 @@ namespace Le_Z
             #endregion TriggerWords
             if (message.Content.Contains("https://twitter.com/") && message.Content.Contains("/status/"))
             {
+                var splitMessage = message.Content.Split('/');
+                var splitID = splitMessage.Last().Split('?');
+                var tweet = (Tweet)await Commands.UseTwitterClientAsync(method: Commands.TwitterClientMethod.GetTweet, id: splitID.First());
+                var embedBuilder = await Commands.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
+                await message.DeleteAsync();
+                var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
+                Emoji[] emojis = new Emoji[2];
+                emojis[0] = new Emoji("👍");
+                emojis[1] = new Emoji("👎");
+                await botResponse.AddReactionsAsync(emojis);
                 return;
             }
             int argPos = 0;
@@ -114,6 +125,10 @@ namespace Le_Z
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
         }
+
+
+
+
 
 
     }
