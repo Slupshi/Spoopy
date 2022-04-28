@@ -75,8 +75,8 @@ namespace Le_Z.Modules
             }
             catch (Exception e)
             {
-                Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
+                Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
+                return ReplyAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
             }
         }
 
@@ -222,106 +222,107 @@ namespace Le_Z.Modules
 
                 if (user.Activities.Count > 0)
                 {
-                    var userPlaying = user.Activities.First();
+                    var userPlaying = user.Activities.FirstOrDefault(a => a.Type != ActivityType.CustomStatus);
 
-                    if (userPlaying.Type == ActivityType.CustomStatus && user.Activities.Count > 1)
+                    if (userPlaying != null)
                     {
-                    }
-
-                    if (userPlaying.Type == ActivityType.Playing)
-                    {
-                        var embedGame = new EmbedBuilder();
-                        bool showingTimespan = false;
-                        if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
+                        if (userPlaying.Type == ActivityType.Playing)
                         {
-                            embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");
-                            ReplyAsync(userStatus);
-                            return ReplyAsync(embed: embedGame.Build());
-                        }
-                        if (userPlaying is RichGame richGameInfo)
-                        {
-                            var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
-                            embedGame.WithTitle($"Joue à {richGameInfo.Name}")
-                                     .WithColor(Color.LightGrey)
-                                     .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
-
-                            if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
+                            var embedGame = new EmbedBuilder();
+                            bool showingTimespan = false;
+                            if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
                             {
-                                if (richGameInfo.LargeAsset.Text != null)
+                                embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");
+                                ReplyAsync(userStatus);
+                                return ReplyAsync(embed: embedGame.Build());
+                            }
+                            if (userPlaying is RichGame richGameInfo)
+                            {
+                                var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
+                                embedGame.WithTitle($"Joue à {richGameInfo.Name}")
+                                         .WithColor(Color.LightGrey)
+                                         .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
+
+                                if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
                                 {
-                                    embedGame.AddField(richGameInfo.Details, richGameInfo.LargeAsset.Text)
-                                         .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    if (richGameInfo.LargeAsset.Text != null)
+                                    {
+                                        embedGame.AddField(richGameInfo.Details, richGameInfo.LargeAsset.Text)
+                                             .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                        showingTimespan = true;
+                                    }
+                                }
+                                else if (richGameInfo.Details != null && richGameInfo.State != null)
+                                {
+                                    embedGame.AddField(richGameInfo.Details, ".")
+                                             .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
                                     showingTimespan = true;
                                 }
-                            }
-                            else if (richGameInfo.Details != null && richGameInfo.State != null)
-                            {
-                                embedGame.AddField(richGameInfo.Details, ".")
-                                         .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
-                                showingTimespan = true;
-                            }
-                            else if (richGameInfo.Details != null && richGameInfo.State == null)
-                            {
-                                embedGame.AddField(richGameInfo.Details, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
-                                showingTimespan = true;
-                            }
-                            else if (richGameInfo.Details == null && richGameInfo.State != null)
-                            {
-                                embedGame.AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
-                                showingTimespan = true;
-                            }
+                                else if (richGameInfo.Details != null && richGameInfo.State == null)
+                                {
+                                    embedGame.AddField(richGameInfo.Details, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    showingTimespan = true;
+                                }
+                                else if (richGameInfo.Details == null && richGameInfo.State != null)
+                                {
+                                    embedGame.AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    showingTimespan = true;
+                                }
 
-                            if (!showingTimespan)
-                                embedGame.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                if (!showingTimespan)
+                                    embedGame.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
 
-                            if (richGameInfo.LargeAsset != null)
-                                embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
-                            ReplyAsync(userStatus);
-                            Task.Delay(10);
-                            return ReplyAsync(embed: embedGame.Build());
+                                if (richGameInfo.LargeAsset != null)
+                                    embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
+                                ReplyAsync(userStatus);
+                                Task.Delay(10);
+                                return ReplyAsync(embed: embedGame.Build());
+                            }
                         }
-                    }
 
-                    if (userPlaying.Type == ActivityType.Listening)
-                    {
-                        if (userPlaying is SpotifyGame spotifyInfo)
+                        if (userPlaying.Type == ActivityType.Listening)
                         {
-                            var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;
-                            var spotifyInfoElapsed = (TimeSpan)spotifyInfo.Elapsed;
-                            var embedSpotify = new EmbedBuilder();
-                            embedSpotify.WithColor(Color.DarkGreen)
-                                .WithTitle("Ecoute de la musique")
-                                .WithUrl(spotifyInfo.TrackUrl)
-                                .WithThumbnailUrl(spotifyInfo.AlbumArtUrl)
-                                .AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
-                                .AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
-                                .AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
-                                .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
-                            var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
-                            int elalpsedBarLenght = (int)(30 * elapsed);
-                            string elapsedBar = "";
-                            for (int i = 0; i <= elalpsedBarLenght; i++)
-                                elapsedBar += "\u25A0";
-                            for (int i = 0; i <= 30 - elalpsedBarLenght; i++)
-                                elapsedBar += "\u25A1";
+                            if (userPlaying is SpotifyGame spotifyInfo)
+                            {
+                                var spotifyInfoDuration = (TimeSpan)spotifyInfo.Duration;
+                                var spotifyInfoElapsed = (TimeSpan)spotifyInfo.Elapsed;
+                                var embedSpotify = new EmbedBuilder();
+                                embedSpotify.WithColor(Color.DarkGreen)
+                                    .WithTitle("Ecoute de la musique")
+                                    .WithUrl(spotifyInfo.TrackUrl)
+                                    .WithThumbnailUrl(spotifyInfo.AlbumArtUrl)
+                                    .AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
+                                    .AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
+                                    .AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
+                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
+                                var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
+                                int elalpsedBarLenght = (int)(30 * elapsed);
+                                string elapsedBar = "";
+                                for (int i = 0; i <= elalpsedBarLenght; i++)
+                                    elapsedBar += "\u25A0";
+                                for (int i = 0; i <= 30 - elalpsedBarLenght; i++)
+                                    elapsedBar += "\u25A1";
 
-                            embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
-                            ReplyAsync(userStatus);
-                            Task.Delay(10);
-                            return ReplyAsync(embed: embedSpotify.Build());
+                                embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
+                                ReplyAsync(userStatus);
+                                Task.Delay(10);
+                                return ReplyAsync(embed: embedSpotify.Build());
+                            }
                         }
-                    }
 
-                    if (userPlaying.Type == ActivityType.Streaming)
-                    {
-                        if (userPlaying is StreamingGame streamInfo)
+                        if (userPlaying.Type == ActivityType.Streaming)
                         {
-                            userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
-                            userPlayingStatus = Format.Bold(userPlayingStatus);
-                            userStatus = $"{userStatus}\n{userPlayingStatus}";
-                            return ReplyAsync($"{userStatus}");
+                            if (userPlaying is StreamingGame streamInfo)
+                            {
+                                userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
+                                userPlayingStatus = Format.Bold(userPlayingStatus);
+                                userStatus = $"{userStatus}\n{userPlayingStatus}";
+                                return ReplyAsync($"{userStatus}");
+                            }
                         }
+
                     }
+
                 }
                 return ReplyAsync($"{userStatus}");
             }
@@ -393,7 +394,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
                 return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
             }
-            return ReplyAsync(msgToReturn);
+            return ReplyAsync(msgToReturn.Substring(0, 1950));
         }
 
         #endregion SoftSpam
@@ -565,7 +566,12 @@ namespace Le_Z.Modules
                 if (tweet.Attachments.Media[0].Url != null)
                     embedTweet.WithImageUrl(tweet.Attachments.Media[0].Url);
                 if (tweet.Attachments.Media[0].PreviewImageUrl != null)
+                {
                     embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
+                    embedTweet.WithDescription($"{DeleteUrlFromText(tweet.Text)} \n\n `Ce tweet contient une vidéo de {(tweet.Attachments.Media[0].DurationMs) / 1000} secondes`");
+                }
+
+
             }
             if (tweet.ReferencedTweets != null)
             {
@@ -628,7 +634,7 @@ namespace Le_Z.Modules
             UserOption[] everyUserOptions = (UserOption[])Enum.GetValues(typeof(UserOption));
             UserOption[] userOption = new UserOption[3];
             MediaOption[] everyMediaOptions = (MediaOption[])Enum.GetValues(typeof(MediaOption));
-            MediaOption[] mediaOption = new MediaOption[2];
+            MediaOption[] mediaOption = new MediaOption[3];
 
             tweetOption[0] = everyTweetOptions[1];  // Date de publication
             tweetOption[1] = everyTweetOptions[10]; // Attachments
@@ -642,6 +648,7 @@ namespace Le_Z.Modules
 
             mediaOption[0] = everyMediaOptions[4];  // Image Preview Url
             mediaOption[1] = everyMediaOptions[3];  // Url
+            mediaOption[2] = everyMediaOptions[0];  // Duration
 
             Tweet tweet;
 

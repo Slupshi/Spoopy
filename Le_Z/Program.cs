@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using Le_Z.Modules;
 using System;
@@ -40,6 +41,8 @@ namespace Le_Z
         public async Task InstallCommandsAsync()
         {
             _client.MessageReceived += HandleCommandAsync;
+            _client.UserVoiceStateUpdated += UwU;
+            _client.LatencyUpdated += LatencyUpdated;
             //_client.SlashCommandExecuted
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
@@ -92,6 +95,11 @@ namespace Le_Z
             }
             //
             #endregion TriggerWords
+            if (message.Attachments.Count > 0 && message.Author.Id == 429352632138858506)
+            {
+                MessageReference messageRef = new MessageReference(messageId: message.Id);
+                await message.Channel.SendMessageAsync("**Les sources de ce message ne sont surement pas valide**", messageReference: messageRef);
+            }
             if (message.Content.Contains("https://twitter.com/") && message.Content.Contains("/status/"))
             {
                 var splitMessage = message.Content.Split('/');
@@ -126,8 +134,60 @@ namespace Le_Z
             return Task.CompletedTask;
         }
 
+        private async Task UwU(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
+        {
+            if (newVoiceState.VoiceChannel == null || newVoiceState.VoiceChannel.Guild.Id != 611568951406624768) return;
+            SocketRole UwU = _client.GetGuild(611568951406624768).GetRole(964621092562034718);
+            bool isUwU = newVoiceState.VoiceChannel.Id == 611881198700068864;
 
+            if (isUwU)
+            {
+                await (user as IGuildUser).AddRoleAsync(UwU);
+            }
+            else
+            {
+                await (user as IGuildUser).RemoveRoleAsync(UwU);
+            }
+        }
 
+        private async Task LatencyUpdated(int previousLatency, int newLatency)
+        {
+            try
+            {
+                if (previousLatency == 0) return;
+                SocketGuild guild = _client.GetGuild(611568951406624768);
+                var rolesList = guild.Roles.ToList();
+                var activeUsers = guild.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
+                foreach (var user in activeUsers)
+                {
+                    var game = user.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
+                    if (game != null)
+                    {
+                        SocketRole role = rolesList.FirstOrDefault(r => r.Name == game.Name);
+                        if (role == null)
+                        {
+                            RestRole restRole = await guild.CreateRoleAsync(name: game.Name, isMentionable: true, color: new Color(255, 255, 255));
+                            Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
+                            await user.AddRoleAsync(restRole);
+                            Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
+                        }
+                        else
+                        {
+                            if (user.Roles.FirstOrDefault(r => r.Name == role.Name) == null)
+                            {
+                                await user.AddRoleAsync(role);
+                                Console.WriteLine($"Rôle {role.Name} ajouté à {user.Username}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+        }
 
 
 
