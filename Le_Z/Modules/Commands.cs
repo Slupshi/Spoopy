@@ -14,6 +14,7 @@ using TwitterSharp.Client;
 using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
+using TwitterSharp.Request.Option;
 
 namespace Le_Z.Modules
 {
@@ -651,14 +652,19 @@ namespace Le_Z.Modules
             mediaOption[2] = everyMediaOptions[0];  // Duration
 
             Tweet tweet;
+            var tweetOptions = new TweetSearchOptions();
+            tweetOptions.TweetOptions = tweetOption;
+            tweetOptions.UserOptions = userOption;
+            tweetOptions.MediaOptions = mediaOption;
+
 
             if (method == TwitterClientMethod.GetTweet)
             {
-                tweet = await twitterClient.GetTweetAsync(id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+                tweet = await twitterClient.GetTweetAsync(id, options: tweetOptions);
             }
             else
             {
-                Tweet[] tweets = await twitterClient.GetTweetsFromUserIdAsync(id, tweetOptions: tweetOption, userOptions: userOption, mediaOptions: mediaOption);
+                Tweet[] tweets = await twitterClient.GetTweetsFromUserIdAsync(id, options: tweetOptions);
                 tweet = tweets.FirstOrDefault(tweetos => tweetos.ReferencedTweets == null || tweetos.ReferencedTweets.First().Type == ReferenceType.Quoted);
             }
             return tweet;
