@@ -13,6 +13,7 @@ namespace Le_Z
 {
     public class Program
     {
+        private bool _aEmmerderZozoToday = false;
         private byte _isStarting = 1;
         private SocketGuildChannel _botLogChannel;
         private DiscordSocketClient _client;
@@ -181,6 +182,14 @@ namespace Le_Z
                 var activeUsers = guild.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
                 foreach (var user in activeUsers)
                 {
+                    if (user.Id == 434662109595435008 && user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null)
+                    {
+                        if (!_aEmmerderZozoToday)
+                        {
+                            await EmmerderZozo(user);
+                            _aEmmerderZozoToday = true;
+                        }
+                    }
                     var game = user.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
                     if (game != null)
                     {
@@ -211,5 +220,11 @@ namespace Le_Z
 
         }
 
+
+        private async Task EmmerderZozo(SocketGuildUser user)
+        {
+            await user.CreateDMChannelAsync();
+            await user.SendMessageAsync("**Ils sont bien les skins dans ton shop aujourd'hui ? =D**");
+        }
     }
 }
