@@ -13,8 +13,10 @@ namespace Le_Z
 {
     public class Program
     {
+        private byte _isStarting = 1;
+        private SocketGuildChannel _botLogChannel;
         private DiscordSocketClient _client;
-        private CommandService commands;
+        private CommandService _commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
 
         public async Task RunBotAsync()
@@ -22,14 +24,13 @@ namespace Le_Z
             _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
             _client.Log += Log;
 
-            commands = new CommandService();
+            _commands = new CommandService();
             await InstallCommandsAsync();
 
             await _client.SetGameAsync("UwU");
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
-
 
             //Starting the bot
             await _client.StartAsync();
@@ -44,7 +45,7 @@ namespace Le_Z
             _client.UserVoiceStateUpdated += UwU;
             _client.LatencyUpdated += LatencyUpdated;
             //_client.SlashCommandExecuted
-            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
 
         private async Task HandleCommandAsync(SocketMessage msg)
@@ -119,7 +120,7 @@ namespace Le_Z
             if (!message.HasStringPrefix("z!", ref argPos)) return;
             var context = new SocketCommandContext(_client, message);
             await context.Guild.DownloadUsersAsync();
-            var result = await commands.ExecuteAsync(context, argPos, null);
+            var result = await _commands.ExecuteAsync(context, argPos, null);
             if (!result.IsSuccess)
             {
                 MessageReference messageRef = new MessageReference(messageId: message.Id);
@@ -152,9 +153,23 @@ namespace Le_Z
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
         {
+            if (_isStarting == 1)
+            {
+                _isStarting = 2;
+                return;
+            }
+            if (_isStarting == 2)
+            {
+                _botLogChannel = _client.GetGuild(611568951406624768).Channels.Where(c => c.Id == 969507287448301598).First();
+                _isStarting = 0;
+            }
+            await SetGameRoleAsync();
+        }
+
+        private async Task SetGameRoleAsync()
+        {
             try
             {
-                if (previousLatency == 0) return;
                 SocketGuild guild = _client.GetGuild(611568951406624768);
                 var rolesList = guild.Roles.ToList();
                 var activeUsers = guild.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
@@ -167,6 +182,7 @@ namespace Le_Z
                         if (role == null)
                         {
                             RestRole restRole = await guild.CreateRoleAsync(name: game.Name, isMentionable: true, color: new Color(255, 255, 255));
+                            await (_botLogChannel as IMessageChannel).SendMessageAsync($"**```{DateTime.Now.ToString("T")} | Rôle {restRole.Name} créé avec succès```**");
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
                             Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
@@ -188,8 +204,6 @@ namespace Le_Z
             }
 
         }
-
-
 
     }
 }
