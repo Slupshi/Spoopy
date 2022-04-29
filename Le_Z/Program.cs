@@ -143,7 +143,10 @@ namespace Le_Z
 
             if (isUwU)
             {
-                await (user as IGuildUser).AddRoleAsync(UwU);
+                if (!(user as IGuildUser).RoleIds.Any(r => r == 964621092562034718))
+                {
+                    await (user as IGuildUser).AddRoleAsync(UwU);
+                }
             }
             else
             {
