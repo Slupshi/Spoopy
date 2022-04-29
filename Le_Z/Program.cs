@@ -147,7 +147,10 @@ namespace Le_Z
             }
             else
             {
-                await (user as IGuildUser).RemoveRoleAsync(UwU);
+                if ((user as IGuildUser).RoleIds.Any(r => r == 964621092562034718))
+                {
+                    await (user as IGuildUser).RemoveRoleAsync(UwU);
+                }
             }
         }
 
