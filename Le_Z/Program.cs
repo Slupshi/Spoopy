@@ -13,8 +13,12 @@ namespace Le_Z
 {
     public class Program
     {
+        public Color WhiteColor { get => new Color(255, 255, 255); }
+        public Color GreenColor { get => new Color(19, 121, 16); }
+        public Color RedColor { get => new Color(219, 78, 78); }
         private byte _isStarting = 1;
         private SocketGuildChannel _botLogChannel;
+        private SocketGuild _banquise;
         private DiscordSocketClient _client;
         private CommandService _commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
@@ -166,7 +170,8 @@ namespace Le_Z
             }
             if (_isStarting == 2)
             {
-                _botLogChannel = _client.GetGuild(611568951406624768).Channels.Where(c => c.Id == 969507287448301598).First();
+                _banquise = _client.GetGuild(611568951406624768);
+                _botLogChannel = _banquise.Channels.Where(c => c.Id == 969507287448301598).First();
                 _isStarting = 0;
             }
             await SetGameRoleAsync();
@@ -176,9 +181,8 @@ namespace Le_Z
         {
             try
             {
-                SocketGuild guild = _client.GetGuild(611568951406624768);
-                var rolesList = guild.Roles.ToList();
-                var activeUsers = guild.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
+                var rolesList = _banquise.Roles.ToList();
+                var activeUsers = _banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
                 foreach (var user in activeUsers)
                 {
                     var game = user.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
@@ -187,7 +191,7 @@ namespace Le_Z
                         SocketRole role = rolesList.FirstOrDefault(r => r.Name == game.Name);
                         if (role == null)
                         {
-                            RestRole restRole = await guild.CreateRoleAsync(name: game.Name, isMentionable: true, color: new Color(255, 255, 255));
+                            RestRole restRole = await _banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: WhiteColor);
                             await (_botLogChannel as IMessageChannel).SendMessageAsync($"**```{DateTime.Now.ToString("T")} | Rôle {restRole.Name} créé avec succès```**");
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
@@ -203,6 +207,7 @@ namespace Le_Z
                         }
                     }
                 }
+                //await CheckRoleMembers();
             }
             catch (Exception e)
             {
@@ -210,6 +215,22 @@ namespace Le_Z
             }
 
         }
+
+        private async Task CheckRoleMembers()
+        {
+            foreach(SocketRole role in _banquise.Roles)
+            {
+                if(role.Members.ToList().Count > 1 && role.Members.ToList().Count < 3 && role.Color == WhiteColor)
+                {
+                    await role.ModifyAsync(r => r.Color = GreenColor);
+                }
+                else if (role.Members.ToList().Count > 3 && (role.Color == WhiteColor || role.Color == GreenColor))
+                {
+                    await role.ModifyAsync(r => r.Color = RedColor);
+                }
+            }
+        }
+
 
     }
 }
