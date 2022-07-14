@@ -15,6 +15,7 @@ using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
 using TwitterSharp.Request.Option;
+using System.Text.RegularExpressions;
 
 namespace Le_Z.Modules
 {
@@ -808,13 +809,13 @@ namespace Le_Z.Modules
         /// <param name="isEveryone">[true]</param>
         /// <returns></returns>
         [Command("sondage")]
-        public Task Sondage([Remainder] string question)
+        public async Task SondageAsync([Remainder] string question)
         {
             bool isEveryone = Context.Message.Content.Split(" ").LastOrDefault() == "true";
-            Context.Message.DeleteAsync();
+            await Context.Message.DeleteAsync();
             if(Context.Guild.Id != Program.BanquiseID)
             {
-                return Task.CompletedTask;
+                return;
             }
             var author = Context.User;
             if (isEveryone)
@@ -823,7 +824,16 @@ namespace Le_Z.Modules
                 words.RemoveAt(words.Count - 1);
                 question = string.Join(" ", words);
             }
-            return Program.CreateSondageAsync(author, question, isEveryone);
+
+            EmbedBuilder embedBuilder = new();
+            embedBuilder.WithColor(new Color(27, 37, 70))
+                                    .WithTitle($"Sondage de {author.Username}")
+                                    .WithThumbnailUrl(author.GetAvatarUrl())
+                                    .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
+                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Program.Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
+            var embed = await Program.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
+            await embed.AddReactionsAsync(Program.ThumbEmojis);
+            await Program.ZLog($"Sondage crée par {author.Username}");
         }
 
         #endregion

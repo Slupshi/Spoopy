@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.Rest;
 using Discord.WebSocket;
 using Le_Z.Modules;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,14 +31,19 @@ namespace Le_Z
         public const long BanquiseID = 611568951406624768;
 
         public static readonly List<Emoji> ThumbEmojis = new() { new Emoji("👍"), new Emoji("👎") };
+        public static readonly Dictionary<byte,Emoji> NumberEmoji = new() 
+        { 
+            {1,  new Emoji("1️⃣") }, { 2, new Emoji("2️⃣") }, { 3, new Emoji("3️⃣") }, { 4, new Emoji("4️⃣") }, { 5, new Emoji("5️⃣") }, { 6, new Emoji("6️⃣") }, { 7, new Emoji("7️⃣") }, { 8, new Emoji("8️⃣") }, { 9, new Emoji("9️⃣") }, 
+        };
 
         #endregion
 
 
         private bool _aEmmerderZozoToday = false;
-        private byte _isStarting = 1;
         private static IMessageChannel _botLogChannel;
+        public static IMessageChannel PollChannel;
         private SocketGuild _banquise;
+
         private static DiscordSocketClient _client;
         private CommandService _commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
@@ -50,6 +57,7 @@ namespace Le_Z
             await InstallCommandsAsync();
 
             await _client.SetGameAsync("UwU");
+            _client.Ready += _client_Ready;
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
@@ -62,8 +70,6 @@ namespace Le_Z
         public async Task InstallCommandsAsync()
         {
             _client.MessageReceived += HandleCommandAsync;
-            _client.UserVoiceStateUpdated += UwU;
-            _client.LatencyUpdated += LatencyUpdated;
             //_client.SlashCommandExecuted
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
@@ -147,6 +153,21 @@ namespace Le_Z
 
         }
 
+        private async Task SlashCommandHandler(SocketSlashCommand command)
+        {
+            switch (command.CommandName)
+            {
+                case "sondage":
+                    await SlashCommands.CreatePoll(command);
+                    break;
+                case "poll":
+                    await SlashCommands.CreateComplexPoll(command);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
@@ -155,9 +176,72 @@ namespace Le_Z
 
         public static async Task ZLog(string message)
         {
-            _botLogChannel = (IMessageChannel)_client.GetChannel(969507287448301598);
             await _botLogChannel.SendMessageAsync($"**```{DateTime.Now.ToString("T")} | {message}```**");
+        }        
+
+        private async Task LatencyUpdated(int previousLatency, int newLatency)
+        {
+            await SetGameRoleAsync();
         }
+
+        private Task _client_Ready()
+        {
+            _banquise = _client.GetGuild(BanquiseID);
+            _botLogChannel = (IMessageChannel)_client.GetChannel(969507287448301598);
+            PollChannel = (IMessageChannel)_client.GetChannel(997148190568611870);
+
+            _client.UserVoiceStateUpdated += UwU;
+            _client.LatencyUpdated += LatencyUpdated;
+
+            CreateSlashCommands();
+
+            _client.SlashCommandExecuted += SlashCommandHandler;
+
+            return Task.CompletedTask;
+        }
+
+        private Task CreateSlashCommands()
+        {
+            var pollCommand = new SlashCommandBuilder();
+            pollCommand.WithName("sondage");
+            pollCommand.WithDescription("Création de sondage");
+            pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
+            pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false);
+
+            var complexPollCommand = new SlashCommandBuilder();
+            complexPollCommand.WithName("poll");
+            complexPollCommand.WithDescription("Création de sondage à choix multiples");
+            complexPollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true)
+                .AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false)
+                .AddOption("proposition1", ApplicationCommandOptionType.String, "Proposition n°1", isRequired: true)
+                .AddOption("proposition2", ApplicationCommandOptionType.String, "Proposition n°2", isRequired: true)
+                .AddOption("proposition3", ApplicationCommandOptionType.String, "Proposition n°3", isRequired: false)
+                .AddOption("proposition4", ApplicationCommandOptionType.String, "Proposition n°4", isRequired: false)
+                .AddOption("proposition5", ApplicationCommandOptionType.String, "Proposition n°5", isRequired: false)
+                .AddOption("proposition6", ApplicationCommandOptionType.String, "Proposition n°6", isRequired: false)
+                .AddOption("proposition7", ApplicationCommandOptionType.String, "Proposition n°7", isRequired: false)
+                .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
+                .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
+
+            try
+            {
+                _banquise.CreateApplicationCommandAsync(pollCommand.Build());
+                _banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
+            }
+            catch (ApplicationCommandException exception)
+            {
+                var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
+
+                Console.WriteLine(json);
+            }
+
+            return Task.CompletedTask;
+        }
+
+
+
+
+
 
         private async Task UwU(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
         {
@@ -179,21 +263,6 @@ namespace Le_Z
                     await (user as IGuildUser).RemoveRoleAsync(UwU);
                 }
             }
-        }
-
-        private async Task LatencyUpdated(int previousLatency, int newLatency)
-        {
-            if (_isStarting == 1)
-            {
-                _isStarting = 2;
-                return;
-            }
-            if (_isStarting == 2)
-            {
-                _banquise = _client.GetGuild(BanquiseID);
-                _isStarting = 0;
-            }
-            await SetGameRoleAsync();
         }
 
         private async Task SetGameRoleAsync()
@@ -243,7 +312,6 @@ namespace Le_Z
 
         }
 
-
         private async Task EmmerderZozo(SocketGuildUser user)
         {
             await user.CreateDMChannelAsync();
@@ -264,21 +332,6 @@ namespace Le_Z
                 }
             }
         }
-
-        public static async Task CreateSondageAsync(SocketUser author, string question, bool isEveryone)
-        {
-            IMessageChannel sondageChannel = (IMessageChannel)_client.GetChannel(997148190568611870);
-            EmbedBuilder embedBuilder = new();
-            embedBuilder.WithColor(new Color(27, 37, 70))
-                                    .WithTitle($"Sondage de {author.Username}")
-                                    .WithThumbnailUrl(author.GetAvatarUrl())
-                                    .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
-            var embed = await sondageChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-            await embed.AddReactionsAsync(ThumbEmojis);
-            await ZLog($"Sondage crée par {author.Username}");
-        }
-
 
     }
 }
