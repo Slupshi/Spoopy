@@ -4,8 +4,11 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Le_Z.Modules;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TwitterSharp.Response.RTweet;
 
@@ -13,10 +16,28 @@ namespace Le_Z
 {
     public class Program
     {
+        #region Property
+
+        public readonly static CultureInfo Culture = new CultureInfo("fr-FR");
+
+        public Color WhiteColor { get => new Color(255, 255, 255); }
+        public Color GreenColor { get => new Color(19, 121, 16); }
+        public Color RedColor { get => new Color(219, 78, 78); }
+
+        private const long _slupID = 429352632138858506;
+        private const long _uwuID = 964621092562034718;
+        public const long BanquiseID = 611568951406624768;
+
+        public static readonly List<Emoji> ThumbEmojis = new() { new Emoji("👍"), new Emoji("👎") };
+
+        #endregion
+
+
         private bool _aEmmerderZozoToday = false;
         private byte _isStarting = 1;
-        private SocketGuildChannel _botLogChannel;
-        private DiscordSocketClient _client;
+        private static IMessageChannel _botLogChannel;
+        private SocketGuild _banquise;
+        private static DiscordSocketClient _client;
         private CommandService _commands;
         public static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
 
@@ -36,8 +57,6 @@ namespace Le_Z
             //Starting the bot
             await _client.StartAsync();
             await Task.Delay(-1);
-
-
         }
 
         public async Task InstallCommandsAsync()
@@ -97,7 +116,7 @@ namespace Le_Z
             }
             //
             #endregion TriggerWords
-            if (message.Attachments.Count > 0 && message.Author.Id == 429352632138858506)
+            if (message.Attachments.Count > 0 && message.Author.Id == _slupID)
             {
                 MessageReference messageRef = new MessageReference(messageId: message.Id);
                 await message.Channel.SendMessageAsync("**Les sources de ce message ne sont surement pas valide**", messageReference: messageRef);
@@ -110,10 +129,8 @@ namespace Le_Z
                 var embedBuilder = await Commands.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
                 await message.DeleteAsync();
                 var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
-                Emoji[] emojis = new Emoji[2];
-                emojis[0] = new Emoji("👍");
-                emojis[1] = new Emoji("👎");
-                await botResponse.AddReactionsAsync(emojis);
+                
+                await botResponse.AddReactionsAsync(ThumbEmojis);
                 return;
             }
             int argPos = 0;
@@ -136,22 +153,28 @@ namespace Le_Z
             return Task.CompletedTask;
         }
 
+        public static async Task ZLog(string message)
+        {
+            _botLogChannel = (IMessageChannel)_client.GetChannel(969507287448301598);
+            await _botLogChannel.SendMessageAsync($"**```{DateTime.Now.ToString("T")} | {message}```**");
+        }
+
         private async Task UwU(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
         {
-            if (newVoiceState.VoiceChannel == null || newVoiceState.VoiceChannel.Guild.Id != 611568951406624768) return;
-            SocketRole UwU = _client.GetGuild(611568951406624768).GetRole(964621092562034718);
+            if (newVoiceState.VoiceChannel == null || newVoiceState.VoiceChannel.Guild.Id != BanquiseID) return;
+            SocketRole UwU = _client.GetGuild(BanquiseID).GetRole(_uwuID);
             bool isUwU = newVoiceState.VoiceChannel.Id == 611881198700068864;
 
             if (isUwU)
             {
-                if (!(user as IGuildUser).RoleIds.Any(r => r == 964621092562034718))
+                if (!(user as IGuildUser).RoleIds.Any(r => r == _uwuID))
                 {
                     await (user as IGuildUser).AddRoleAsync(UwU);
                 }
             }
             else
             {
-                if ((user as IGuildUser).RoleIds.Any(r => r == 964621092562034718))
+                if ((user as IGuildUser).RoleIds.Any(r => r == _uwuID))
                 {
                     await (user as IGuildUser).RemoveRoleAsync(UwU);
                 }
@@ -167,7 +190,7 @@ namespace Le_Z
             }
             if (_isStarting == 2)
             {
-                _botLogChannel = _client.GetGuild(611568951406624768).Channels.Where(c => c.Id == 969507287448301598).First();
+                _banquise = _client.GetGuild(BanquiseID);
                 _isStarting = 0;
             }
             await SetGameRoleAsync();
@@ -177,16 +200,15 @@ namespace Le_Z
         {
             try
             {
-                SocketGuild guild = _client.GetGuild(611568951406624768);
-                var rolesList = guild.Roles.ToList();
-                var activeUsers = guild.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
+                var rolesList = _banquise.Roles.ToList();
+                var activeUsers = _banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
                 foreach (var user in activeUsers)
                 {
-                    if (user.Id == 434662109595435008 && user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null)
+                    if (user.Id == 434662109595435008 && user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null) // 434662109595435008 : zozoID
                     {
                         if (!_aEmmerderZozoToday)
                         {
-                            await EmmerderZozo(user);
+                            //await EmmerderZozo(user);
                             _aEmmerderZozoToday = true;
                         }
                     }
@@ -196,8 +218,8 @@ namespace Le_Z
                         SocketRole role = rolesList.FirstOrDefault(r => r.Name == game.Name);
                         if (role == null)
                         {
-                            RestRole restRole = await guild.CreateRoleAsync(name: game.Name, isMentionable: true, color: new Color(255, 255, 255));
-                            await (_botLogChannel as IMessageChannel).SendMessageAsync($"**```{DateTime.Now.ToString("T")} | Rôle {restRole.Name} créé avec succès```**");
+                            RestRole restRole = await _banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: WhiteColor);
+                            await ZLog($"Rôle {restRole.Name} créé avec succès");
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
                             Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
@@ -212,6 +234,7 @@ namespace Le_Z
                         }
                     }
                 }
+                //await CheckRoleMembers();
             }
             catch (Exception e)
             {
@@ -226,5 +249,36 @@ namespace Le_Z
             await user.CreateDMChannelAsync();
             await user.SendMessageAsync("**Ils sont bien les skins dans ton shop aujourd'hui ? =D**");
         }
+
+        private async Task CheckRoleMembers()
+        {
+            foreach(SocketRole role in _banquise.Roles)
+            {
+                if(role.Members.ToList().Count > 1 && role.Members.ToList().Count < 3 && role.Color == WhiteColor)
+                {
+                    await role.ModifyAsync(r => r.Color = GreenColor);
+                }
+                else if (role.Members.ToList().Count > 3 && (role.Color == WhiteColor || role.Color == GreenColor))
+                {
+                    await role.ModifyAsync(r => r.Color = RedColor);
+                }
+            }
+        }
+
+        public static async Task CreateSondageAsync(SocketUser author, string question, bool isEveryone)
+        {
+            IMessageChannel sondageChannel = (IMessageChannel)_client.GetChannel(997148190568611870);
+            EmbedBuilder embedBuilder = new();
+            embedBuilder.WithColor(new Color(27, 37, 70))
+                                    .WithTitle($"Sondage de {author.Username}")
+                                    .WithThumbnailUrl(author.GetAvatarUrl())
+                                    .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
+                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
+            var embed = await sondageChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
+            await embed.AddReactionsAsync(ThumbEmojis);
+            await ZLog($"Sondage crée par {author.Username}");
+        }
+
+
     }
 }

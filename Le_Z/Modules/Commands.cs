@@ -23,7 +23,6 @@ namespace Le_Z.Modules
     /// </summary>
     public class Commands : ModuleBase<SocketCommandContext>
     {
-        readonly static CultureInfo Culture = new CultureInfo("fr-FR");
         readonly static Random Random = new Random();
 
         #region Help     	
@@ -52,7 +51,9 @@ namespace Le_Z.Modules
                 if (message == "Voici de l'aide jeune Padawan")
                 {
                     var commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
-                    commandsList.RemoveAt(0);
+                    commandsList.RemoveAll(x => x.Name == "HelpAsync");
+                    commandsList.RemoveAll(x => x.Name == "CreateTweetEmbedAsync");
+                    commandsList.RemoveAll(x => x.Name == "UseTwitterClientAsync");
 
                     var embedHelp = new EmbedBuilder();
                     embedHelp.WithTitle(Format.Underline(message))
@@ -242,7 +243,7 @@ namespace Le_Z.Modules
                                 var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
                                 embedGame.WithTitle($"Joue à {richGameInfo.Name}")
                                          .WithColor(Color.LightGrey)
-                                         .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
+                                         .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Program.Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
 
                                 if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
                                 {
@@ -295,7 +296,7 @@ namespace Le_Z.Modules
                                     .AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
                                     .AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
                                     .AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
-                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
+                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Program.Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
                                 var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
                                 int elalpsedBarLenght = (int)(30 * elapsed);
                                 string elapsedBar = "";
@@ -552,7 +553,7 @@ namespace Le_Z.Modules
                 .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
                 .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
                 .WithDescription(DeleteUrlFromText(tweet.Text))
-                .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png")
+                .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Program.Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png")
                 .AddField("Replys : ", $"`{tweet.PublicMetrics.ReplyCount}`", inline: true)
                 .AddField("RTs : ", $"`{tweet.PublicMetrics.RetweetCount}`", inline: true)
                 .AddField("Likes : ", $"`{tweet.PublicMetrics.LikeCount}`", inline: true);
@@ -797,6 +798,35 @@ namespace Le_Z.Modules
         }
 
         #endregion Repos
+
+        #region Sondage
+
+        /// <summary>
+        /// Crée un sondage, true pour un @everyone
+        /// </summary>
+        /// <param name="question">{La question}</param>
+        /// <param name="isEveryone">[true]</param>
+        /// <returns></returns>
+        [Command("sondage")]
+        public Task Sondage([Remainder] string question)
+        {
+            bool isEveryone = Context.Message.Content.Split(" ").LastOrDefault() == "true";
+            Context.Message.DeleteAsync();
+            if(Context.Guild.Id != Program.BanquiseID)
+            {
+                return Task.CompletedTask;
+            }
+            var author = Context.User;
+            if (isEveryone)
+            {
+                var words = question.Split(' ').ToList();
+                words.RemoveAt(words.Count - 1);
+                question = string.Join(" ", words);
+            }
+            return Program.CreateSondageAsync(author, question, isEveryone);
+        }
+
+        #endregion
 
         #region Game (WIP)
 
