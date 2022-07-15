@@ -163,6 +163,12 @@ namespace Le_Z
                 case "poll":
                     await SlashCommands.CreateComplexPoll(command);
                     break;
+                case "help":
+                    await SlashCommands.HelpAsync(command);
+                    break;
+                case "status":
+                    await SlashCommands.StatusAsync(command);
+                    break;
                 default:
                     break;
             }
@@ -223,10 +229,23 @@ namespace Le_Z
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
                 .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
 
+            var helpCommand = new SlashCommandBuilder();
+            helpCommand.WithName("help");
+            helpCommand.WithDescription("De l'aide pour les gens perdus !");
+
+            var statusCommand = new SlashCommandBuilder();
+            statusCommand.WithName("status");
+            statusCommand.WithDescription("Pour stalk les gens du serveur");
+            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+
+
+
             try
             {
                 _banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 _banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
+                _banquise.CreateApplicationCommandAsync(helpCommand.Build());
+                _banquise.CreateApplicationCommandAsync(statusCommand.Build());
             }
             catch (ApplicationCommandException exception)
             {

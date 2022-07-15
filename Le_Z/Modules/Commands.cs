@@ -174,7 +174,7 @@ namespace Le_Z.Modules
         /// <param name="user">[Pseudo discord ou @]</param>
         /// <returns></returns>
         [Command("status")]
-        public Task StatusAsync([Remainder] SocketGuildUser user = null)
+        public async Task StatusAsync([Remainder] SocketGuildUser user = null)
         {
             try
             {
@@ -217,7 +217,7 @@ namespace Le_Z.Modules
 
                 if (user.VoiceChannel != null)
                 {
-                    var userVoicePresenceStatus = $"Se trouve dans \"{user.VoiceChannel}\" dans \"{user.VoiceChannel.Category}\"";
+                    var userVoicePresenceStatus = $"Se trouve dans \"*{user.VoiceChannel}*\" dans \"*{user.VoiceChannel.Category}*\"";
                     userStatus = $"{userStatus}\n{userVoicePresenceStatus}";
                 }
 
@@ -236,8 +236,8 @@ namespace Le_Z.Modules
                             if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
                             {
                                 embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");
-                                ReplyAsync(userStatus);
-                                return ReplyAsync(embed: embedGame.Build());
+                                await ReplyAsync(message: userStatus, embed: embedGame.Build());
+                                return;
                             }
                             if (userPlaying is RichGame richGameInfo)
                             {
@@ -277,9 +277,8 @@ namespace Le_Z.Modules
 
                                 if (richGameInfo.LargeAsset != null)
                                     embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
-                                ReplyAsync(userStatus);
-                                Task.Delay(10);
-                                return ReplyAsync(embed: embedGame.Build());
+                                await ReplyAsync(message: userStatus, embed: embedGame.Build());
+                                return;
                             }
                         }
 
@@ -307,9 +306,8 @@ namespace Le_Z.Modules
                                     elapsedBar += "\u25A1";
 
                                 embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
-                                ReplyAsync(userStatus);
-                                Task.Delay(10);
-                                return ReplyAsync(embed: embedSpotify.Build());
+                                await ReplyAsync(message: userStatus, embed: embedSpotify.Build());
+                                return;
                             }
                         }
 
@@ -320,19 +318,22 @@ namespace Le_Z.Modules
                                 userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
                                 userPlayingStatus = Format.Bold(userPlayingStatus);
                                 userStatus = $"{userStatus}\n{userPlayingStatus}";
-                                return ReplyAsync($"{userStatus}");
+                                await ReplyAsync($"{userStatus}");
+                                return;
                             }
                         }
 
                     }
 
                 }
-                return ReplyAsync($"{userStatus}");
+                await ReplyAsync($"{userStatus}");
+                return;
             }
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                return ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
+                await ReplyAsync("Une erreur s'est produite avec l'éxécution de cette commande");
+                return;
             }
         }
 
@@ -875,5 +876,5 @@ namespace Le_Z.Modules
 
 
 
-    }//Fin de la class
-}//Fin du Namespace
+    }
+}
