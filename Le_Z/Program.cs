@@ -180,9 +180,9 @@ namespace Le_Z
             return Task.CompletedTask;
         }
 
-        public static async Task ZLog(string message)
+        public static async Task ZLog(string message, bool isError = false)
         {
-            await _botLogChannel.SendMessageAsync($"**```{DateTime.Now.ToString("T")} | {message}```**");
+            await _botLogChannel.SendMessageAsync($"**```{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}```**");
         }        
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
