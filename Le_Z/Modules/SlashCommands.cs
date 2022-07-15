@@ -40,7 +40,7 @@ namespace Le_Z.Modules
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await command.RespondAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
-                await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
+                await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
 
         }
@@ -79,7 +79,7 @@ namespace Le_Z.Modules
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await command.RespondAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
-                await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
+                await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
             
         }
