@@ -33,8 +33,8 @@ namespace Le_Z.Modules
                                         .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Program.Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
                 var embed = await Program.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
                 await embed.AddReactionsAsync(Program.ThumbEmojis);
-                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
                 await Program.ZLog($"Sondage crée par {author.Username}");
+                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
             }
             catch (Exception e)
             {
@@ -72,8 +72,8 @@ namespace Le_Z.Modules
                 }
                 var embed = await Program.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
                 await embed.AddReactionsAsync(emojis);
-                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
                 await Program.ZLog($"Sondage crée par {author.Username}");
+                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
             }
             catch (Exception e)
             {
