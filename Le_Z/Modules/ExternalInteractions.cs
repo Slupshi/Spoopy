@@ -11,7 +11,7 @@ namespace Le_Z.Modules
 {
     public class ExternalInteractions
     {
-        public static async Task UwUAsync(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
+        public static async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
         {
             if (newVoiceState.VoiceChannel == null || newVoiceState.VoiceChannel.Guild.Id != Properties.BanquiseID) return;
 

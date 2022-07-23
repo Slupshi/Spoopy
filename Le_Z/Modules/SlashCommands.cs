@@ -77,7 +77,7 @@ namespace Le_Z.Modules
                 foreach (var option in options)
                 {
                     string number = option.Name.Split('n').LastOrDefault();
-                    embedBuilder.AddField($"Proposition n°{number}", option.Value);
+                    embedBuilder.AddField($"{Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
 
                     emojis.Add(Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
                 }

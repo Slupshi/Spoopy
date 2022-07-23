@@ -161,13 +161,18 @@ namespace Le_Z
             await ExternalInteractions.SetGameRoleAsync();
         }
 
+        private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
+        {
+            await ExternalInteractions.UwUAsync(user, newVoiceState);
+        }
+
         private Task _client_Ready()
         {
             Properties.SetPropertiesAtStartup(_client);
 
-            _client.UserVoiceStateUpdated += ExternalInteractions.UwUAsync;
+            _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
             _client.LatencyUpdated += LatencyUpdated;
-
+            
             CreateSlashCommands();
 
             _client.SlashCommandExecuted += HandleSlashCommandAsync;
