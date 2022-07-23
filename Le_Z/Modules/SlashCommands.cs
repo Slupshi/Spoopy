@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Namotion.Reflection;
 using TwitterSharp.Response.RUser;
@@ -17,6 +18,11 @@ namespace Le_Z.Modules
         #region Polls
 
         // Y/N Poll
+        /// <summary>
+        /// Crée un sondage avec Oui ou Non comme réponses
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("sondage", "Créer un sondage avec Oui/Non comme réponses")]
         public static async Task CreatePoll(SocketSlashCommand command)
         {
             try
@@ -46,6 +52,11 @@ namespace Le_Z.Modules
         }
 
         // 2-9 Choices Poll
+        /// <summary>
+        /// Crée un sondage avec jusqu'à 9 propositions possibles
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("poll", "Créer un sondage avec jusqu'à 9 propositions possibles")]
         public static async Task CreateComplexPoll(SocketSlashCommand command)
         {
             try
@@ -92,24 +103,48 @@ namespace Le_Z.Modules
         {
             try
             {
-                    var commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
+                bool isStandard = (scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value) == null ? false : (bool)(scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value);
+
+                List<MethodInfo> commandsList;
+
+                if (isStandard)
+                {
+                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
                     commandsList.RemoveAll(x => x.Name == "HelpAsync");
                     commandsList.RemoveAll(x => x.Name == "CreateTweetEmbedAsync");
                     commandsList.RemoveAll(x => x.Name == "UseTwitterClientAsync");
+                }
+                else
+                {
+                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
+                    commandsList.RemoveAll(x => x.Name == "HelpAsync");
+                }
 
-                    var embedHelp = new EmbedBuilder();
-                    embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
-                             .WithColor(Color.DarkBlue)
-                             .WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__")
-                             .WithFooter("Généré automatiquement", iconUrl: "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png");
-                    foreach (var command in commandsList)
+                var embedHelp = new EmbedBuilder();
+                embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
+                            .WithColor(Color.DarkBlue)
+                            .WithFooter("Généré automatiquement", iconUrl: "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png");
+                if (isStandard)
+                {
+                    embedHelp.WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__");
+                }
+
+                foreach (var command in commandsList)
+                {
+                    var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
+                    commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
+                    var commandName = command.CustomAttributes.Last().ConstructorArguments.First().ToString();
+                    if (isStandard)
                     {
-                        var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
-                        commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
-                        var commandName = command.CustomAttributes.Last().ConstructorArguments.First();
                         embedHelp.AddField(name: $"`{commandName} {string.Join(" ", commandsSummaryList.Skip(1).ToList())}`", value: commandsSummaryList.First());
                     }
-                    await scommand.RespondAsync(embed: embedHelp.Build(), ephemeral: true);
+                    else
+                    {
+                        commandName = commandName.Replace("\"", string.Empty);   
+                        embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
+                    }
+                }
+                await scommand.RespondAsync(embed: embedHelp.Build(), ephemeral: true);
                 
             }
             catch (Exception e)
@@ -123,7 +158,11 @@ namespace Le_Z.Modules
         #endregion
 
         #region Status
-
+        /// <summary>
+        /// Affiche le status de la personne
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("status", "Affiche le status de la personne")]
         public static async Task StatusAsync(SocketSlashCommand command)
         {
             try

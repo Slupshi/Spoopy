@@ -201,6 +201,7 @@ namespace Le_Z
             var helpCommand = new SlashCommandBuilder();
             helpCommand.WithName("help");
             helpCommand.WithDescription("De l'aide pour les gens perdus !");
+            helpCommand.AddOption("standard", ApplicationCommandOptionType.Boolean, "Si True, cela affichera les anciennes commandes", isRequired: false);
 
             var statusCommand = new SlashCommandBuilder();
             statusCommand.WithName("status");
