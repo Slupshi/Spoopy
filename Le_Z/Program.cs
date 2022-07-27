@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.Net;
-using Discord.Rest;
 using Discord.WebSocket;
 using Le_Z.Modules;
 using Newtonsoft.Json;
@@ -187,12 +186,15 @@ namespace Le_Z
             pollCommand.WithDescription("Création de sondage");
             pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
             pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false);
+            pollCommand.AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non", isRequired: false);
+
 
             var complexPollCommand = new SlashCommandBuilder();
             complexPollCommand.WithName("poll");
             complexPollCommand.WithDescription("Création de sondage à choix multiples");
             complexPollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true)
                 .AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false)
+                .AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non", isRequired: false)
                 .AddOption("proposition1", ApplicationCommandOptionType.String, "Proposition n°1", isRequired: true)
                 .AddOption("proposition2", ApplicationCommandOptionType.String, "Proposition n°2", isRequired: true)
                 .AddOption("proposition3", ApplicationCommandOptionType.String, "Proposition n°3", isRequired: false)

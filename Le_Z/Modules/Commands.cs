@@ -5,7 +5,6 @@ using Namotion.Reflection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -15,7 +14,6 @@ using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
 using TwitterSharp.Request.Option;
-using System.Text.RegularExpressions;
 
 namespace Le_Z.Modules
 {
