@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
@@ -21,6 +23,7 @@ namespace Le_Z.Modules
         {
             try
             {
+                await scommand.DeferAsync(ephemeral: true);
                 bool isStandard = (scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value) == null ? false : (bool)(scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value);
 
                 List<MethodInfo> commandsList;
@@ -62,13 +65,19 @@ namespace Le_Z.Modules
                         embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
                     }
                 }
-                await scommand.RespondAsync(embed: embedHelp.Build(), ephemeral: true);
+                await scommand.ModifyOriginalResponseAsync(func: delegate(MessageProperties msg)
+                {
+                    msg.Embed = embedHelp.Build();
+                });
 
             }
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await scommand.RespondAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
+                await scommand.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
             }
         }
@@ -87,6 +96,7 @@ namespace Le_Z.Modules
         {
             try
             {
+                await command.DeferAsync(ephemeral: true);
                 string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
                 bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
                 bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
@@ -105,13 +115,19 @@ namespace Le_Z.Modules
                 }
                 await embed.AddReactionsAsync(Properties.ThumbEmojis);
                 await Program.ZLog($"Sondage crée par {author.Username}");
-                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**```Sondage crée dans le channel \"sondage\"```**";
+                });
                 await CheckUselessPolls();
             }
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.RespondAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
 
@@ -127,6 +143,7 @@ namespace Le_Z.Modules
         {
             try
             {
+                await command.DeferAsync(ephemeral: true);
                 string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
                 bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
                 bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
@@ -155,13 +172,19 @@ namespace Le_Z.Modules
                 }
                 await embed.AddReactionsAsync(emojis);
                 await Program.ZLog($"Sondage crée par {author.Username}");
-                await command.RespondAsync(text: "**```Sondage crée dans le channel \"sondage\"```**", ephemeral: true);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**```Sondage crée dans le channel \"sondage\"```**";
+                });
                 await CheckUselessPolls();
             }
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.RespondAsync("**Une erreur s'est produite avec l'éxécution de cette commande**");
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
             
@@ -201,6 +224,7 @@ namespace Le_Z.Modules
         {
             try
             {
+                await command.DeferAsync(ephemeral: true);
                 SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
                 if (user == null)
                     user = (SocketGuildUser)command.User;
@@ -260,7 +284,12 @@ namespace Le_Z.Modules
                             if (userPlaying is Game gameInfo && !(userPlaying is RichGame game))
                             {
                                 embedGame.WithTitle($"Joue à \"{gameInfo.Name}\"");
-                                await command.RespondAsync(text: userStatus, embed: embedGame.Build());
+                                await command.ModifyOriginalResponseAsync(func: delegate (MessageProperties msg)
+                                {
+                                    msg.Content = userStatus;
+                                    msg.Embed = embedGame.Build();
+                                });
+                                return;
                             }
                             if (userPlaying is RichGame richGameInfo)
                             {
@@ -300,7 +329,12 @@ namespace Le_Z.Modules
 
                                 if (richGameInfo.LargeAsset != null)
                                     embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
-                                await command.RespondAsync(text: userStatus, embed: embedGame.Build());
+                                await command.ModifyOriginalResponseAsync(func: delegate (MessageProperties msg)
+                                {
+                                    msg.Content = userStatus;
+                                    msg.Embed = embedGame.Build();
+                                });
+                                return;
                             }
                         }
 
@@ -328,7 +362,12 @@ namespace Le_Z.Modules
                                     elapsedBar += "\u25A1";
 
                                 embedSpotify.AddField("Durée :", $"{spotifyInfoElapsed.ToString(@"mm\:ss")} | {elapsedBar} | {spotifyInfoDuration.ToString(@"mm\:ss")}");
-                                await command.RespondAsync(text: userStatus, embed: embedSpotify.Build());
+                                await command.ModifyOriginalResponseAsync(func: delegate (MessageProperties msg)
+                                {
+                                    msg.Content = userStatus;
+                                    msg.Embed = embedSpotify.Build();
+                                });
+                                return;
                             }
                         }
 
@@ -339,19 +378,30 @@ namespace Le_Z.Modules
                                 userPlayingStatus = $"Et est en stream \"{streamInfo.Name}\"\nLien : {streamInfo.Url}";
                                 userPlayingStatus = Format.Bold(userPlayingStatus);
                                 userStatus = $"{userStatus}\n{userPlayingStatus}";
-                                await command.RespondAsync($"{userStatus}");
+                                await command.ModifyOriginalResponseAsync(func: delegate (MessageProperties msg)
+                                {
+                                    msg.Content = userStatus;
+                                });
+                                return;
                             }
                         }
 
                     }
 
                 }
-                await command.RespondAsync($"{userStatus}");
+                await command.ModifyOriginalResponseAsync(func: delegate (MessageProperties msg)
+                {
+                    msg.Content = userStatus;
+                });
+                return;
             }
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.RespondAsync("Une erreur s'est produite avec l'éxécution de cette commande");
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand Statut", isError: true);
             }
         }
