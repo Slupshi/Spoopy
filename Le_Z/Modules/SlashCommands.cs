@@ -293,7 +293,15 @@ namespace Le_Z.Modules
                             }
                             if (userPlaying is RichGame richGameInfo)
                             {
-                                var userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
+                                TimeSpan userPlayingTime;
+                                if (richGameInfo.Timestamps.Start != null)
+                                {
+                                    userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
+                                }
+                                else
+                                {
+                                    userPlayingTime = (TimeSpan)(DateTime.Now - (DateTime.Now - TimeSpan.FromSeconds(1)));
+                                }
                                 embedGame.WithTitle($"Joue à {richGameInfo.Name}")
                                          .WithColor(Color.LightGrey)
                                          .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");

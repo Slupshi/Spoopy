@@ -868,7 +868,19 @@ namespace Le_Z.Modules
 
         #endregion Game (WIP)
 
+        [Command("albert")]
+        public Task AlbertEmbed()
+        {
+            var embedBuilder = new EmbedBuilder();
+            embedBuilder.WithTitle("Playlist communautaire !")
+                .WithColor(Color.DarkGreen)
+                .WithDescription($"Voici une playlist Spotify communautaire où vous pouvez y mettre les musiques que vous souhaitez ! {Environment.NewLine} *Vous pouvez jouer cette playlist avec le bot Maki !* {Environment.NewLine} *Pour cela : **/play [Lien de la playlist]***")
+                .WithThumbnailUrl("https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
+            var componentBuilder = new ComponentBuilder();
+            componentBuilder.WithButton(label: "Lien de la Playlist",style: ButtonStyle.Link, url: "");
 
+            return Context.Channel.SendMessageAsync(text: "@here",embed: embedBuilder.Build(), components: componentBuilder.Build());
+        }
 
 
 
