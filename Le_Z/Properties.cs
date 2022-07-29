@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Discord;
 using Discord.WebSocket;
+using Le_Z.Modules;
 
 namespace Le_Z
 {
@@ -47,5 +49,14 @@ namespace Le_Z
             PollChannel = (IMessageChannel)client.GetChannel(997148190568611870);
         }
 
-    }
+        public static Dictionary<string, Func<SocketSlashCommand, System.Threading.Tasks.Task>> SlashCommandsDico = new()
+        {
+            {"help", SlashCommands.HelpAsync },
+            {"sondage", SlashCommands.CreatePoll },
+            {"poll", SlashCommands.CreateComplexPoll },
+            {"status", SlashCommands.StatusAsync },
+
+        };
+
+    }    
 }

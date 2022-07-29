@@ -12,6 +12,10 @@
 	<None Remove="Services\**" />
   </ItemGroup>
 
+	<ItemGroup>
+	  <None Include="..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
+
   <ItemGroup>
 	<PackageReference Include="Discord.Net" Version="3.7.2" />
 	<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />

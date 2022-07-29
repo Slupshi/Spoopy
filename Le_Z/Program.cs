@@ -125,23 +125,7 @@ namespace Le_Z
 
         private async Task HandleSlashCommandAsync(SocketSlashCommand command)
         {
-            switch (command.CommandName)
-            {
-                case "sondage":
-                    await SlashCommands.CreatePoll(command);
-                    break;
-                case "poll":
-                    await SlashCommands.CreateComplexPoll(command);
-                    break;
-                case "help":
-                    await SlashCommands.HelpAsync(command);
-                    break;
-                case "status":
-                    await SlashCommands.StatusAsync(command);
-                    break;
-                default:
-                    break;
-            }
+            await Properties.SlashCommandsDico.FirstOrDefault(x => x.Key == command.CommandName).Value.Invoke(command);
         }
 
         private Task Log(LogMessage msg)
@@ -181,6 +165,7 @@ namespace Le_Z
 
         private Task CreateSlashCommands()
         {
+            // Basic Poll
             var pollCommand = new SlashCommandBuilder();
             pollCommand.WithName("sondage");
             pollCommand.WithDescription("Création de sondage");
@@ -188,7 +173,7 @@ namespace Le_Z
             pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false);
             pollCommand.AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non", isRequired: false);
 
-
+            // Complex Poll
             var complexPollCommand = new SlashCommandBuilder();
             complexPollCommand.WithName("poll");
             complexPollCommand.WithDescription("Création de sondage à choix multiples");
@@ -205,11 +190,13 @@ namespace Le_Z
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
                 .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
 
+            // Help
             var helpCommand = new SlashCommandBuilder();
             helpCommand.WithName("help");
             helpCommand.WithDescription("De l'aide pour les gens perdus !");
             helpCommand.AddOption("standard", ApplicationCommandOptionType.Boolean, "Si True, cela affichera les anciennes commandes", isRequired: false);
 
+            // Status
             var statusCommand = new SlashCommandBuilder();
             statusCommand.WithName("status");
             statusCommand.WithDescription("Pour stalk les gens du serveur");
