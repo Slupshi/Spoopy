@@ -15,6 +15,7 @@ namespace Le_Z
         public static SocketRole UwuRole;
         public static IMessageChannel PollChannel;
         public static IMessageChannel BotLogChannel;
+        public static IMessageChannel BotDMsChannel;
 
         public static bool HadEmmerderZozoToday = false;
 
@@ -46,6 +47,7 @@ namespace Le_Z
             Banquise = client.GetGuild(BanquiseID);
             UwuRole = Banquise.GetRole(UwuID);
             BotLogChannel = (IMessageChannel)client.GetChannel(969507287448301598);
+            BotDMsChannel = (IMessageChannel)client.GetChannel(1002946943959433308);
             PollChannel = (IMessageChannel)client.GetChannel(997148190568611870);
         }
 
@@ -55,6 +57,7 @@ namespace Le_Z
             {"sondage", SlashCommands.CreatePoll },
             {"poll", SlashCommands.CreateComplexPoll },
             {"status", SlashCommands.StatusAsync },
+            {"test", SlashCommands.TestAsync },
 
         };
 

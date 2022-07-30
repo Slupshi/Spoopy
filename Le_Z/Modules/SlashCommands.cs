@@ -416,7 +416,31 @@ namespace Le_Z.Modules
 
         #endregion
 
+        public static async Task TestAsync(SocketSlashCommand command)
+        {
+            try
+            {
+                var textInput = new TextInputBuilder();
+                textInput.WithLabel("QUESTION");
+                textInput.WithPlaceholder("P'tit worms les bros ?");
+                textInput.WithStyle(TextInputStyle.Paragraph);
+                textInput.WithCustomId("textinput");
+                textInput.WithRequired(true);
 
+               
+
+                var modal = new ModalBuilder();
+                modal.WithTitle("Création de sondage");
+                modal.AddTextInput(textInput);
+                modal.WithCustomId("sondage");
+                await command.RespondWithModalAsync(modal: modal.Build());
+            }
+            catch(Exception e)
+            {
+                await command.RespondAsync(text: e.Message);
+            }
+            
+        }
 
     }
 }

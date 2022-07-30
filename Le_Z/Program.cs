@@ -47,6 +47,11 @@ namespace Le_Z
         private async Task HandleCommandAsync(SocketMessage msg)
         {
             var message = (SocketUserMessage)msg;
+            if (message.Channel.Name.Contains('@') && !message.Author.IsBot)
+            {
+                await ExternalInteractions.CheckDMs(message);
+                return;
+            }
             #region TriggerWords
             if (message == null) return;
             if (message.Content.ToLower() == "ah" || message.Content.ToLower() == "ahh")
@@ -165,6 +170,13 @@ namespace Le_Z
 
         private Task CreateSlashCommands()
         {
+            // Test
+            var testCommand = new SlashCommandBuilder();
+            testCommand.WithName("test");
+            testCommand.WithDescription("A ne pas utiliser");
+            testCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
+            
+
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
             pollCommand.WithName("sondage");
@@ -208,8 +220,9 @@ namespace Le_Z
                 Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
                 Properties.Banquise.CreateApplicationCommandAsync(helpCommand.Build());
                 Properties.Banquise.CreateApplicationCommandAsync(statusCommand.Build());
+                Properties.Banquise.CreateApplicationCommandAsync(testCommand.Build());
             }
-            catch (ApplicationCommandException exception)
+            catch (HttpException exception)
             {
                 var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
 

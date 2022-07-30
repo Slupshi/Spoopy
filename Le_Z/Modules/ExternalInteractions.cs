@@ -100,5 +100,11 @@ namespace Le_Z.Modules
                 }
             }
         }
+
+        public static async Task CheckDMs(SocketUserMessage message)
+        {
+            string response = $"**{DateTime.Now.ToString("T")} | {message.Author.Username} sent :``` {message.CleanContent} ```**";
+            await Properties.BotDMsChannel.SendMessageAsync(response);
+        }
     }
 }
