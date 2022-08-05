@@ -38,6 +38,21 @@ namespace Le_Z
             await Task.Delay(-1);
         }
 
+        private Task _client_Ready()
+        {
+            Properties.SetPropertiesAtStartup(_client);
+
+            _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
+            _client.LatencyUpdated += LatencyUpdated;
+            _client.ButtonExecuted += ButtonExecuted;
+            _client.ModalSubmitted += ModalSubmitted;
+
+            CreateSlashCommands();
+            _client.SlashCommandExecuted += HandleSlashCommandAsync;
+
+            return Task.CompletedTask;
+        }
+
         public async Task InstallCommandsAsync()
         {
             _client.MessageReceived += HandleCommandAsync;
@@ -49,8 +64,12 @@ namespace Le_Z
             var message = (SocketUserMessage)msg;
             if (message.Channel.Name.Contains('@') && !message.Author.IsBot)
             {
-                await ExternalInteractions.CheckDMs(message);
+                await ExternalInteractions.CheckDMsAsync(message);
                 return;
+            }
+            if(message.Channel == Properties.YoutubeVideoChannel && !message.Author.IsBot && message.Content.Contains("http"))
+            {
+                await ExternalInteractions.HandleNewYoutubeVideoAsync(message);
             }
             #region TriggerWords
             if (message == null) return;
@@ -141,7 +160,7 @@ namespace Le_Z
 
         public static async Task ZLog(string message, bool isError = false)
         {
-            await Properties.BotLogChannel.SendMessageAsync($"**```{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}```**");
+            await Properties.BotLogChannel.SendMessageAsync(Utilities.FormatToCode($"{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}"));
         }        
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
@@ -154,18 +173,14 @@ namespace Le_Z
             await ExternalInteractions.UwUAsync(user, newVoiceState);
         }
 
-        private Task _client_Ready()
+        private async Task ButtonExecuted(SocketMessageComponent arg)
         {
-            Properties.SetPropertiesAtStartup(_client);
+            await Properties.ButtonHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+        }
 
-            _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
-            _client.LatencyUpdated += LatencyUpdated;
-            
-            CreateSlashCommands();
-
-            _client.SlashCommandExecuted += HandleSlashCommandAsync;
-
-            return Task.CompletedTask;
+        private async Task ModalSubmitted(SocketModal arg)
+        {
+            await Properties.ModalHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
         }
 
         private Task CreateSlashCommands()
@@ -212,7 +227,7 @@ namespace Le_Z
             var statusCommand = new SlashCommandBuilder();
             statusCommand.WithName("status");
             statusCommand.WithDescription("Pour stalk les gens du serveur");
-            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);           
 
             try
             {

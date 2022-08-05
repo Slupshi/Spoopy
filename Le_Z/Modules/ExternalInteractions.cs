@@ -101,10 +101,34 @@ namespace Le_Z.Modules
             }
         }
 
-        public static async Task CheckDMs(SocketUserMessage message)
+        public static async Task CheckDMsAsync(SocketUserMessage message)
         {
             string response = $"**{DateTime.Now.ToString("T")} | {message.Author.Username} sent :``` {message.CleanContent} ```**";
             await Properties.BotDMsChannel.SendMessageAsync(response);
+        }
+
+        public static async Task HandleNewYoutubeVideoAsync(SocketUserMessage message)
+        {
+            await message.PinAsync();
+            var embed = new EmbedBuilder();
+            embed.WithTitle("Nouvelle vidéo !")
+                .WithUrl(message.GetJumpUrl())
+                .WithThumbnailUrl(message.Author.GetAvatarUrl())
+                .WithColor(Color.Red)
+                .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c545.png")
+                .WithDescription("N'hésites pas à mettre un petit like stp !\nTu peux aussi donner ton avis en utilisant un des bouton si dessous")
+                .AddField("Lien :", $"**[Clique ici !]({message.CleanContent})**", inline: true)
+                .AddField("Titre :", $"**`{message.Embeds.First().Title}`**", inline: true);
+
+            var button = new ButtonBuilder();
+            button.WithCustomId("ytCommentButton")
+                .WithLabel("Donnes ton avis !")
+                .WithStyle(ButtonStyle.Danger)
+                .WithEmote(new Emoji("✏"));
+
+            var msgComponents = new ComponentBuilder().WithButton(button);
+
+            await Properties.HelloChannel.SendMessageAsync(text: "@everyone",embed: embed.Build(), components: msgComponents.Build());
         }
     }
 }

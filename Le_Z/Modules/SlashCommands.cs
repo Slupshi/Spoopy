@@ -76,7 +76,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await scommand.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                    msg.Content = Utilities.FormatToCode("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
             }

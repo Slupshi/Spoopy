@@ -16,6 +16,9 @@ namespace Le_Z
         public static IMessageChannel PollChannel;
         public static IMessageChannel BotLogChannel;
         public static IMessageChannel BotDMsChannel;
+        public static IMessageChannel YoutubeVideoChannel;
+        public static IMessageChannel HelloChannel;
+        public static IMessageChannel TestChannel;
 
         public static bool HadEmmerderZozoToday = false;
 
@@ -49,6 +52,9 @@ namespace Le_Z
             BotLogChannel = (IMessageChannel)client.GetChannel(969507287448301598);
             BotDMsChannel = (IMessageChannel)client.GetChannel(1002946943959433308);
             PollChannel = (IMessageChannel)client.GetChannel(997148190568611870);
+            YoutubeVideoChannel = (IMessageChannel)client.GetChannel(694662332953133148);
+            TestChannel = (IMessageChannel)client.GetChannel(930095425292238879);
+            HelloChannel = (IMessageChannel)client.GetChannel(611619367469449227);
         }
 
         public static Dictionary<string, Func<SocketSlashCommand, System.Threading.Tasks.Task>> SlashCommandsDico = new()
@@ -59,6 +65,16 @@ namespace Le_Z
             {"status", SlashCommands.StatusAsync },
             {"test", SlashCommands.TestAsync },
 
+        };
+
+        public static Dictionary<string, Func<SocketMessageComponent, System.Threading.Tasks.Task>> ButtonHandlersDico = new()
+        {
+            {"ytCommentButton", ButtonHandler.OpenYTCommentsModal },
+        };
+
+        public static Dictionary<string, Func<SocketModal, System.Threading.Tasks.Task>> ModalHandlersDico = new()
+        {
+            {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
         };
 
 
