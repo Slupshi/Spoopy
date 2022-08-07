@@ -13,7 +13,14 @@ namespace Le_Z.Modules
     {
         public static async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
         {
-            if (newVoiceState.VoiceChannel == null || newVoiceState.VoiceChannel.Guild.Id != Properties.BanquiseID) return;
+            if(newVoiceState.VoiceChannel == null)
+            {
+                if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                {
+                    await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
+                }
+                return;
+            }
 
             bool isUwU = newVoiceState.VoiceChannel.Id == 611881198700068864;
 
@@ -83,7 +90,7 @@ namespace Le_Z.Modules
         public static async Task EmmerderZozoAsync(SocketGuildUser user)
         {
             await user.CreateDMChannelAsync();
-            await user.SendMessageAsync("**Ils sont bien les skins dans ton shop aujourd'hui ? =D**");
+            await user.SendMessageAsync(Format.Bold("Ils sont bien les skins dans ton shop aujourd'hui ? =D"));
         }
 
         public static async Task CheckRoleMembersAsync()
@@ -98,6 +105,90 @@ namespace Le_Z.Modules
                 {
                     await role.ModifyAsync(r => r.Color = Properties.RedColor);
                 }
+            }
+        }
+
+        public static async Task CheckDMsAsync(SocketUserMessage message)
+        {
+            string response = Format.Bold($"{DateTime.Now.ToString("T")} | {message.Author.Username} sent :``` {message.CleanContent} ```");
+            await Properties.BotDMsChannel.SendMessageAsync(response);
+        }
+
+        public static async Task HandleNewYoutubeVideoAsync(SocketUserMessage message)
+        {
+            await message.PinAsync();
+            var embed = new EmbedBuilder();
+            embed.WithTitle("Nouvelle vidéo !")
+                .WithUrl(message.GetJumpUrl())
+                .WithThumbnailUrl(message.Author.GetAvatarUrl())
+                .WithColor(Color.Red)
+                .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.YoutubeLogoURL)
+                .WithDescription("N'hésites pas à mettre un petit like stp !\nTu peux aussi donner ton avis en utilisant un des bouton si dessous")
+                .AddField("Lien :", Format.Bold($"[Clique ici !]({message.CleanContent})"), inline: true)
+                .AddField("Titre :", Format.Bold(Format.Code($"{message.Embeds.First().Title}")), inline: true);
+
+            var button = new ButtonBuilder();
+            button.WithCustomId("ytCommentButton")
+                .WithLabel("Donnes ton avis !")
+                .WithStyle(ButtonStyle.Danger)
+                .WithEmote(new Emoji("✏"));
+
+            var msgComponents = new ComponentBuilder().WithButton(button);
+
+            await Properties.HelloChannel.SendMessageAsync(text: "@everyone",embed: embed.Build(), components: msgComponents.Build());
+        }
+
+        public static async Task HandleTriggerWords(SocketUserMessage message)
+        {
+            #region TriggerWords
+            if (message.Content.ToLower() == "ah" || message.Content.ToLower() == "ahh")
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/ah-denis-brognart-tf1-koh-lanta-gif-7256068");
+                return;
+            }
+            if (message.Content.ToLower() == "ils sont là" || message.Content.ToLower() == "ils sont la")
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/marine-le-pen-le-pen-gif-8538154");
+                return;
+            }
+            if (message.Content.ToLower() == "salut mon pote")
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/salut-mon-pote-hi-buddy-michel-drucker-gif-16070000");
+                return;
+            }
+            if (message.Content.ToLower().Contains("zeub") || message.Content.ToLower().Contains("zob"))
+            {
+                var emoji = new Emoji("🍆");
+                await message.AddReactionAsync(emoji);
+                await message.Channel.SendMessageAsync("https://tenor.com/view/penis-standing-erect-erection-smile-gif-15812844");
+            }
+            if (message.Content.ToUpper().Contains("DEMARRER") || message.Content.ToUpper().Contains("DEMARRE"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/je-vais-le-d%C3%A9marrer-cet-gif-19154207");
+            }
+            if (message.Content.ToUpper().Contains("PHILIPPE"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/philippe-cobra-hitman-gif-13748655");
+            }
+            if (message.Content.ToLower().Contains("enorme") || message.Content.ToLower().Contains("énorme"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/%C3%A9norme-jamy-pas-sorcier-huge-gif-14277967");
+            }
+            if (message.Content.ToUpper().Contains("PARCOUR") || message.Content.ToUpper().Contains("PARCOURS") || message.Content.ToUpper().Contains("PARKOUR") || message.Content.ToUpper().Contains("PARKOURS"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/parkour-theoffice-freerunning-gif-5128248");
+            }
+            if (message.Content.ToUpper().Contains("EXPLOSION"))
+            {
+                await message.Channel.SendMessageAsync("https://tenor.com/view/explosion-megumin-konusoba-magic-destruction-gif-7559841");
+            }
+            #endregion TriggerWords
+
+            if (message.Attachments.Count > 0 && message.Author.Id == Properties.SlupID)
+            {
+                MessageReference messageRef = new MessageReference(messageId: message.Id);
+                await message.Channel.SendMessageAsync("**Les sources de ce message ne sont surement pas valide**", messageReference: messageRef);
+                return;
             }
         }
     }

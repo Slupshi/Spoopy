@@ -15,7 +15,6 @@ namespace Le_Z.Modules
 {
     public class SlashCommands
     {
-        readonly Random Random = new Random();
 
         #region Help
 
@@ -44,7 +43,7 @@ namespace Le_Z.Modules
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
                             .WithColor(Color.DarkBlue)
-                            .WithFooter("Généré automatiquement", iconUrl: "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png");
+                            .WithFooter("Généré automatiquement", iconUrl: Properties.InfoIconURL);
                 if (isStandard)
                 {
                     embedHelp.WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__");
@@ -76,7 +75,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await scommand.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
             }
@@ -107,7 +106,7 @@ namespace Le_Z.Modules
                                         .WithTitle($"Sondage de {author.Username}")
                                         .WithThumbnailUrl(author.GetAvatarUrl())
                                         .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
                 var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
                 if (isPersistant)
                 {
@@ -117,7 +116,7 @@ namespace Le_Z.Modules
                 await Program.ZLog($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**```Sondage crée dans le channel \"sondage\"```**";
+                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
                 await CheckUselessPolls();
             }
@@ -126,7 +125,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
@@ -156,7 +155,7 @@ namespace Le_Z.Modules
                                         .WithTitle($"Sondage de {author.Username}")
                                         .WithThumbnailUrl(author.GetAvatarUrl())
                                         .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png");
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
                 List<Emoji> emojis = new List<Emoji>();
                 foreach (var option in options)
                 {
@@ -174,7 +173,7 @@ namespace Le_Z.Modules
                 await Program.ZLog($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**```Sondage crée dans le channel \"sondage\"```**";
+                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
                 await CheckUselessPolls();
             }
@@ -183,7 +182,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
@@ -277,6 +276,7 @@ namespace Le_Z.Modules
 
                     if (userPlaying != null)
                     {
+                        // Gaming
                         if (userPlaying.Type == ActivityType.Playing)
                         {
                             var embedGame = new EmbedBuilder();
@@ -291,6 +291,7 @@ namespace Le_Z.Modules
                                 });
                                 return;
                             }
+                            // Rich Game
                             if (userPlaying is RichGame richGameInfo)
                             {
                                 TimeSpan userPlayingTime;
@@ -304,7 +305,7 @@ namespace Le_Z.Modules
                                 }
                                 embedGame.WithTitle($"Joue à {richGameInfo.Name}")
                                          .WithColor(Color.LightGrey)
-                                         .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png");
+                                         .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.ControllerIconURL);
 
                                 if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
                                 {
@@ -345,7 +346,7 @@ namespace Le_Z.Modules
                                 return;
                             }
                         }
-
+                        // Spotify
                         if (userPlaying.Type == ActivityType.Listening)
                         {
                             if (userPlaying is SpotifyGame spotifyInfo)
@@ -360,7 +361,7 @@ namespace Le_Z.Modules
                                     .AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
                                     .AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
                                     .AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
-                                    .WithFooter($"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png");
+                                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.SpotifyLogoURL);
                                 var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
                                 int elalpsedBarLenght = (int)(30 * elapsed);
                                 string elapsedBar = "";
@@ -408,7 +409,7 @@ namespace Le_Z.Modules
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = "**Une erreur s'est produite avec l'éxécution de cette commande**";
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
                 await Program.ZLog("Une erreur est survenue avec SlashCommand Statut", isError: true);
             }
@@ -416,7 +417,24 @@ namespace Le_Z.Modules
 
         #endregion
 
+        #region Music
 
+
+
+        #endregion
+
+        public static async Task TestAsync(SocketSlashCommand command)
+        {
+            try
+            {
+
+            }
+            catch(Exception e)
+            {
+                await command.RespondAsync(text: e.Message);
+            }
+            
+        }
 
     }
 }

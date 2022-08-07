@@ -1,69 +1,48 @@
-﻿using Discord.Audio;
+﻿using CliWrap;
+using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using System.Diagnostics;
+using Le_Z.Services;
 using System.Threading.Tasks;
 
 namespace Le_Z.Modules
 {
-	public class AudioCommands : ModuleBase<SocketCommandContext>
-	{	
+    public class AudioModule : ModuleBase<ICommandContext>
+    {
+        // Scroll down further for the AudioService.
+        // Like, way down
+        private readonly AudioService _service;
 
-		// z!connect
-		[Command("connect", RunMode = RunMode.Async)]
-		public async Task ConnectAsync()
-		{
-			var user = (SocketGuildUser)Context.User;
-			if (user.VoiceChannel == null)
-			{
-				await ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
-				return;
-			}
-			var audioClient = await user.VoiceChannel.ConnectAsync(selfDeaf: true);			
-			await SendAsync(audioClient, "testaudio.mp4");
-		}
+        // Remember to add an instance of the AudioService
+        // to your IServiceCollection when you initialize your bot
 
-		private Process CreateStream(string path)
-		{
-			return Process.Start(new ProcessStartInfo
-			{
-				FileName = "ffmpeg",
-				Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
-				UseShellExecute = false,
-				RedirectStandardOutput = true,
-			});
-		}
-		private async Task SendAsync(IAudioClient client, string path)
-		{
-			// Create FFmpeg using the previous example
-			using (var ffmpeg = CreateStream(path))
-			using (var output = ffmpeg.StandardOutput.BaseStream)
-			using (var discord = client.CreatePCMStream(AudioApplication.Music))
-			{
-				try
-				{
-					await output.CopyToAsync(discord);					
-				}
-				finally { await discord.FlushAsync(); }
-			}
-		}
+        public AudioModule(AudioService service)
+        {
+            _service = service;
+        }
 
-		[Command("connect2")]
-		public async Task Connect2Async()
-		{
-			var user = (SocketGuildUser)Context.User;
-			if (user.VoiceChannel == null)
-			{
-				await ReplyAsync("**Tu dois être dans un channel vocal pour m'invoquer**");
-				return;
-			}
-			var audioClient = await user.VoiceChannel.ConnectAsync(selfDeaf: true);
-			await SendAsync(audioClient, "testaudio.mp4");
-		}
+        // You *MUST* mark these commands with 'RunMode.Async'
+        // otherwise the bot will not respond until the Task times out.
+        [Command("join", RunMode = RunMode.Async)]
+        public async Task JoinCmd()
+        {
+            await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+        }
 
+        // Remember to add preconditions to your commands,
+        // this is merely the minimal amount necessary.
+        // Adding more commands of your own is also encouraged.
+        [Command("leave", RunMode = RunMode.Async)]
+        public async Task LeaveCmd()
+        {
+            await _service.LeaveAudio(Context.Guild);
+        }
 
+        [Command("play", RunMode = RunMode.Async)]
+        public async Task PlayCmd([Remainder] string song)
+        {
+            await _service.SendAudioAsync(Context.Guild, Context.Channel, song);
+        }
 
+    }
 
-
-	}
 }
