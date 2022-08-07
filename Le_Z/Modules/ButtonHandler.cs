@@ -29,7 +29,7 @@ namespace Le_Z.Modules
             catch(Exception ex)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", ex.Message);
-                await arg.RespondAsync("**```Une erreur s'est produite, veuillez réessayer ultérieurement```**", ephemeral: true);
+                await arg.RespondAsync(Utilities.FormatToCode("Une erreur s'est produite, veuillez réessayer ultérieurement"), ephemeral: true);
                 await Program.ZLog("Une erreur s'est produite avec la modal de commentaires YT");
             }
             

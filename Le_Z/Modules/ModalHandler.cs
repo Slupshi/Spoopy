@@ -13,7 +13,7 @@ namespace Le_Z.Modules
             {
                 var message = (modal.Data.Components as SocketMessageComponentData[])[0].Value;
 
-                string response = $"**{DateTime.Now.ToString("T")} | {modal.User.Username} sent :``` {message} ```**";
+                string response = Format.Bold($"{DateTime.Now.ToString("T")} | {modal.User.Username} sent :``` {message} ```");
                 await Properties.BotDMsChannel.SendMessageAsync(response);
 
                 await modal.RespondAsync(text: Utilities.FormatToCode("Votre commentaires à bien été envoyé à Slupshi !"), ephemeral:true);
