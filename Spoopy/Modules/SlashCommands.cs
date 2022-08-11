@@ -11,7 +11,7 @@ using Discord.WebSocket;
 using Namotion.Reflection;
 using TwitterSharp.Response.RUser;
 
-namespace Le_Z.Modules
+namespace Spoopy.Modules
 {
     public class SlashCommands
     {

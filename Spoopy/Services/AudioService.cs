@@ -7,7 +7,7 @@ using Discord.Audio;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
 
-namespace Le_Z.Services
+namespace Spoopy.Services
 {
 	public class AudioService
 	{

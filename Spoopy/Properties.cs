@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using Discord;
 using Discord.WebSocket;
-using Le_Z.Modules;
+using Spoopy.Modules;
 
-namespace Le_Z
+namespace Spoopy
 {
     public class Properties
     {

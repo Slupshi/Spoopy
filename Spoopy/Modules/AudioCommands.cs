@@ -1,10 +1,10 @@
 ﻿using CliWrap;
 using Discord;
 using Discord.Commands;
-using Le_Z.Services;
+using Spoopy.Services;
 using System.Threading.Tasks;
 
-namespace Le_Z.Modules
+namespace Spoopy.Modules
 {
     public class AudioModule : ModuleBase<ICommandContext>
     {

@@ -15,7 +15,7 @@ using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
 using TwitterSharp.Request.Option;
 
-namespace Le_Z.Modules
+namespace Spoopy.Modules
 {
     /// <summary>
     /// Text Commands 

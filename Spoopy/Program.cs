@@ -2,8 +2,8 @@
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-using Le_Z.Modules;
-using Le_Z.Services;
+using Spoopy.Modules;
+using Spoopy.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using TwitterSharp.Response.RTweet;
 
-namespace Le_Z
+namespace Spoopy
 {
     public class Program
     {     

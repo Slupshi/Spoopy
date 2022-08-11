@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace Le_Z.Modules
+namespace Spoopy.Modules
 {
     public class ModalHandler
     {

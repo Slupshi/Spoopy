@@ -7,7 +7,7 @@ using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
 
-namespace Le_Z.Modules
+namespace Spoopy.Modules
 {
     public class ExternalInteractions
     {
