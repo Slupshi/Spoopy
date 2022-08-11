@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Spoopy.Services;
+using TwitterSharp.Response.RTweet;
 
 namespace Spoopy.Modules
 {
     public class ExternalInteractions
     {
+        private static TwitterService _twitterService;
+        public ExternalInteractions(TwitterService tweetService)
+        {
+            _twitterService = tweetService;
+        }
+
         public static async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
         {
             if(newVoiceState.VoiceChannel == null)
@@ -190,6 +198,18 @@ namespace Spoopy.Modules
                 await message.Channel.SendMessageAsync("**Les sources de ce message ne sont surement pas valide**", messageReference: messageRef);
                 return;
             }
+        }
+
+        public static async Task HandleNewTweetSent(SocketUserMessage message)
+        {
+            var splitMessage = message.Content.Split('/');
+            var splitID = splitMessage.Last().Split('?');
+            var tweet = (Tweet)await _twitterService.UseTwitterClientAsync(method: TwitterService.TwitterClientMethod.GetTweet, id: splitID.First());
+            var embedBuilder = await _twitterService.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
+            await message.DeleteAsync();
+            var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
+
+            await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
         }
     }
 }

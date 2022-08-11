@@ -25,6 +25,7 @@ namespace Spoopy
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<AudioService>()
+                .AddSingleton<TwitterService>()
                 .BuildServiceProvider();
 
             new Program().RunBotAsync().GetAwaiter().GetResult();
@@ -38,7 +39,7 @@ namespace Spoopy
             _commands = new CommandService();
             await InstallCommandsAsync();
 
-            await _client.SetGameAsync("UwU | /help");
+            await _client.SetGameAsync("/help");
             _client.Ready += _client_Ready;
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
@@ -97,14 +98,7 @@ namespace Spoopy
             }
             if (message.Content.Contains("https://twitter.com/") && message.Content.Contains("/status/"))
             {
-                var splitMessage = message.Content.Split('/');
-                var splitID = splitMessage.Last().Split('?');
-                var tweet = (Tweet)await Commands.UseTwitterClientAsync(method: Commands.TwitterClientMethod.GetTweet, id: splitID.First());
-                var embedBuilder = await Commands.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
-                await message.DeleteAsync();
-                var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
-
-                await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
+                await ExternalInteractions.HandleNewTweetSent(message);
                 return;
             }
 
