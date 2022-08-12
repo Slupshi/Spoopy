@@ -159,14 +159,19 @@ namespace Spoopy
         }
 
 
-        private Task CreateSlashCommands()
+        private async Task CreateSlashCommands()
         {
             // Test
             var testCommand = new SlashCommandBuilder();
             testCommand.WithName("test");
             testCommand.WithDescription("A ne pas utiliser");
             testCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
-            
+
+            // Help
+            var helpCommand = new SlashCommandBuilder();
+            helpCommand.WithName("help");
+            helpCommand.WithDescription("De l'aide pour les gens perdus !");
+            //helpCommand.AddOption("standard", ApplicationCommandOptionType.Boolean, "Si True, cela affichera les anciennes commandes", isRequired: false);
 
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
@@ -193,12 +198,6 @@ namespace Spoopy
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
                 .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
 
-            // Help
-            var helpCommand = new SlashCommandBuilder();
-            helpCommand.WithName("help");
-            helpCommand.WithDescription("De l'aide pour les gens perdus !");
-            helpCommand.AddOption("standard", ApplicationCommandOptionType.Boolean, "Si True, cela affichera les anciennes commandes", isRequired: false);
-
             // Status
             var statusCommand = new SlashCommandBuilder();
             statusCommand.WithName("status");
@@ -207,11 +206,11 @@ namespace Spoopy
 
             try
             {
-                Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
-                Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
-                Properties.Banquise.CreateApplicationCommandAsync(helpCommand.Build());
-                Properties.Banquise.CreateApplicationCommandAsync(statusCommand.Build());
-                Properties.Banquise.CreateApplicationCommandAsync(testCommand.Build());
+                await _client.CreateGlobalApplicationCommandAsync(helpCommand.Build());
+                await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
+                await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
+                await Properties.Banquise.CreateApplicationCommandAsync(statusCommand.Build());
+                await Properties.Banquise.CreateApplicationCommandAsync(testCommand.Build());
             }
             catch (HttpException exception)
             {
@@ -219,8 +218,6 @@ namespace Spoopy
 
                 Console.WriteLine(json);
             }
-
-            return Task.CompletedTask;
         }       
 
     }

@@ -23,46 +23,46 @@ namespace Spoopy.Modules
             try
             {
                 await scommand.DeferAsync(ephemeral: true);
-                bool isStandard = (scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value) == null ? false : (bool)(scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value);
+                //bool isStandard = (scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value) == null ? false : (bool)(scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value);
 
                 List<MethodInfo> commandsList;
 
-                if (isStandard)
-                {
-                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
+                //if (isStandard)
+                //{
+                //    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
+                //    commandsList.RemoveAll(x => x.Name == "HelpAsync");
+                //    commandsList.RemoveAll(x => x.Name == "CreateTweetEmbedAsync");
+                //    commandsList.RemoveAll(x => x.Name == "UseTwitterClientAsync");
+                //}
+                //else
+                //{
+                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
                     commandsList.RemoveAll(x => x.Name == "HelpAsync");
-                    commandsList.RemoveAll(x => x.Name == "CreateTweetEmbedAsync");
-                    commandsList.RemoveAll(x => x.Name == "UseTwitterClientAsync");
-                }
-                else
-                {
-                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Le_Z.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Le_Z.dll");
-                    commandsList.RemoveAll(x => x.Name == "HelpAsync");
-                }
+                //}
 
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
                             .WithColor(Color.DarkBlue)
                             .WithFooter("Généré automatiquement", iconUrl: Properties.InfoIconURL);
-                if (isStandard)
-                {
-                    embedHelp.WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__");
-                }
+                //if (isStandard)
+                //{
+                //    embedHelp.WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__");
+                //}
 
                 foreach (var command in commandsList)
                 {
                     var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
                     commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
                     var commandName = command.CustomAttributes.Last().ConstructorArguments.First().ToString();
-                    if (isStandard)
-                    {
-                        embedHelp.AddField(name: $"`{commandName} {string.Join(" ", commandsSummaryList.Skip(1).ToList())}`", value: commandsSummaryList.First());
-                    }
-                    else
-                    {
+                    //if (isStandard)
+                    //{
+                    //    embedHelp.AddField(name: $"`{commandName} {string.Join(" ", commandsSummaryList.Skip(1).ToList())}`", value: commandsSummaryList.First());
+                    //}
+                    //else
+                    //{
                         commandName = commandName.Replace("\"", string.Empty);
                         embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
-                    }
+                    //}
                 }
                 await scommand.ModifyOriginalResponseAsync(func: delegate(MessageProperties msg)
                 {
