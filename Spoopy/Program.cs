@@ -43,7 +43,8 @@ namespace Spoopy
             _commands = new CommandService();
             await InstallCommandsAsync();
 
-            await _client.SetGameAsync("/help");
+            await _client.SetGameAsync("/help", type: ActivityType.Watching);
+            await _client.SetStatusAsync(UserStatus.Online);
             _client.Ready += _client_Ready;
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);

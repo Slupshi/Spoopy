@@ -295,14 +295,10 @@ namespace Spoopy.Modules
                             // Rich Game
                             if (userPlaying is RichGame richGameInfo)
                             {
-                                TimeSpan userPlayingTime;
-                                if (richGameInfo.Timestamps.Start != null)
+                                TimeSpan? userPlayingTime = null;
+                                if (richGameInfo.Timestamps != null && richGameInfo.Timestamps.Start != null)
                                 {
                                     userPlayingTime = (TimeSpan)(DateTime.Now - richGameInfo.Timestamps.Start);
-                                }
-                                else
-                                {
-                                    userPlayingTime = (TimeSpan)(DateTime.Now - (DateTime.Now - TimeSpan.FromSeconds(1)));
                                 }
                                 embedGame.WithTitle($"Joue à {richGameInfo.Name}")
                                          .WithColor(Color.LightGrey)
@@ -313,29 +309,29 @@ namespace Spoopy.Modules
                                     if (richGameInfo.LargeAsset.Text != null)
                                     {
                                         embedGame.AddField(richGameInfo.Details, richGameInfo.LargeAsset.Text)
-                                             .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                             .AddField(richGameInfo.State, userPlayingTime == null ? "depuis une durée inconnue" : $"depuis {userPlayingTime?.ToString(@"hh\:mm\:ss")}");
                                         showingTimespan = true;
                                     }
                                 }
                                 else if (richGameInfo.Details != null && richGameInfo.State != null)
                                 {
                                     embedGame.AddField(richGameInfo.Details, ".")
-                                             .AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                             .AddField(richGameInfo.State, userPlayingTime == null ? "depuis une durée inconnue" : $"depuis {userPlayingTime?.ToString(@"hh\:mm\:ss")}");
                                     showingTimespan = true;
                                 }
                                 else if (richGameInfo.Details != null && richGameInfo.State == null)
                                 {
-                                    embedGame.AddField(richGameInfo.Details, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    embedGame.AddField(richGameInfo.Details, userPlayingTime == null ? "depuis une durée inconnue" : $"depuis {userPlayingTime?.ToString(@"hh\:mm\:ss")}");
                                     showingTimespan = true;
                                 }
                                 else if (richGameInfo.Details == null && richGameInfo.State != null)
                                 {
-                                    embedGame.AddField(richGameInfo.State, $"depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    embedGame.AddField(richGameInfo.State, userPlayingTime == null ? "depuis une durée inconnue" : $"depuis {userPlayingTime?.ToString(@"hh\:mm\:ss")}");
                                     showingTimespan = true;
                                 }
 
                                 if (!showingTimespan)
-                                    embedGame.WithDescription($"Depuis {userPlayingTime.ToString(@"hh\:mm\:ss")}");
+                                    embedGame.WithDescription(userPlayingTime == null ? "Depuis une durée inconnue" : $"Depuis {userPlayingTime?.ToString(@"hh\:mm\:ss")}");
 
                                 if (richGameInfo.LargeAsset != null)
                                     embedGame.WithThumbnailUrl($"{richGameInfo.LargeAsset.GetImageUrl()}");
