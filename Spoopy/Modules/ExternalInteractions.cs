@@ -95,6 +95,11 @@ namespace Spoopy.Modules
 
         }
 
+        public async Task SetRoleOnGuildJoined(SocketGuildUser user)
+        {
+            await user.AddRoleAsync(Properties.TkiToiRole);
+        }
+
         public async Task EmmerderZozoAsync(SocketGuildUser user)
         {
             await user.CreateDMChannelAsync();

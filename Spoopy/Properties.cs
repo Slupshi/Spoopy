@@ -11,8 +11,11 @@ namespace Spoopy
     {
         #region Properties       
 
+        public static SocketGuild TestServer;
+
         public static SocketGuild Banquise;
         public static SocketRole UwuRole;
+        public static SocketRole TkiToiRole;
         public static IMessageChannel PollChannel;
         public static IMessageChannel BotLogChannel;
         public static IMessageChannel BotDMsChannel;
@@ -54,8 +57,10 @@ namespace Spoopy
 
         public static void SetPropertiesAtStartup(DiscordSocketClient client)
         {
+            TestServer = client.GetGuild(1007315790283952188);
             Banquise = client.GetGuild(BanquiseID);
             UwuRole = Banquise.GetRole(UwuID);
+            TkiToiRole = Banquise.GetRole(611571904901414921);
             BotLogChannel = (IMessageChannel)client.GetChannel(969507287448301598);
             BotDMsChannel = (IMessageChannel)client.GetChannel(1002946943959433308);
             PollChannel = (IMessageChannel)client.GetChannel(997148190568611870);

@@ -58,6 +58,7 @@ namespace Spoopy
             Properties.SetPropertiesAtStartup(_client);
 
             _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
+            _client.UserJoined += UserJoined;
             _client.LatencyUpdated += LatencyUpdated;
             _client.ButtonExecuted += ButtonExecuted;
             _client.ModalSubmitted += ModalSubmitted;
@@ -129,7 +130,15 @@ namespace Spoopy
             await Properties.SlashCommandsDico.FirstOrDefault(x => x.Key == command.CommandName).Value.Invoke(command);
         }
 
-             
+        private async Task ButtonExecuted(SocketMessageComponent arg)
+        {
+            await Properties.ButtonHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+        }
+
+        private async Task ModalSubmitted(SocketModal arg)
+        {
+            await Properties.ModalHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+        }
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
         {
@@ -141,15 +150,14 @@ namespace Spoopy
             await _externalInteractions.UwUAsync(user, newVoiceState);
         }
 
-        private async Task ButtonExecuted(SocketMessageComponent arg)
+        private async Task UserJoined(SocketGuildUser user)
         {
-            await Properties.ButtonHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+            if(user.Guild == Properties.Banquise)
+            {
+                await _externalInteractions.SetRoleOnGuildJoined(user);
+            }
         }
 
-        private async Task ModalSubmitted(SocketModal arg)
-        {
-            await Properties.ModalHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
-        }
 
         private Task CreateSlashCommands()
         {
