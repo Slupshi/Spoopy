@@ -13,13 +13,13 @@ namespace Spoopy.Modules
 {
     public class ExternalInteractions
     {
-        private static TwitterService _twitterService;
+        private TwitterService _twitterService;
         public ExternalInteractions(TwitterService tweetService)
         {
             _twitterService = tweetService;
         }
 
-        public static async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
+        public async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
         {
             if(newVoiceState.VoiceChannel == null)
             {
@@ -48,7 +48,7 @@ namespace Spoopy.Modules
             }
         }
 
-        public static async Task SetGameRoleAsync()
+        public async Task SetGameRoleAsync()
         {
             try
             {
@@ -95,13 +95,13 @@ namespace Spoopy.Modules
 
         }
 
-        public static async Task EmmerderZozoAsync(SocketGuildUser user)
+        public async Task EmmerderZozoAsync(SocketGuildUser user)
         {
             await user.CreateDMChannelAsync();
             await user.SendMessageAsync(Format.Bold("Ils sont bien les skins dans ton shop aujourd'hui ? =D"));
         }
 
-        public static async Task CheckRoleMembersAsync()
+        public async Task CheckRoleMembersAsync()
         {
             foreach (SocketRole role in Properties.Banquise.Roles)
             {
@@ -116,13 +116,13 @@ namespace Spoopy.Modules
             }
         }
 
-        public static async Task CheckDMsAsync(SocketUserMessage message)
+        public async Task CheckDMsAsync(SocketUserMessage message)
         {
             string response = Format.Bold($"{DateTime.Now.ToString("T")} | {message.Author.Username} sent :``` {message.CleanContent} ```");
             await Properties.BotDMsChannel.SendMessageAsync(response);
         }
 
-        public static async Task HandleNewYoutubeVideoAsync(SocketUserMessage message)
+        public async Task HandleNewYoutubeVideoAsync(SocketUserMessage message)
         {
             await message.PinAsync();
             var embed = new EmbedBuilder();
@@ -146,7 +146,7 @@ namespace Spoopy.Modules
             await Properties.HelloChannel.SendMessageAsync(text: "@everyone",embed: embed.Build(), components: msgComponents.Build());
         }
 
-        public static async Task HandleTriggerWords(SocketUserMessage message)
+        public async Task HandleTriggerWords(SocketUserMessage message)
         {
             #region TriggerWords
             if (message.Content.ToLower() == "ah" || message.Content.ToLower() == "ahh")
@@ -200,7 +200,7 @@ namespace Spoopy.Modules
             }
         }
 
-        public static async Task HandleNewTweetSent(SocketUserMessage message)
+        public async Task HandleNewTweetSent(SocketUserMessage message)
         {
             var splitMessage = message.Content.Split('/');
             var splitID = splitMessage.Last().Split('?');

@@ -14,6 +14,7 @@ using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
 using TwitterSharp.Request.Option;
+using Spoopy.Services;
 
 namespace Spoopy.Modules
 {
@@ -23,6 +24,12 @@ namespace Spoopy.Modules
     public class Commands : ModuleBase<SocketCommandContext>
     {
         readonly Random Random = new Random();
+        private TwitterService _twitterService;
+
+        public Commands(TwitterService twitterService)
+        {
+            _twitterService = twitterService;
+        }
 
         #region Help     	
 
@@ -479,7 +486,7 @@ namespace Spoopy.Modules
                     await ReplyAsync("**Les Pseudos Twitter ne contiennent pas d'espaces**");
                     return;
                 }
-                User user = (User)await UseTwitterClientAsync(TwitterClientMethod.GetUser, username: username);
+                User user = (User)await _twitterService.UseTwitterClientAsync(TwitterService.TwitterClientMethod.GetUser, username: username);
                 if (user == null)
                 {
                     await ReplyAsync("**Utilisateur introuvable**");
@@ -494,14 +501,14 @@ namespace Spoopy.Modules
                     }
                 }
 
-                Tweet tweet = (Tweet)await UseTwitterClientAsync(TwitterClientMethod.GetTweets, id: user.Id);
+                Tweet tweet = (Tweet)await _twitterService.UseTwitterClientAsync(TwitterService.TwitterClientMethod.GetTweets, id: user.Id);
                 if (tweet == null)
                 {
                     await ReplyAsync("**L'utilisateur n'a aucun tweet de disponible**");
                     return;
                 }
 
-                var embedTweet = await CreateTweetEmbedAsync(tweet, title: "Dernier Tweet");
+                var embedTweet = await _twitterService.CreateTweetEmbedAsync(tweet, title: "Dernier Tweet");
                 await ReplyAsync(embed: embedTweet.Build());
             }
             catch (Exception e)

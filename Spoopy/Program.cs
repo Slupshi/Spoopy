@@ -18,6 +18,7 @@ namespace Spoopy
     {     
         private static DiscordSocketClient _client;
         private static IServiceProvider _services;
+        private ExternalInteractions _externalInteractions;
         private CommandService _commands;
         public static void Main(string[] args)
         {
@@ -26,8 +27,9 @@ namespace Spoopy
                 .AddSingleton<CommandService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<TwitterService>()
+                .AddSingleton<ExternalInteractions>()
                 .BuildServiceProvider();
-
+            
             new Program().RunBotAsync().GetAwaiter().GetResult();
         }
 
@@ -36,6 +38,8 @@ namespace Spoopy
             _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
             _client.Log += Log;
 
+            _externalInteractions = _services.GetService<ExternalInteractions>();
+                
             _commands = new CommandService();
             await InstallCommandsAsync();
 
@@ -88,17 +92,17 @@ namespace Spoopy
 
             if (message.Channel.Name.Contains('@') && !message.Author.IsBot)
             {
-                await ExternalInteractions.CheckDMsAsync(message);
+                await _externalInteractions.CheckDMsAsync(message);
                 return;
             }
             if (message.Channel == Properties.YoutubeVideoChannel && !message.Author.IsBot && message.Content.Contains("http"))
             {
-                await ExternalInteractions.HandleNewYoutubeVideoAsync(message);
+                await _externalInteractions.HandleNewYoutubeVideoAsync(message);
                 return;
             }
             if (message.Content.Contains("https://twitter.com/") && message.Content.Contains("/status/"))
             {
-                await ExternalInteractions.HandleNewTweetSent(message);
+                await _externalInteractions.HandleNewTweetSent(message);
                 return;
             }
 
@@ -129,12 +133,12 @@ namespace Spoopy
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
         {
-            await ExternalInteractions.SetGameRoleAsync();
+            await _externalInteractions.SetGameRoleAsync();
         }
 
         private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
         {
-            await ExternalInteractions.UwUAsync(user, newVoiceState);
+            await _externalInteractions.UwUAsync(user, newVoiceState);
         }
 
         private async Task ButtonExecuted(SocketMessageComponent arg)
