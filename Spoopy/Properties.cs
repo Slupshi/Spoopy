@@ -48,10 +48,10 @@ namespace Spoopy
 
         public const string YoutubeLogoURL = "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c545.png";
         public const string SpotifyLogoURL = "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png";
-        public const string TwitterLogoURL = "";
+        public const string TwitterLogoURL = "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png";
         public const string ControllerIconURL = "https://icons.iconarchive.com/icons/paomedia/small-n-flat/512/gamepad-icon.png";
-        public const string QuestionMarkURL = "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c545.png";
-        public const string InfoIconURL = "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c545.png";
+        public const string QuestionMarkURL = "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png";
+        public const string InfoIconURL = "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png";
 
         #endregion
 

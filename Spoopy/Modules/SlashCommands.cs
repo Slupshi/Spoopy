@@ -38,6 +38,7 @@ namespace Spoopy.Modules
                 //{
                     commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
                     commandsList.RemoveAll(x => x.Name == "HelpAsync");
+                    commandsList.RemoveAll(x => x.Name == "TestAsync");
                 //}
 
                 var embedHelp = new EmbedBuilder();

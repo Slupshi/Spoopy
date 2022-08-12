@@ -46,7 +46,7 @@ namespace Spoopy.Services
                     .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
                     .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
                     .WithDescription(Utilities.DeleteUrlFromText(tweet.Text))
-                    .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: "https://www.freepnglogos.com/uploads/twitter-logo-png/twitter-icon-circle-png-logo-8.png")
+                    .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: Properties.TwitterLogoURL)
                     .AddField("Replys : ", $"`{tweet.PublicMetrics.ReplyCount}`", inline: true)
                     .AddField("RTs : ", $"`{tweet.PublicMetrics.RetweetCount}`", inline: true)
                     .AddField("Likes : ", $"`{tweet.PublicMetrics.LikeCount}`", inline: true);
