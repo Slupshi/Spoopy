@@ -19,7 +19,7 @@ namespace Spoopy.Modules
                 var videoTitle = message.Embeds.First().Fields.FirstOrDefault(x => x.Name.Contains("Titre")).Value;
 
 
-                string response = Format.Bold($"Commentaire de {modal.User.Username} sur la vidéo `{videoTitle}` ```{DateTime.Now.ToString("T")} | {messageText} ```");
+                string response = Format.Bold($"Commentaire de {modal.User.Username} sur la vidéo {videoTitle} ```{DateTime.Now.ToString("T")} | {messageText} ```");
                 await Properties.BotDMsChannel.SendMessageAsync(response);
 
                 await modal.RespondAsync(text: Utilities.FormatToCode("Votre commentaires à bien été envoyé à Slupshi !"), ephemeral:true);
