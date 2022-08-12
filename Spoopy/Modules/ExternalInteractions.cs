@@ -123,7 +123,7 @@ namespace Spoopy.Modules
 
         public async Task CheckDMsAsync(SocketUserMessage message)
         {
-            string response = Format.Bold($"{DateTime.Now.ToString("T")} | {message.Author.Username} sent :``` {message.CleanContent} ```");
+            string response = Format.Bold($"DM de {message.Author.Username} : ```{DateTime.Now.ToString("T")} | {message} ```");
             await Properties.BotDMsChannel.SendMessageAsync(response);
         }
 
@@ -141,7 +141,7 @@ namespace Spoopy.Modules
                 .AddField("Titre :", Format.Bold(Format.Code($"{message.Embeds.First().Title}")), inline: true);
 
             var button = new ButtonBuilder();
-            button.WithCustomId("ytCommentButton")
+            button.WithCustomId($"ytCommentButton|{message.Id}")
                 .WithLabel("Donnes ton avis !")
                 .WithStyle(ButtonStyle.Danger)
                 .WithEmote(new Emoji("✏"));

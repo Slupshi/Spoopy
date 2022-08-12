@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -19,7 +20,7 @@ namespace Spoopy.Modules
                     .WithPlaceholder("N'hésitez pas à donner des conseils/idées pour les futures vidéos !");
 
                 var modal = new ModalBuilder();
-                modal.WithCustomId("ytCommentModal")
+                modal.WithCustomId($"ytCommentModal|{arg.Data.CustomId.Split('|').Last()}")
                     .WithTitle("Commenter")
                     .AddTextInput(input);
 

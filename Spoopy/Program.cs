@@ -132,12 +132,12 @@ namespace Spoopy
 
         private async Task ButtonExecuted(SocketMessageComponent arg)
         {
-            await Properties.ButtonHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+            await Properties.ButtonHandlersDico.FirstOrDefault(x => arg.Data.CustomId.Contains(x.Key)).Value.Invoke(arg);
         }
 
         private async Task ModalSubmitted(SocketModal arg)
         {
-            await Properties.ModalHandlersDico.FirstOrDefault(x => x.Key == arg.Data.CustomId).Value.Invoke(arg);
+            await Properties.ModalHandlersDico.FirstOrDefault(x => arg.Data.CustomId.Contains(x.Key)).Value.Invoke(arg);
         }
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
