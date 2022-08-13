@@ -33,13 +33,36 @@ namespace Spoopy.Modules
                             .WithColor(Color.DarkBlue)
                             .WithFooter("Généré automatiquement", iconUrl: Properties.InfoIconURL);
 
+                bool guildField = false;
+
                 foreach (var command in commandsList)
                 {
                     var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
                     commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
                     var commandName = command.CustomAttributes.Last().ConstructorArguments.First().ToString();
                     commandName = commandName.Replace("\"", string.Empty);
-                    embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());                    
+                    if(commandsSummaryList.Count > 1)
+                    {
+                        var guild = typeof(Properties).GetField(commandsSummaryList.Skip(1).First()).GetValue(null);
+                        if(guild is SocketGuild)
+                        {
+                            SocketGuild server = (SocketGuild)guild;
+                            if(server.Id == scommand.GuildId)
+                            {
+                                if (!guildField)
+                                {
+                                    embedHelp.AddField(name: "============================", value: $"Les suivantes sont exclusives à : `{server.Name}`");
+                                    guildField = true;
+                                }
+                                embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
+                            }
+                        }
+                    }
+                    else
+                    {
+                        embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
+                    }
+                            
                 }
                 await scommand.ModifyOriginalResponseAsync(func: delegate(MessageProperties msg)
                 {
@@ -314,6 +337,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Crée un sondage avec Oui ou Non comme réponses
         /// </summary>
+        /// <param name="guild">Banquise</param>
         /// <returns></returns>
         [SlashCommand("sondage", "Créer un sondage avec Oui/Non comme réponses")]
         public static async Task CreatePoll(SocketSlashCommand command)
@@ -360,7 +384,8 @@ namespace Spoopy.Modules
         // 2-9 Choices Poll
         /// <summary>
         /// Crée un sondage avec jusqu'à 9 propositions possibles
-        /// </summary>
+        /// </summary> 
+        /// <param name="guild">Banquise</param>
         /// <returns></returns>
         [SlashCommand("poll", "Créer un sondage avec jusqu'à 9 propositions possibles")]
         public static async Task CreateComplexPoll(SocketSlashCommand command)
