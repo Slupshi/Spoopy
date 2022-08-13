@@ -15,7 +15,7 @@ namespace Spoopy.Modules
 {
     public class SlashCommands
     {
-
+        //----------| GlobalCommand |----------//
         #region Help
 
         public static async Task HelpAsync(SocketSlashCommand scommand)
@@ -23,47 +23,23 @@ namespace Spoopy.Modules
             try
             {
                 await scommand.DeferAsync(ephemeral: true);
-                //bool isStandard = (scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value) == null ? false : (bool)(scommand.Data.Options.FirstOrDefault(x => x.Name == "standard")?.Value);
 
-                List<MethodInfo> commandsList;
-
-                //if (isStandard)
-                //{
-                //    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.Commands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
-                //    commandsList.RemoveAll(x => x.Name == "HelpAsync");
-                //    commandsList.RemoveAll(x => x.Name == "CreateTweetEmbedAsync");
-                //    commandsList.RemoveAll(x => x.Name == "UseTwitterClientAsync");
-                //}
-                //else
-                //{
-                    commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
-                    commandsList.RemoveAll(x => x.Name == "HelpAsync");
-                    commandsList.RemoveAll(x => x.Name == "TestAsync");
-                //}
-
+                List<MethodInfo> commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
+                commandsList.RemoveAll(x => x.Name == "HelpAsync");
+                commandsList.RemoveAll(x => x.Name == "TestAsync");
+                
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
                             .WithColor(Color.DarkBlue)
                             .WithFooter("Généré automatiquement", iconUrl: Properties.InfoIconURL);
-                //if (isStandard)
-                //{
-                //    embedHelp.WithDescription("Chaque commande doit être éxécutée avec le préfix \"**z!**\"\n Les variables avec des '**{**' sont __obligatoires__, celles avec des '**[**' sont __optionnelles__");
-                //}
 
                 foreach (var command in commandsList)
                 {
                     var commandsSummaryList = command.GetXmlDocsElement().ToXmlDocsContent().Split("\n").ToList();
                     commandsSummaryList.RemoveAll(i => string.IsNullOrWhiteSpace(i));
                     var commandName = command.CustomAttributes.Last().ConstructorArguments.First().ToString();
-                    //if (isStandard)
-                    //{
-                    //    embedHelp.AddField(name: $"`{commandName} {string.Join(" ", commandsSummaryList.Skip(1).ToList())}`", value: commandsSummaryList.First());
-                    //}
-                    //else
-                    //{
-                        commandName = commandName.Replace("\"", string.Empty);
-                        embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());
-                    //}
+                    commandName = commandName.Replace("\"", string.Empty);
+                    embedHelp.AddField(name: $"/{commandName}", value: commandsSummaryList.First());                    
                 }
                 await scommand.ModifyOriginalResponseAsync(func: delegate(MessageProperties msg)
                 {
@@ -82,137 +58,7 @@ namespace Spoopy.Modules
             }
         }
 
-        #endregion
-
-        #region Polls
-
-        // Y/N Poll
-        /// <summary>
-        /// Crée un sondage avec Oui ou Non comme réponses
-        /// </summary>
-        /// <returns></returns>
-        [SlashCommand("sondage", "Créer un sondage avec Oui/Non comme réponses")]
-        public static async Task CreatePoll(SocketSlashCommand command)
-        {
-            try
-            {
-                await command.DeferAsync(ephemeral: true);
-                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
-                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
-                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
-                SocketUser author = command.User;
-
-                EmbedBuilder embedBuilder = new();
-                embedBuilder.WithColor(new Color(27, 37, 70))
-                                        .WithTitle($"Sondage de {author.Username}")
-                                        .WithThumbnailUrl(author.GetAvatarUrl())
-                                        .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
-                var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-                if (isPersistant)
-                {
-                    await embed.PinAsync();
-                }
-                await embed.AddReactionsAsync(Properties.ThumbEmojis);
-                await Program.ZLog($"Sondage crée par {author.Username}");
-                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
-                });
-                await CheckUselessPolls();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
-                });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
-            }
-
-        }
-
-        // 2-9 Choices Poll
-        /// <summary>
-        /// Crée un sondage avec jusqu'à 9 propositions possibles
-        /// </summary>
-        /// <returns></returns>
-        [SlashCommand("poll", "Créer un sondage avec jusqu'à 9 propositions possibles")]
-        public static async Task CreateComplexPoll(SocketSlashCommand command)
-        {
-            try
-            {
-                await command.DeferAsync(ephemeral: true);
-                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
-                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
-                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
-                SocketUser author = command.User;
-
-                var options = command.Data.Options.Where(x => x.Name.Contains("proposition")).ToList();
-
-                EmbedBuilder embedBuilder = new();
-                embedBuilder.WithColor(new Color(27, 37, 70))
-                                        .WithTitle($"Sondage de {author.Username}")
-                                        .WithThumbnailUrl(author.GetAvatarUrl())
-                                        .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
-                List<Emoji> emojis = new List<Emoji>();
-                foreach (var option in options)
-                {
-                    string number = option.Name.Split('n').LastOrDefault();
-                    embedBuilder.AddField($"{Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
-
-                    emojis.Add(Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
-                }
-                var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-                if (isPersistant)
-                {
-                    await embed.PinAsync();
-                }
-                await embed.AddReactionsAsync(emojis);
-                await Program.ZLog($"Sondage crée par {author.Username}");
-                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
-                });
-                await CheckUselessPolls();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
-                });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
-            }
-            
-        }
-
-        private static async Task CheckUselessPolls()
-        {
-            var messages = await Properties.PollChannel.GetMessagesAsync().FirstAsync();
-            var hours = TimeSpan.FromHours(24);
-            foreach(var message in messages)
-            {
-                if (message.Content.Contains("pinned"))
-                {
-                    await message.DeleteAsync();
-                }
-                else
-                {
-                    var time = DateTime.Now - message.Timestamp;
-                    if (time > hours && !message.IsPinned)
-                    {
-                        await message.DeleteAsync();
-                    }
-                }
-
-            }
-        }
-
-        #endregion      
+        #endregion       
 
         #region Status
         /// <summary>
@@ -420,18 +266,191 @@ namespace Spoopy.Modules
 
         #endregion
 
+        #region Avatar
+        /// <summary>
+        /// Récupère l'avatar un utilisateur du serveur
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("avatar", "Récupère l'avatar un utilisateur du serveur")]
+        public static async Task GetUserAvatarAsync(SocketSlashCommand command)
+        {            
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
+                var size = command.Data.Options.FirstOrDefault((x) => x.Name == "size")?.Value;
+
+                if(user == null)
+                    user = (SocketGuildUser)command.User;
+                if (size == null)
+                    size = 512;
+
+                ulong userID = user.Id;
+                string avatarID = user.AvatarId;
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = CDN.GetUserAvatarUrl(userID, avatarID, ushort.Parse(size.ToString()), ImageFormat.Auto);
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                });
+                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand Avatar", isError: true);
+            }
+        }
+
+        #endregion       
+
+        //----------| BanquiseCommand |----------//
+
+        #region Polls
+
+        // Y/N Poll
+        /// <summary>
+        /// Crée un sondage avec Oui ou Non comme réponses
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("sondage", "Créer un sondage avec Oui/Non comme réponses")]
+        public static async Task CreatePoll(SocketSlashCommand command)
+        {
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
+                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
+                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
+                SocketUser author = command.User;
+
+                EmbedBuilder embedBuilder = new();
+                embedBuilder.WithColor(new Color(27, 37, 70))
+                                        .WithTitle($"Sondage de {author.Username}")
+                                        .WithThumbnailUrl(author.GetAvatarUrl())
+                                        .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
+                if (isPersistant)
+                {
+                    await embed.PinAsync();
+                }
+                await embed.AddReactionsAsync(Properties.ThumbEmojis);
+                await Program.ZLog($"Sondage crée par {author.Username}");
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
+                });
+                await CheckUselessPolls();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                });
+                await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
+            }
+
+        }
+
+        // 2-9 Choices Poll
+        /// <summary>
+        /// Crée un sondage avec jusqu'à 9 propositions possibles
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("poll", "Créer un sondage avec jusqu'à 9 propositions possibles")]
+        public static async Task CreateComplexPoll(SocketSlashCommand command)
+        {
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
+                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
+                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
+                SocketUser author = command.User;
+
+                var options = command.Data.Options.Where(x => x.Name.Contains("proposition")).ToList();
+
+                EmbedBuilder embedBuilder = new();
+                embedBuilder.WithColor(new Color(27, 37, 70))
+                                        .WithTitle($"Sondage de {author.Username}")
+                                        .WithThumbnailUrl(author.GetAvatarUrl())
+                                        .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                List<Emoji> emojis = new List<Emoji>();
+                foreach (var option in options)
+                {
+                    string number = option.Name.Split('n').LastOrDefault();
+                    embedBuilder.AddField($"{Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
+
+                    emojis.Add(Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
+                }
+                var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
+                if (isPersistant)
+                {
+                    await embed.PinAsync();
+                }
+                await embed.AddReactionsAsync(emojis);
+                await Program.ZLog($"Sondage crée par {author.Username}");
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
+                });
+                await CheckUselessPolls();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                });
+                await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
+            }
+
+        }
+
+        private static async Task CheckUselessPolls()
+        {
+            var messages = await Properties.PollChannel.GetMessagesAsync().FirstAsync();
+            var hours = TimeSpan.FromHours(24);
+            foreach (var message in messages)
+            {
+                if (message.Content.Contains("pinned"))
+                {
+                    await message.DeleteAsync();
+                }
+                else
+                {
+                    var time = DateTime.Now - message.Timestamp;
+                    if (time > hours && !message.IsPinned)
+                    {
+                        await message.DeleteAsync();
+                    }
+                }
+
+            }
+        }
+
+        #endregion
+
+
+
         public static async Task TestAsync(SocketSlashCommand command)
         {
             try
             {
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await command.RespondAsync(text: e.Message);
             }
-            
-        }
 
+        }
     }
 }

@@ -171,7 +171,65 @@ namespace Spoopy
             var helpCommand = new SlashCommandBuilder();
             helpCommand.WithName("help");
             helpCommand.WithDescription("De l'aide pour les gens perdus !");
-            //helpCommand.AddOption("standard", ApplicationCommandOptionType.Boolean, "Si True, cela affichera les anciennes commandes", isRequired: false);
+
+            // Status
+            var statusCommand = new SlashCommandBuilder();
+            statusCommand.WithName("status");
+            statusCommand.WithDescription("Pour stalk les gens du serveur");
+            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+
+            // Avatar
+            var avatarCommand = new SlashCommandBuilder();
+            avatarCommand.WithName("avatar");
+            avatarCommand.WithDescription("Récupère l'avatar d'un membre du serveur");
+            avatarCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+            avatarCommand.AddOption(name: "size",
+               type: ApplicationCommandOptionType.Integer,
+               description: "La taille de l'image en pixel",
+               isRequired: false,
+               choices: new ApplicationCommandOptionChoiceProperties[]
+               {
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "2048x2048",
+                       Value = 2048,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "1024x1024",
+                       Value = 1024,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "512x512",
+                       Value = 512,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "256x256",
+                       Value = 256,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "128x128",
+                       Value = 128,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "64x64",
+                       Value = 64,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "32x32",
+                       Value = 32,
+                   },
+                   new ApplicationCommandOptionChoiceProperties
+                   {
+                       Name = "16x16",
+                       Value = 16,
+                   },
+               });
 
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
@@ -196,21 +254,18 @@ namespace Spoopy
                 .AddOption("proposition6", ApplicationCommandOptionType.String, "Proposition n°6", isRequired: false)
                 .AddOption("proposition7", ApplicationCommandOptionType.String, "Proposition n°7", isRequired: false)
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
-                .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
-
-            // Status
-            var statusCommand = new SlashCommandBuilder();
-            statusCommand.WithName("status");
-            statusCommand.WithDescription("Pour stalk les gens du serveur");
-            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);           
+                .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);       
 
             try
             {
                 await _client.CreateGlobalApplicationCommandAsync(helpCommand.Build());
+                await _client.CreateGlobalApplicationCommandAsync(statusCommand.Build());
+                await _client.CreateGlobalApplicationCommandAsync(avatarCommand.Build());
+
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
-                await Properties.Banquise.CreateApplicationCommandAsync(statusCommand.Build());
-                await Properties.Banquise.CreateApplicationCommandAsync(testCommand.Build());
+
+                await Properties.TestServer.CreateApplicationCommandAsync(testCommand.Build());
             }
             catch (HttpException exception)
             {

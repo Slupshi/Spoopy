@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Spoopy.Modules;
@@ -69,22 +70,23 @@ namespace Spoopy
             HelloChannel = (IMessageChannel)client.GetChannel(611619367469449227);
         }
 
-        public static Dictionary<string, Func<SocketSlashCommand, System.Threading.Tasks.Task>> SlashCommandsDico = new()
+        public static Dictionary<string, Func<SocketSlashCommand,Task>> SlashCommandsDico = new()
         {
+            {"test", SlashCommands.TestAsync },
             {"help", SlashCommands.HelpAsync },
+            {"status", SlashCommands.StatusAsync },
+            {"avatar", SlashCommands.GetUserAvatarAsync },
             {"sondage", SlashCommands.CreatePoll },
             {"poll", SlashCommands.CreateComplexPoll },
-            {"status", SlashCommands.StatusAsync },
-            {"test", SlashCommands.TestAsync },
 
         };
 
-        public static Dictionary<string, Func<SocketMessageComponent, System.Threading.Tasks.Task>> ButtonHandlersDico = new()
+        public static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
         {
             {"ytCommentButton", ButtonHandler.OpenYTCommentsModal },
         };
 
-        public static Dictionary<string, Func<SocketModal, System.Threading.Tasks.Task>> ModalHandlersDico = new()
+        public static Dictionary<string, Func<SocketModal,Task>> ModalHandlersDico = new()
         {
             {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
         };
