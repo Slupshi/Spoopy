@@ -9,11 +9,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using TwitterSharp.Client;
-using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Response.RTweet;
 using TwitterSharp.Response.RUser;
-using TwitterSharp.Request.Option;
 using Spoopy.Services;
 
 namespace Spoopy.Modules
