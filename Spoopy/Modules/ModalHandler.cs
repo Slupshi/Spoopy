@@ -15,11 +15,11 @@ namespace Spoopy.Modules
                 var messageText = (modal.Data.Components as SocketMessageComponentData[])[0].Value;
                 var messageID = modal.Data.CustomId.Split('|').Last();
 
-                var message = await Properties.HelloChannel.GetMessageAsync(ulong.Parse(messageID));
-                var videoTitle = message.Embeds.First().Fields.FirstOrDefault(x => x.Name.Contains("Titre")).Value;
+                var message = await Properties.YoutubeVideoChannel.GetMessageAsync(ulong.Parse(messageID));
+                var videoTitle = message.Embeds.First().Title;
 
 
-                string response = Format.Bold($"Commentaire de {modal.User.Username} sur la vidéo {videoTitle} ```{DateTime.Now.ToString("T")} | {messageText} ```");
+                string response = Format.Bold($"Commentaire de {modal.User.Username} sur la vidéo `{videoTitle}` ```{DateTime.Now.ToString("T")} | {messageText} ```");
                 await Properties.BotDMsChannel.SendMessageAsync(response);
 
                 await modal.RespondAsync(text: Utilities.FormatToCode("Votre commentaires à bien été envoyé à Slupshi !"), ephemeral:true);

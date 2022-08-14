@@ -88,16 +88,20 @@ namespace Spoopy
         }
 
         private async Task MessageReceive(SocketMessage msg)
-        {            
+        {
+            if (msg.Author.IsBot)
+            {
+                return;
+            }
             var message = (SocketUserMessage)msg;
             if (message == null) return;
 
-            if (message.Channel.Name.Contains('@') && !message.Author.IsBot)
+            if (message.Channel.Name.Contains('@'))
             {
                 await _externalInteractions.CheckDMsAsync(message);
                 return;
             }
-            if (message.Channel == Properties.YoutubeVideoChannel && !message.Author.IsBot && message.Content.Contains("http"))
+            if (message.Channel == Properties.YoutubeVideoChannel && message.Content.Contains("http"))
             {
                 await _externalInteractions.HandleNewYoutubeVideoAsync(message);
                 return;
