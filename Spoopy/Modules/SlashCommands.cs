@@ -311,9 +311,25 @@ namespace Spoopy.Modules
 
                 ulong userID = user.Id;
                 string avatarID = user.AvatarId;
+
+                string avatarURL = CDN.GetUserAvatarUrl(userID, avatarID, ushort.Parse(size.ToString()), ImageFormat.Auto);
+
+                var openButton = new ButtonBuilder();
+                openButton.WithUrl(avatarURL)
+                    .WithLabel("Ouvrir l'originale")
+                    .WithStyle(ButtonStyle.Link);
+
+                //var copyButton = new ButtonBuilder();
+                //copyButton.WithCustomId("copyAvatarButton")
+                //    .WithLabel("Copier le lien")
+                //    .WithStyle(ButtonStyle.Primary);
+
+                var msgComponents = new ComponentBuilder().WithButton(openButton)/*.WithButton(copyButton)*/;
+
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
-                    msg.Content = CDN.GetUserAvatarUrl(userID, avatarID, ushort.Parse(size.ToString()), ImageFormat.Auto);
+                    msg.Content = avatarURL;
+                    msg.Components = msgComponents.Build();
                 });
             }
             catch (Exception e)
