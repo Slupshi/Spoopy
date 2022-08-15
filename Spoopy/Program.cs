@@ -180,16 +180,16 @@ namespace Spoopy
             var statusCommand = new SlashCommandBuilder();
             statusCommand.WithName("status");
             statusCommand.WithDescription("Pour stalk les gens du serveur");
-            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée (Vous même par défaut)", isRequired: false);
 
             // Avatar
             var avatarCommand = new SlashCommandBuilder();
             avatarCommand.WithName("avatar");
             avatarCommand.WithDescription("Récupère l'avatar d'un membre du serveur");
-            avatarCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée", isRequired: false);
+            avatarCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne dont l'avatar sera prélevé (Vous même par défaut)", isRequired: false);
             avatarCommand.AddOption(name: "size",
                type: ApplicationCommandOptionType.Integer,
-               description: "La taille de l'image en pixel",
+               description: "La taille de l'image en pixel (512x512 par défaut)",
                isRequired: false,
                choices: new ApplicationCommandOptionChoiceProperties[]
                {
@@ -240,8 +240,8 @@ namespace Spoopy
             pollCommand.WithName("sondage");
             pollCommand.WithDescription("Création de sondage");
             pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
-            pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false);
-            pollCommand.AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non", isRequired: false);
+            pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué (False par défaut)", isRequired: false);
+            pollCommand.AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non (False par défaut)", isRequired: false);
 
             // Complex Poll
             var complexPollCommand = new SlashCommandBuilder();
