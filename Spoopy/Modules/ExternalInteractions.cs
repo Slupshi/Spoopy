@@ -66,7 +66,7 @@ namespace Spoopy.Modules
                     var game = user.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
                     if (game != null)
                     {
-                        SocketRole role = rolesList.FirstOrDefault(r => r.Name == game.Name);
+                        SocketRole role = rolesList.FirstOrDefault(r => r.Name.Contains(game.Name) || game.Name.Contains(r.Name));
                         if (role == null)
                         {
                             RestRole restRole = await Properties.Banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: Properties.WhiteColor);
