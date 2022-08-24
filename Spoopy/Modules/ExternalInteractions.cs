@@ -68,6 +68,7 @@ namespace Spoopy.Modules
                         SocketRole role = rolesList.FirstOrDefault(r => r.Name.Contains(game.Name) || game.Name.Contains(r.Name));
                         if (role == null)
                         {
+                            if (game.Name.Contains("Launcher")) return;
                             RestRole restRole = await Properties.Banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: Properties.WhiteColor);
                             await Program.ZLog($"Rôle {restRole.Name} créé avec succès");
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
@@ -83,7 +84,15 @@ namespace Spoopy.Modules
                             }
                         }
                     }
+                    
                 }
+                rolesList.ForEach(async r =>
+                {
+                    if (!r.Members.Any() && !r.Name.Contains("Server Booster"))
+                    {
+                        await r.DeleteAsync();
+                    }
+                });
                 //await CheckRoleMembers();
             }
             catch (Exception e)
