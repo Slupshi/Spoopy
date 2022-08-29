@@ -57,11 +57,19 @@ namespace Spoopy.Modules
                 
                 foreach (var user in activeUsers)
                 {
-                    if (user.Id == 434662109595435008 && user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null) // 434662109595435008 : zozoID
-                    {
+                    if (user.Id == 434662109595435008) // 434662109595435008 : zozoID
+                    {                        
                         if (!Properties.HadEmmerderZozoToday)
                         {
-                            await EmmerderZozoAsync(user);
+                            if(user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null)
+                            {
+                                await EmmerderZozoAsync(user, "VALORANT");
+                            }
+                            else if(user.Activities.FirstOrDefault(a => a.Name.Contains("Destiny")) != null)
+                            {
+                                await EmmerderZozoAsync(user, "Destiny");
+                            }
+                            
                             Properties.HadEmmerderZozoToday = true;
                         }
                     }
@@ -111,10 +119,19 @@ namespace Spoopy.Modules
             await user.AddRoleAsync(Properties.TkiToiRole);
         }
 
-        public async Task EmmerderZozoAsync(SocketGuildUser user)
+        public async Task EmmerderZozoAsync(SocketGuildUser user, string gameName)
         {
+            string message;
+            if(gameName == "VALORANT")
+            {
+                message = "Ils sont bien les skins dans ton shop aujourd'hui ? =D";
+            }
+            else
+            {
+                message = "Sale drogué";
+            }
             await user.CreateDMChannelAsync();
-            await user.SendMessageAsync(Format.Bold("Ils sont bien les skins dans ton shop aujourd'hui ? =D"));
+            await user.SendMessageAsync(Format.Bold(message));
         }
 
         public async Task CheckRoleMembersAsync()
