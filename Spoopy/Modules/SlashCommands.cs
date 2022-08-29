@@ -476,7 +476,55 @@ namespace Spoopy.Modules
 
         #endregion
 
+        #region FakeBan
 
+        [SlashCommand("ban", "Ban une personne du serveur")]
+        public static async Task FakeBanAsync(SocketSlashCommand command)
+        {
+            try
+            {
+                await command.DeferAsync(ephemeral:true);
+
+                bool userWasNull = false;
+
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
+                SocketGuildUser author = (SocketGuildUser)command.User;
+
+                if (user == null)
+                {
+                    user = author;
+                    userWasNull = true;
+                }
+
+                await author.SetTimeOutAsync(TimeSpan.FromSeconds(60));
+                await author.CreateDMChannelAsync();
+                if (userWasNull) 
+                {
+                    await author.SendMessageAsync(Format.Bold("La prochaine fois précise un pseudo ... Sinon ça va encore te tomber dessus"));
+                }
+                else
+                {
+                    await author.SendMessageAsync(Format.Bold("Tu as vraiment cru que j'allais vraiment ban quelqu'un ??"));
+                    await Properties.HelloChannel.SendMessageAsync(Format.Bold($"@everyone {author.Mention} a essayé de ban {user.Mention} du coup il est Timed Out ce con"));
+                    await command.ModifyOriginalResponseAsync((msg) =>
+                    {
+                        msg.Content = Format.Bold("Tu viens de te TimedOut tous seul en faisant ça !");
+                    });
+                }   
+
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                });
+                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand FakeBan", isError: true);
+            }
+        }
+
+        #endregion
 
         public static async Task TestAsync(SocketSlashCommand command)
         {

@@ -258,7 +258,13 @@ namespace Spoopy
                 .AddOption("proposition6", ApplicationCommandOptionType.String, "Proposition n°6", isRequired: false)
                 .AddOption("proposition7", ApplicationCommandOptionType.String, "Proposition n°7", isRequired: false)
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
-                .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);       
+                .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
+
+            // FakeBan
+            var fakeBanCommand = new SlashCommandBuilder();
+            fakeBanCommand.WithName("ban");
+            fakeBanCommand.WithDescription("Ban une personne du serveur");
+            fakeBanCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
 
             try
             {
@@ -268,6 +274,7 @@ namespace Spoopy
 
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
+                await Properties.Banquise.CreateApplicationCommandAsync(fakeBanCommand.Build());
 
                 await Properties.TestServer.CreateApplicationCommandAsync(testCommand.Build());
             }
