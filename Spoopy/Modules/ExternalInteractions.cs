@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -11,6 +12,7 @@ namespace Spoopy.Modules
 {
     public class ExternalInteractions
     {
+        private Random _random = new Random();
         private TwitterService _twitterService;
         public ExternalInteractions(TwitterService tweetService)
         {
@@ -52,6 +54,7 @@ namespace Spoopy.Modules
             {
                 var rolesList = Properties.Banquise.Roles.ToList();
                 var activeUsers = Properties.Banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
+                
                 foreach (var user in activeUsers)
                 {
                     if (user.Id == 434662109595435008 && user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null) // 434662109595435008 : zozoID
@@ -88,9 +91,10 @@ namespace Spoopy.Modules
                 }
                 rolesList.ForEach(async r =>
                 {
-                    if (!r.Members.Any() && !r.Name.Contains("Server Booster"))
+                    if (!r.Members.Any() && !r.Name.Contains("Server Booster") && !r.Permissions.Administrator && r.Color.RawValue != 0)
                     {
                         await r.DeleteAsync();
+                        await Program.ZLog($"Role {r.Name} supprimé avec succès");
                     }
                 });
                 //await CheckRoleMembers();
@@ -223,5 +227,24 @@ namespace Spoopy.Modules
 
             await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
         }
+
+        public async Task ReorderVocalChannel()
+        {
+            var channels = Properties.Banquise.CategoryChannels.FirstOrDefault(x => x.Id == 611568952069586947).Channels.ToList();
+            List<int> positions = new();
+            channels.ForEach(x => positions.Add(x.Position));
+            channels.ForEach(async x =>
+            {
+                await x.ModifyAsync((chan) =>
+                {
+                    int pos = _random.Next(positions.Count);
+                    chan.Position = positions.ElementAt(pos);
+                    positions.Remove(pos);
+                });
+            });  
+
+        }
+
     }
+
 }

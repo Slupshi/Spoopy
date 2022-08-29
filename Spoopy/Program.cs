@@ -33,8 +33,8 @@ namespace Spoopy
         }
 
         public async Task RunBotAsync()
-        {            
-            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents = GatewayIntents.All });
+        {
+            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents =  Properties.GatewayPrivleges});
             _client.Log += Log;
 
             _externalInteractions = _services.GetService<ExternalInteractions>();
@@ -53,7 +53,7 @@ namespace Spoopy
             await Task.Delay(-1);
         }
 
-        private Task _client_Ready()
+        private async Task _client_Ready()
         {
             Properties.SetPropertiesAtStartup(_client);
 
@@ -63,10 +63,10 @@ namespace Spoopy
             _client.ButtonExecuted += ButtonExecuted;
             _client.ModalSubmitted += ModalSubmitted;
 
-            CreateSlashCommands();
+            await CreateSlashCommands();
             _client.SlashCommandExecuted += HandleSlashCommandAsync;
 
-            return Task.CompletedTask;
+            await _externalInteractions.ReorderVocalChannel();
         }
 
         private Task Log(LogMessage msg)

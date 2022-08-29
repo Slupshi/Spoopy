@@ -54,6 +54,17 @@ namespace Spoopy
         public const string QuestionMarkURL = "https://www.nicepng.com/png/full/181-1816226_blue-question-mark-clipart-question-mark-icon-blue.png";
         public const string InfoIconURL = "https://e7.pngegg.com/pngimages/359/338/png-clipart-logo-information-library-business-information-miscellaneous-blue-thumbnail.png";
 
+        public const GatewayIntents GatewayPrivleges = GatewayIntents.Guilds |
+                GatewayIntents.GuildBans |
+                GatewayIntents.DirectMessages |
+                GatewayIntents.DirectMessageReactions |
+                GatewayIntents.GuildVoiceStates |
+                GatewayIntents.GuildMessages |
+                GatewayIntents.GuildMessageReactions |
+                GatewayIntents.GuildIntegrations |
+                GatewayIntents.GuildMembers |
+                GatewayIntents.GuildPresences;
+
         #endregion
 
         public static void SetPropertiesAtStartup(DiscordSocketClient client)
