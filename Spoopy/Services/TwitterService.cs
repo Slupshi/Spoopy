@@ -42,7 +42,7 @@ namespace Spoopy.Services
                 var embedTweet = new EmbedBuilder();
                 embedTweet.WithColor(Color.Blue)
                     .WithAuthor($"{tweet.Author.Name} @{tweet.Author.Username}")
-                    .WithTitle($"{title} de {tweet.Author.Name}")
+                    .WithTitle($"{title} {Utilities.DeFactory(tweet.Author.Name)}{tweet.Author.Name}")
                     .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
                     .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
                     .WithDescription(Utilities.DeleteUrlFromText(tweet.Text))
@@ -50,12 +50,7 @@ namespace Spoopy.Services
                     .AddField("Replys : ", $"`{tweet.PublicMetrics.ReplyCount}`", inline: true)
                     .AddField("RTs : ", $"`{tweet.PublicMetrics.RetweetCount}`", inline: true)
                     .AddField("Likes : ", $"`{tweet.PublicMetrics.LikeCount}`", inline: true);
-
-                string upperName = tweet.Author.Name.ToUpper();
-                if (upperName.StartsWith('A') || upperName.StartsWith('E') || upperName.StartsWith('Y') || upperName.StartsWith('U') || upperName.StartsWith('I') || upperName.StartsWith('O') || upperName.StartsWith('H'))
-                {
-                    embedTweet.WithTitle($"{title} d'{tweet.Author.Name}");
-                }
+                
                 if (tweet.Attachments != null)
                 {
                     if (tweet.Attachments.Media[0].Url != null)
@@ -65,7 +60,6 @@ namespace Spoopy.Services
                         embedTweet.WithImageUrl(tweet.Attachments.Media[0].PreviewImageUrl);
                         embedTweet.WithDescription($"{Utilities.DeleteUrlFromText(tweet.Text)} \n\n `Ce tweet contient une vidéo de {(tweet.Attachments.Media[0].DurationMs) / 1000} secondes`");
                     }
-
 
                 }
                 if (tweet.ReferencedTweets != null)

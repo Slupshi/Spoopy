@@ -4,6 +4,9 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AngleSharp.Dom.Events;
+using TwitterSharp.Response.RTweet;
+using AngleSharp.Html.Dom;
 
 namespace Spoopy
 {
@@ -34,6 +37,20 @@ namespace Spoopy
                 if (timeZone.UTC_offset == "+01:00") return 1;
                 else return 2;
             }
+        }
+
+        public static string DeFactory(string nextWord, bool isUpperCase = false)
+        {
+            string response = isUpperCase ? "De " : "de ";
+            char firstLetter = char.ToUpperInvariant(nextWord.First());
+            if(Properties.Vowels.Any(x=> x == firstLetter))
+            {
+                if(!(firstLetter == 'Y' && Properties.Vowels.Any(x => x == char.ToUpperInvariant(nextWord.ElementAt(1)))))
+                {
+                    response = isUpperCase ? "D'" : "d'";
+                }
+            }
+            return response;
         }
     }
 

@@ -46,6 +46,10 @@ namespace Spoopy
         {
             {1,  new Emoji("1️⃣") }, { 2, new Emoji("2️⃣") }, { 3, new Emoji("3️⃣") }, { 4, new Emoji("4️⃣") }, { 5, new Emoji("5️⃣") }, { 6, new Emoji("6️⃣") }, { 7, new Emoji("7️⃣") }, { 8, new Emoji("8️⃣") }, { 9, new Emoji("9️⃣") },
         };
+        public static readonly List<char> Vowels = new()
+        {
+            'A', 'E', 'Y', 'U', 'I', 'O'
+        };
 
         public const string YoutubeLogoURL = "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c545.png";
         public const string SpotifyLogoURL = "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-vector-download-11.png";
