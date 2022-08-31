@@ -21,31 +21,40 @@ namespace Spoopy.Modules
 
         public async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
         {
-            if(newVoiceState.VoiceChannel == null)
+            try
             {
-                if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                if (newVoiceState.VoiceChannel == null)
                 {
-                    await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
+                    if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    {
+                        await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
+                    }
+                    return;
                 }
-                return;
-            }
 
-            bool isUwU = newVoiceState.VoiceChannel.Id == 611881198700068864;
+                bool isUwU = newVoiceState.VoiceChannel.Id == 611881198700068864;
 
-            if (isUwU)
-            {
-                if (!(user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                if (isUwU)
                 {
-                    await (user as IGuildUser).AddRoleAsync(Properties.UwuRole);
+                    if (!(user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    {
+                        await (user as IGuildUser).AddRoleAsync(Properties.UwuRole);
+                    }
+                }
+                else
+                {
+                    if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    {
+                        await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
+                    }
                 }
             }
-            else
+            catch(Exception ex)
             {
-                if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
-                {
-                    await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
-                }
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur UwU", isError:true);
             }
+            
         }
 
         public async Task SetGameRoleAsync()
@@ -110,73 +119,118 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                await Program.ZLog("Erreur SetGameRole", isError:true);
             }
 
         }
 
         public async Task SetRoleOnGuildJoined(SocketGuildUser user)
         {
-            await user.AddRoleAsync(Properties.TkiToiRole);
+            try
+            {
+                await user.AddRoleAsync(Properties.TkiToiRole);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur SetRoleOnJoin", isError: true);
+            }
         }
 
         public async Task EmmerderZozoAsync(SocketGuildUser user, string gameName)
         {
-            string message;
-            if(gameName == "VALORANT")
+            try
             {
-                message = "Ils sont bien les skins dans ton shop aujourd'hui ? =D";
+                string message;
+                if (gameName == "VALORANT")
+                {
+                    message = "Ils sont bien les skins dans ton shop aujourd'hui ? =D";
+                }
+                else
+                {
+                    message = "Sale drogué";
+                }
+                await user.CreateDMChannelAsync();
+                await user.SendMessageAsync(Format.Bold(message));
             }
-            else
+            catch(Exception ex)
             {
-                message = "Sale drogué";
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans EmmerderZozo", isError: true);
             }
-            await user.CreateDMChannelAsync();
-            await user.SendMessageAsync(Format.Bold(message));
+            
         }
 
         public async Task CheckRoleMembersAsync()
         {
-            foreach (SocketRole role in Properties.Banquise.Roles)
+            try
             {
-                if (role.Members.ToList().Count > 1 && role.Members.ToList().Count < 3 && role.Color == Properties.WhiteColor)
+                foreach (SocketRole role in Properties.Banquise.Roles)
                 {
-                    await role.ModifyAsync(r => r.Color = Properties.GreenColor);
-                }
-                else if (role.Members.ToList().Count > 3 && (role.Color == Properties.WhiteColor || role.Color == Properties.GreenColor))
-                {
-                    await role.ModifyAsync(r => r.Color = Properties.RedColor);
+                    if (role.Members.ToList().Count > 1 && role.Members.ToList().Count < 3 && role.Color == Properties.WhiteColor)
+                    {
+                        await role.ModifyAsync(r => r.Color = Properties.GreenColor);
+                    }
+                    else if (role.Members.ToList().Count > 3 && (role.Color == Properties.WhiteColor || role.Color == Properties.GreenColor))
+                    {
+                        await role.ModifyAsync(r => r.Color = Properties.RedColor);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur CheckRole",isError:true);
+            }
+           
         }
 
         public async Task CheckDMsAsync(SocketUserMessage message)
         {
-            string response = Format.Bold($"DM de {message.Author.Username} : ```{DateTime.Now.ToString("T")} | {message} ```");
-            await Properties.BotDMsChannel.SendMessageAsync(response);
+            try
+            {
+                string response = Format.Bold($"DM de {message.Author.Username} : ```{DateTime.Now.ToString("T")} | {message} ```");
+                await Properties.BotDMsChannel.SendMessageAsync(response);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur CheckDMs", isError: true);
+            }
+            
         }
 
         public async Task HandleNewYoutubeVideoAsync(SocketUserMessage message)
         {
-            await message.PinAsync();
-            var embed = new EmbedBuilder();
-            embed.WithTitle("Nouvelle vidéo !")
-                .WithUrl(message.GetJumpUrl())
-                .WithThumbnailUrl(message.Author.GetAvatarUrl())
-                .WithColor(Color.Red)
-                .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.YoutubeLogoURL)
-                .WithDescription("N'hésites pas à mettre un petit like stp !\nTu peux aussi donner ton avis en utilisant un des bouton si dessous")
-                .AddField("Lien :", Format.Bold($"[Clique ici !]({message.CleanContent})"), inline: true)
-                .AddField("Titre :", Format.Bold(Format.Code($"{message.Embeds.First().Title}")), inline: true);
+            try
+            {
+                await message.PinAsync();
+                var embed = new EmbedBuilder();
+                embed.WithTitle("Nouvelle vidéo !")
+                    .WithUrl(message.GetJumpUrl())
+                    .WithThumbnailUrl(message.Author.GetAvatarUrl())
+                    .WithColor(Color.Red)
+                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.YoutubeLogoURL)
+                    .WithDescription("N'hésites pas à mettre un petit like stp !\nTu peux aussi donner ton avis en utilisant un des bouton si dessous")
+                    .AddField("Lien :", Format.Bold($"[Clique ici !]({message.CleanContent})"), inline: true)
+                    .AddField("Titre :", Format.Bold(Format.Code($"{message.Embeds.First().Title}")), inline: true);
 
-            var button = new ButtonBuilder();
-            button.WithCustomId($"ytCommentButton|{message.Id}")
-                .WithLabel("Donnes ton avis !")
-                .WithStyle(ButtonStyle.Danger)
-                .WithEmote(new Emoji("✏"));
+                var button = new ButtonBuilder();
+                button.WithCustomId($"ytCommentButton|{message.Id}")
+                    .WithLabel("Donnes ton avis !")
+                    .WithStyle(ButtonStyle.Danger)
+                    .WithEmote(new Emoji("✏"));
 
-            var msgComponents = new ComponentBuilder().WithButton(button);
+                var msgComponents = new ComponentBuilder().WithButton(button);
 
-            await Properties.HelloChannel.SendMessageAsync(text: "@everyone",embed: embed.Build(), components: msgComponents.Build());
+                await Properties.HelloChannel.SendMessageAsync(text: "@everyone", embed: embed.Build(), components: msgComponents.Build());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans le newVideoEmbed", isError: true);
+            }
+           
         }
 
         public async Task HandleTriggerWords(SocketUserMessage message)
@@ -235,30 +289,48 @@ namespace Spoopy.Modules
 
         public async Task HandleNewTweetSent(SocketUserMessage message)
         {
-            var splitMessage = message.Content.Split('/');
-            var splitID = splitMessage.Last().Split('?');
-            var tweet = (Tweet)await _twitterService.UseTwitterClientAsync(method: TwitterService.TwitterClientMethod.GetTweet, id: splitID.First());
-            var embedBuilder = await _twitterService.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
-            await message.DeleteAsync();
-            var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
+            try
+            {
+                var splitMessage = message.Content.Split('/');
+                var splitID = splitMessage.Last().Split('?');
+                var tweet = (Tweet)await _twitterService.UseTwitterClientAsync(method: TwitterService.TwitterClientMethod.GetTweet, id: splitID.First());
+                var embedBuilder = await _twitterService.CreateTweetEmbedAsync(tweet, title: $"{message.Author.Username} partage un tweet");
+                await message.DeleteAsync();
+                var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
 
-            await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
+                await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans le tweetEmbed", isError: true);
+            }
+            
         }
 
         public async Task ReorderVocalChannel()
         {
-            var channels = Properties.Banquise.CategoryChannels.FirstOrDefault(x => x.Id == 611568952069586947).Channels.ToList();
-            List<int> positions = new();
-            channels.ForEach(x => positions.Add(x.Position));
-            channels.ForEach(async x =>
+            try
             {
-                await x.ModifyAsync((chan) =>
+                var channels = Properties.Banquise.CategoryChannels.FirstOrDefault(x => x.Id == 611568952069586947).Channels.ToList();
+                List<int> positions = new();
+                channels.ForEach(x => positions.Add(x.Position));
+                channels.ForEach(async x =>
                 {
-                    int pos = _random.Next(positions.Count);
-                    chan.Position = positions.ElementAt(pos);
-                    positions.Remove(pos);
+                    await x.ModifyAsync((chan) =>
+                    {
+                        int pos = _random.Next(positions.Count);
+                        chan.Position = positions.ElementAt(pos);
+                        positions.Remove(pos);
+                    });
                 });
-            });  
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans le reorder des channels vocaux", isError: true);
+            }
+             
 
         }
 
