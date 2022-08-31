@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom.Events;
 using TwitterSharp.Response.RTweet;
 using AngleSharp.Html.Dom;
+using Spoopy.Services;
 
 namespace Spoopy
 {
@@ -25,18 +26,10 @@ namespace Spoopy
         }
 
         public static async Task<int> GetParisTimeZoneAsync()
-        {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                string path = "http://worldtimeapi.org/api/timezone/Europe/Paris";
-                HttpResponseMessage response = await httpClient.GetAsync(path);
-                response.EnsureSuccessStatusCode();
-                var responseText = await response.Content.ReadAsStringAsync();
-                TimeZoneModel timeZone = JsonConvert.DeserializeObject<TimeZoneModel>(responseText);
-
-                if (timeZone.UTC_offset == "+01:00") return 1;
-                else return 2;
-            }
+        {            
+            var timeZone = await ApiService.HttpGet<TimeZoneModel>("http://worldtimeapi.org/api/timezone/Europe/Paris") as TimeZoneModel;
+            if(timeZone.UTC_offset == "+01:00") return 1;
+            else return 2;
         }
 
         public static string DeFactory(string nextWord, bool isUpperCase = false)
