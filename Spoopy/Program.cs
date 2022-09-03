@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Spoopy
 {
@@ -19,6 +20,7 @@ namespace Spoopy
         private static IServiceProvider _services;
         private ExternalInteractions _externalInteractions;
         private CommandService _commands;
+        private Timer _activitiesTimer;
         public static void Main(string[] args)
         {
             _services = new ServiceCollection()
@@ -44,6 +46,7 @@ namespace Spoopy
 
             await _client.SetGameAsync("/help", type: ActivityType.Watching);
             await _client.SetStatusAsync(UserStatus.Online);
+
             _client.Ready += _client_Ready;
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
@@ -56,15 +59,20 @@ namespace Spoopy
         private async Task _client_Ready()
         {
             Properties.SetPropertiesAtStartup(_client);
+            await CreateSlashCommands();
 
+            _client.SlashCommandExecuted += HandleSlashCommandAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
             _client.UserJoined += UserJoined;
             _client.LatencyUpdated += LatencyUpdated;
             _client.ButtonExecuted += ButtonExecuted;
             _client.ModalSubmitted += ModalSubmitted;
+            _client.PresenceUpdated += PresenceUpdated;
 
-            await CreateSlashCommands();
-            _client.SlashCommandExecuted += HandleSlashCommandAsync;
+            _activitiesTimer = new Timer();
+            _activitiesTimer.Interval = 20000;
+            _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
+            _activitiesTimer.Start();
 
             await _externalInteractions.ReorderVocalChannel();
         }
@@ -162,6 +170,21 @@ namespace Spoopy
             }
         }
 
+        private async Task PresenceUpdated(SocketUser user, SocketPresence pastPresence, SocketPresence newPresence)
+        {
+            
+        }
+
+
+        private async void _activitiesTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (Properties.BotActivities.Count == 0)
+            {
+                Properties.SetupBotActivities(_client);
+            }
+            string activity = Properties.BotActivities.Dequeue();
+            await _client.SetGameAsync(activity, type: ActivityType.Watching);            
+        }
 
         private async Task CreateSlashCommands()
         {

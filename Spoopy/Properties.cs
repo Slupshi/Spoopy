@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -27,7 +28,6 @@ namespace Spoopy
         public static bool HadEmmerderZozoToday = false;
 
         #endregion
-
 
         #region Constantes
 
@@ -71,6 +71,35 @@ namespace Spoopy
 
         #endregion
 
+        #region Dictionaries
+
+        public readonly static Dictionary<string, Func<SocketSlashCommand,Task>> SlashCommandsDico = new()
+        {
+            {"test", SlashCommands.TestAsync },
+            {"help", SlashCommands.HelpAsync },
+            {"status", SlashCommands.StatusAsync },
+            {"avatar", SlashCommands.GetUserAvatarAsync },
+            {"sondage", SlashCommands.CreatePoll },
+            {"poll", SlashCommands.CreateComplexPoll },
+            {"ban", SlashCommands.FakeBanAsync }
+
+        };
+
+        public readonly static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
+        {
+            {"ytCommentButton", ButtonHandler.OpenYTCommentsModal },
+        };
+
+        public readonly static Dictionary<string, Func<SocketModal,Task>> ModalHandlersDico = new()
+        {
+            {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
+        };
+
+        public static Queue<string> BotActivities = new Queue<string>();
+
+        #endregion
+
+
         public static void SetPropertiesAtStartup(DiscordSocketClient client)
         {
             TestServer = client.GetGuild(1007315790283952188);
@@ -85,28 +114,13 @@ namespace Spoopy
             HelloChannel = (IMessageChannel)client.GetChannel(611619367469449227);
         }
 
-        public static Dictionary<string, Func<SocketSlashCommand,Task>> SlashCommandsDico = new()
+        public static void SetupBotActivities(DiscordSocketClient client)
         {
-            {"test", SlashCommands.TestAsync },
-            {"help", SlashCommands.HelpAsync },
-            {"status", SlashCommands.StatusAsync },
-            {"avatar", SlashCommands.GetUserAvatarAsync },
-            {"sondage", SlashCommands.CreatePoll },
-            {"poll", SlashCommands.CreateComplexPoll },
-            {"ban", SlashCommands.FakeBanAsync }
+            BotActivities.Enqueue("/help");
+            BotActivities.Enqueue($"{client.Guilds.Count} servers");
+            BotActivities.Enqueue($"{client.Guilds.Select(x => x.MemberCount).Sum()} persons");
+            BotActivities.Enqueue($"{SlashCommandsDico.Where(x => !x.Key.Contains("test")).Count()} commands");
+        }
 
-        };
-
-        public static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
-        {
-            {"ytCommentButton", ButtonHandler.OpenYTCommentsModal },
-        };
-
-        public static Dictionary<string, Func<SocketModal,Task>> ModalHandlersDico = new()
-        {
-            {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
-        };
-
-
-    }    
+    }
 }

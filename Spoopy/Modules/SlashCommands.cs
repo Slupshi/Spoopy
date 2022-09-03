@@ -530,7 +530,11 @@ namespace Spoopy.Modules
         {
             try
             {
-
+                var embed = new EmbedBuilder();
+                embed.WithTitle("Test")
+                    .WithDescription("❌❌❌\n⬛⬛⬛\n⭕⭕⭕");
+                await command.RespondAsync(embed: embed.Build());
+                
             }
             catch (Exception e)
             {
