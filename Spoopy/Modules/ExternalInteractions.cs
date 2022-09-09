@@ -334,6 +334,31 @@ namespace Spoopy.Modules
 
         }
 
+        public async Task GetNumberFact()
+        {
+            string year = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/year");
+            string trivia = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/trivia");
+            string date = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/date");
+
+            while(year.Count() > 128)
+            {
+                year = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/year");
+            }
+            while (trivia.Count() > 128)
+            {
+                trivia = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/trivia");
+            }
+            while (date.Count() > 128)
+            {
+                date = await Utilities.ScrapHtmlAsync("http://numbersapi.com/random/date");
+            }
+
+            Properties.BotActivities.Enqueue(year);
+            Properties.BotActivities.Enqueue(trivia);
+            Properties.BotActivities.Enqueue(date);
+
+        }
+
     }
 
 }

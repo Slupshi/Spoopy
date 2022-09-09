@@ -114,12 +114,9 @@ namespace Spoopy
             HelloChannel = (IMessageChannel)client.GetChannel(611619367469449227);
         }
 
-        public static void SetupBotActivities(DiscordSocketClient client)
+        public static void SetupBotActivities()
         {
             BotActivities.Enqueue("/help");
-            BotActivities.Enqueue($"{client.Guilds.Count} servers");
-            BotActivities.Enqueue($"{client.Guilds.Select(x => x.MemberCount).Sum()} persons");
-            BotActivities.Enqueue($"{SlashCommandsDico.Where(x => !x.Key.Contains("test")).Count()} commands");
         }
 
     }

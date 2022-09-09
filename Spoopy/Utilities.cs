@@ -13,6 +13,13 @@ namespace Spoopy
 {
     public class Utilities
     {
+        private static ApiService _apiService;
+
+        public Utilities(ApiService apiService)
+        {
+            _apiService = apiService;
+        }
+
         public static string FormatToCode(string message) => $"```{message}```";
 
         public static string GetCustomTimestamp() => $"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ";
@@ -27,7 +34,7 @@ namespace Spoopy
 
         public static async Task<int> GetParisTimeZoneAsync()
         {            
-            var timeZone = await ApiService.HttpGet<TimeZoneModel>("http://worldtimeapi.org/api/timezone/Europe/Paris") as TimeZoneModel;
+            var timeZone = await _apiService.HttpGetAsync<TimeZoneModel>("http://worldtimeapi.org/api/timezone/Europe/Paris") as TimeZoneModel;
             if(timeZone.UTC_offset == "+01:00") return 1;
             else return 2;
         }
@@ -44,6 +51,11 @@ namespace Spoopy
                 }
             }
             return response;
+        }
+
+        public static async Task<string> ScrapHtmlAsync(string url)
+        {
+            return await _apiService.ScrapHtmlPageAsync(url);
         }
     }
 

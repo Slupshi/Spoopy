@@ -7,6 +7,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Namotion.Reflection;
+using Spoopy.Services;
 
 namespace Spoopy.Modules
 {
@@ -533,10 +534,13 @@ namespace Spoopy.Modules
         {
             try
             {
-                var embed = new EmbedBuilder();
-                embed.WithTitle("Test")
-                    .WithDescription("❌❌❌\n⬛⬛⬛\n⭕⭕⭕");
-                await command.RespondAsync(embed: embed.Build());
+                
+                //await command.RespondAsync(year + Environment.NewLine + trivia + Environment.NewLine + date);
+
+                //var embed = new EmbedBuilder();
+                //embed.WithTitle("Test")
+                //    .WithDescription("❌❌❌\n⬛⬛⬛\n⭕⭕⭕");
+                //await command.RespondAsync(embed: embed.Build());
                 
             }
             catch (Exception e)

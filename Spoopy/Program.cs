@@ -20,6 +20,8 @@ namespace Spoopy
         private static IServiceProvider _services;
         private ExternalInteractions _externalInteractions;
         private CommandService _commands;
+        private ApiService _apiService;
+        private Utilities _utilities;
         private Timer _activitiesTimer;
         public static void Main(string[] args)
         {
@@ -29,6 +31,8 @@ namespace Spoopy
                 .AddSingleton<AudioService>()
                 .AddSingleton<TwitterService>()
                 .AddSingleton<ExternalInteractions>()
+                .AddSingleton<ApiService>()
+                .AddSingleton<Utilities>()
                 .BuildServiceProvider();
             
             new Program().RunBotAsync().GetAwaiter().GetResult();
@@ -40,6 +44,8 @@ namespace Spoopy
             _client.Log += Log;
 
             _externalInteractions = _services.GetService<ExternalInteractions>();
+            _apiService = _services.GetService<ApiService>();
+            _utilities = _services.GetService<Utilities>();
                 
             _commands = new CommandService();
             await InstallCommandsAsync();
@@ -180,7 +186,8 @@ namespace Spoopy
         {
             if (Properties.BotActivities.Count == 0)
             {
-                Properties.SetupBotActivities(_client);
+                Properties.SetupBotActivities();
+                await _externalInteractions.GetNumberFact();
             }
             string activity = Properties.BotActivities.Dequeue();
             await _client.SetGameAsync(activity, type: ActivityType.Watching);            

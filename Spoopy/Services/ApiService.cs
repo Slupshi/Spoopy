@@ -10,17 +10,26 @@ namespace Spoopy.Services
 {
     public class ApiService
     {
-        public static async Task<object> HttpGet<T>(string url)
-        {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                HttpResponseMessage response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                var responseText = await response.Content.ReadAsStringAsync();
-                T jsonResponse = JsonConvert.DeserializeObject<T>(responseText);
+        private HttpClient _httpClient;
 
-                return jsonResponse;               
-            }
+        public ApiService()
+        {
+            _httpClient = new HttpClient();
+        }
+
+        public async Task<string> ScrapHtmlPageAsync(string url)
+        {
+            return await _httpClient.GetStringAsync(url);
+        }
+
+        public async Task<T> HttpGetAsync<T>(string url)
+        {
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            var responseText = await response.Content.ReadAsStringAsync();
+            T jsonResponse = JsonConvert.DeserializeObject<T>(responseText);
+
+            return jsonResponse;
         }
     }
 }
