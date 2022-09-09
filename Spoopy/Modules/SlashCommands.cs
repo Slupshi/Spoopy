@@ -23,7 +23,7 @@ namespace Spoopy.Modules
 
                 List<MethodInfo> commandsList = Assembly.GetExecutingAssembly().GetModules().First().GetType("Spoopy.Modules.SlashCommands").GetMethods().ToList().FindAll(i => i.Module.Name == "Spoopy.dll");
                 commandsList.RemoveAll(x => x.Name == "HelpAsync");
-                commandsList.RemoveAll(x => x.Name == "TestAsync");
+                commandsList.RemoveAll(x => x.Name.Contains("Test"));
                 
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
@@ -477,7 +477,10 @@ namespace Spoopy.Modules
         #endregion
 
         #region FakeBan
-
+        /// <summary>
+        /// Ban quelqu'un définitivement du serveur
+        /// </summary>
+        /// <returns></returns>
         [SlashCommand("ban", "Ban une personne du serveur")]
         public static async Task FakeBanAsync(SocketSlashCommand command)
         {
