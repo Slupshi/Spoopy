@@ -265,6 +265,14 @@ namespace Spoopy
                    },
                });
 
+            // RandomOrg
+            var randomCommand = new SlashCommandBuilder();
+            randomCommand.WithName("random");
+            randomCommand.WithDescription("Selectionne un nombre random entre le nombre de départ et de fin");
+            randomCommand.AddOption("départ", ApplicationCommandOptionType.Integer, "Le nombre de départ | 1 par défaut", isRequired: false, minValue: 1);
+            randomCommand.AddOption("fin", ApplicationCommandOptionType.Integer, "Le nombre de fin", isRequired: true, minValue: 2);
+            randomCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
+
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
             pollCommand.WithName("sondage");
@@ -301,6 +309,7 @@ namespace Spoopy
                 await _client.CreateGlobalApplicationCommandAsync(helpCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(statusCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(avatarCommand.Build());
+                await _client.CreateGlobalApplicationCommandAsync(randomCommand.Build());
 
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
