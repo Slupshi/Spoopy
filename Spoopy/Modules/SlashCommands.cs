@@ -341,7 +341,58 @@ namespace Spoopy.Modules
             }
         }
 
-        #endregion       
+        #endregion
+
+        #region RandomOrg
+
+        /// <summary>
+        /// Selectionne un nombre aléatoire
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("random", "Selectionne un nombre random")]
+        public static async Task RandomOrgAsync(SocketSlashCommand command)
+        {
+            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
+            try
+            {
+                await command.DeferAsync(ephemeral: !isVisible);
+
+                int start = (command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value) == null ? 1 : Convert.ToInt32((command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value));
+                start = start == 0 ? 1 : start;
+
+                int end = Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == "fin")?.Value);
+
+                if (end <= start)
+                {
+                    await command.ModifyOriginalResponseAsync((MessageProperties msg) =>
+                    {
+                        msg.Content = Format.Bold("Le nombre de fin doit être supérieur au nombre de départ !");
+                    });
+                    return;
+                }
+
+                Random random = new Random();
+
+                int response = random.Next(start, end + 1);
+
+                await command.ModifyOriginalResponseAsync((MessageProperties msg) =>
+                {
+                    msg.Content = Format.Bold($"La réponse est : {response}");
+                });
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
+                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
+                {
+                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                });
+                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand RandomOrg", isError: true);
+            }
+        }
+
+        #endregion
 
         //----------| BanquiseCommand |----------//
 
@@ -531,57 +582,7 @@ namespace Spoopy.Modules
 
         #endregion
 
-        #region RandomOrg
-
-        /// <summary>
-        /// Selectionne un nombre aléatoire
-        /// </summary>
-        /// <returns></returns>
-        [SlashCommand("random", "Selectionne un nombre random")]
-        public static async Task RandomOrgAsync(SocketSlashCommand command)
-        {
-            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
-            try
-            {
-                await command.DeferAsync(ephemeral: !isVisible);
-
-                int start = (command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value) == null ? 1 : Convert.ToInt32((command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value));
-                start = start == 0 ? 1 : start;
-
-                int end = Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == "fin")?.Value);
-
-                if(end <= start)
-                {
-                    await command.ModifyOriginalResponseAsync((MessageProperties msg) =>
-                    {
-                        msg.Content = Format.Bold("Le nombre de fin doit être supérieur au nombre de départ !");
-                    });
-                    return;
-                }
-
-                Random random = new Random();
-
-                int response = random.Next(start, end + 1);
-
-                await command.ModifyOriginalResponseAsync((MessageProperties msg) =>
-                {
-                    msg.Content = Format.Bold($"La réponse est : {response}");
-                });
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
-                });
-                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand RandomOrg", isError: true);
-            }
-        }
-
-        #endregion
-
+       
         public static async Task TestAsync(SocketSlashCommand command)
         {
             try
