@@ -21,6 +21,7 @@ namespace Spoopy
         private ExternalInteractions _externalInteractions;
         private CommandService _commands;
         private ApiService _apiService;
+        private LocalApiService _localApiService;
         private Utilities _utilities;
         private Timer _activitiesTimer;
         public static void Main(string[] args)
@@ -32,6 +33,7 @@ namespace Spoopy
                 .AddSingleton<TwitterService>()
                 .AddSingleton<ExternalInteractions>()
                 .AddSingleton<ApiService>()
+                .AddSingleton<LocalApiService>()
                 .AddSingleton<Utilities>()
                 .BuildServiceProvider();
             
@@ -45,6 +47,7 @@ namespace Spoopy
 
             _externalInteractions = _services.GetService<ExternalInteractions>();
             _apiService = _services.GetService<ApiService>();
+            _localApiService = _services.GetService<LocalApiService>();
             _utilities = _services.GetService<Utilities>();
                 
             _commands = new CommandService();
@@ -79,6 +82,8 @@ namespace Spoopy
             _activitiesTimer.Interval = 20000;
             _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
             _activitiesTimer.Start();
+
+            await _localApiService.PostSpoopyStatus(new Models.SpoopyStatus(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(42), true));
 
             await _externalInteractions.ReorderVocalChannel();
         }

@@ -31,5 +31,12 @@ namespace Spoopy.Services
 
             return jsonResponse;
         }
+
+        public async Task<bool> HttpPostAsync(string url, object model)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync(url, model);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
+        }
     }
 }
