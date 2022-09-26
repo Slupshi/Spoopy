@@ -23,6 +23,8 @@ namespace Spoopy.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans PostSpoopyStatus");
                 return false;
             }
             
