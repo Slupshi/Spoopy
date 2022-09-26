@@ -8,7 +8,6 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Namotion.Reflection;
 using Spoopy.Models;
-using Spoopy.Services;
 
 namespace Spoopy.Modules
 {
