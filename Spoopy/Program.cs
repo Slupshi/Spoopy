@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Diagnostics;
 
 namespace Spoopy
 {
@@ -24,6 +25,8 @@ namespace Spoopy
         private LocalApiService _localApiService;
         private Utilities _utilities;
         private Timer _activitiesTimer;
+        public static Stopwatch UptimeTimer;
+
         public static void Main(string[] args)
         {
             _services = new ServiceCollection()
@@ -48,7 +51,7 @@ namespace Spoopy
             _externalInteractions = _services.GetService<ExternalInteractions>();
             _apiService = _services.GetService<ApiService>();
             _localApiService = _services.GetService<LocalApiService>();
-            _utilities = _services.GetService<Utilities>();
+            _utilities = new Utilities(_apiService, _client);
                 
             _commands = new CommandService();
             await InstallCommandsAsync();
@@ -60,6 +63,9 @@ namespace Spoopy
 
             var token = Environment.GetEnvironmentVariable("DiscordBot_LE_Z", EnvironmentVariableTarget.User);
             await _client.LoginAsync(TokenType.Bot, token);
+
+            UptimeTimer = new Stopwatch();
+            UptimeTimer.Start();
 
             await _client.StartAsync();
             await Task.Delay(-1);
@@ -82,8 +88,6 @@ namespace Spoopy
             _activitiesTimer.Interval = 20000;
             _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
             _activitiesTimer.Start();
-
-            await _localApiService.PostSpoopyStatus(new Models.SpoopyStatus(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(42), true));
 
             await _externalInteractions.ReorderVocalChannel();
         }
@@ -166,6 +170,8 @@ namespace Spoopy
         private async Task LatencyUpdated(int previousLatency, int newLatency)
         {
             await _externalInteractions.SetGameRoleAsync();
+            
+            await _localApiService.PostSpoopyStatus(Utilities.GetSpoopyStatus());
         }
 
         private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
@@ -278,6 +284,11 @@ namespace Spoopy
             randomCommand.AddOption("fin", ApplicationCommandOptionType.Integer, "Le nombre de fin", isRequired: true, minValue: 2);
             randomCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
 
+            // SpoopyStatus
+            var spoopyStatus = new SlashCommandBuilder();
+            spoopyStatus.WithName("spoopy");
+            spoopyStatus.WithDescription("Obtenir le status du bot");
+
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
             pollCommand.WithName("sondage");
@@ -315,6 +326,7 @@ namespace Spoopy
                 await _client.CreateGlobalApplicationCommandAsync(statusCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(avatarCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(randomCommand.Build());
+                await _client.CreateGlobalApplicationCommandAsync(spoopyStatus.Build());
 
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());

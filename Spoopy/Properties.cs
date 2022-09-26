@@ -73,13 +73,14 @@ namespace Spoopy
 
         #region Dictionaries
 
-        public readonly static Dictionary<string, Func<SocketSlashCommand,Task>> SlashCommandsDico = new()
+        public readonly static Dictionary<string, Func<SocketSlashCommand, Task>> SlashCommandsDico = new()
         {
             {"test", SlashCommands.TestAsync },
             {"help", SlashCommands.HelpAsync },
             {"status", SlashCommands.StatusAsync },
             {"avatar", SlashCommands.GetUserAvatarAsync },
             {"random", SlashCommands.RandomOrgAsync },
+            {"spoopy", SlashCommands.PrintSpoopyStatus },
             {"sondage", SlashCommands.CreatePoll },
             {"poll", SlashCommands.CreateComplexPoll },
             {"ban", SlashCommands.FakeBanAsync }

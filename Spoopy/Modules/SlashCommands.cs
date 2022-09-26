@@ -7,6 +7,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Namotion.Reflection;
+using Spoopy.Models;
 using Spoopy.Services;
 
 namespace Spoopy.Modules
@@ -394,6 +395,54 @@ namespace Spoopy.Modules
 
         #endregion
 
+        #region SpoopyStatus
+
+        /// <summary>
+        /// Obtenir le status du bot
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("spoopy", "Obtenir le status du bot")]
+        public static async Task PrintSpoopyStatus(SocketSlashCommand command)
+        {            
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+                SpoopyStatus status = Utilities.GetSpoopyStatus();
+                SpoopyInfos infos = await Utilities.GetSpoopyInfos();
+
+                var spoopyEmbed = new EmbedBuilder();
+                spoopyEmbed.WithTitle($"{infos.Name}'s Status")
+                    .WithColor(Color.DarkOrange)
+                    .WithThumbnailUrl(infos.AvatarURL)
+                    .WithDescription($"Created at {Format.Code(infos.CreatedAt.ToString("d"))} by {Format.Code(infos.Owner.Username)}")
+                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: infos.AvatarURL);
+
+                spoopyEmbed.AddField("Connection", Format.Code(status.IsRunning ? "Connecté" : "Déconnecté"))
+                    .AddField("Uptime", Format.Code($"{status.Uptime.Days} day{(status.Uptime.Days > 1 ? "s" : string.Empty)}, {status.Uptime.Hours} hour{(status.Uptime.Hours > 1 ? "s" : string.Empty)}, {status.Uptime.Minutes} minute{(status.Uptime.Minutes > 1 ? "s" : string.Empty)}"))
+                    .AddField("Runtime", Format.Code($"{status.Runtime.Days} day{(status.Runtime.Days > 1 ? "s" : string.Empty)}, {status.Runtime.Hours} hour{(status.Runtime.Hours > 1 ? "s" : string.Empty)}, {status.Runtime.Minutes} minute{(status.Runtime.Minutes > 1 ? "s" : string.Empty)}"))
+                    .AddField("Servers Count", Format.Code(status.ServersCount.ToString()));
+
+                await command.ModifyOriginalResponseAsync((msg) =>
+                {
+                    msg.Embed = spoopyEmbed.Build();
+                });
+
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                await Program.ZLog("Erreur dans le PrintSpoopyStatus", isError: true);
+                await command.ModifyOriginalResponseAsync((msg) =>
+                {
+                    msg.Content = "**Erreur dans l'execution de cette commande**";
+                });
+
+            }
+        }
+
+
+        #endregion
+
         //----------| BanquiseCommand |----------//
 
         #region Polls
@@ -580,9 +629,9 @@ namespace Spoopy.Modules
             }
         }
 
-        #endregion
+        #endregion       
 
-       
+
         public static async Task TestAsync(SocketSlashCommand command)
         {
             try

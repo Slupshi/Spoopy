@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
-using System.Net.Http;
 using System.Threading.Tasks;
-using AngleSharp.Dom.Events;
-using TwitterSharp.Response.RTweet;
-using AngleSharp.Html.Dom;
 using Spoopy.Services;
+using Spoopy.Models;
+using Discord.WebSocket;
+using System.Diagnostics;
+using Discord;
 
 namespace Spoopy
 {
     public class Utilities
     {
         private static ApiService _apiService;
+        private static DiscordSocketClient _client;
 
-        public Utilities(ApiService apiService)
+        public Utilities(ApiService apiService, DiscordSocketClient client)
         {
             _apiService = apiService;
+            _client = client;
         }
 
         public static string FormatToCode(string message) => $"```{message}```";
@@ -56,6 +57,26 @@ namespace Spoopy
         public static async Task<string> ScrapHtmlAsync(string url)
         {
             return await _apiService.ScrapHtmlPageAsync(url);
+        }
+
+        public static SpoopyStatus GetSpoopyStatus()
+        {
+            bool isConnected = _client.ConnectionState == ConnectionState.Connected;
+            return  new SpoopyStatus(
+                    uptime: isConnected ? Program.UptimeTimer.Elapsed : TimeSpan.Zero,
+                    runtime: DateTime.Now - Process.GetCurrentProcess().StartTime,
+                    isConnected: isConnected,
+                    serverCount: _client.Guilds.Count
+                );
+        }
+
+        public static async Task<SpoopyInfos> GetSpoopyInfos() 
+        {
+            var infos = await _client.GetApplicationInfoAsync();
+            return new SpoopyInfos(name: infos.Name,
+                                   avatarUrl: infos.IconUrl,
+                                   createdAt: infos.CreatedAt.DateTime,
+                                   owner: infos.Owner);         
         }
     }
 

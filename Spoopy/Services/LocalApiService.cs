@@ -19,12 +19,14 @@ namespace Spoopy.Services
         {
             try
             {
+                Console.WriteLine("Posting Status");
                 return await _apiService.HttpPostAsync($"{_baseURL}status", status);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans PostSpoopyStatus");
+                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return false;
+                await Program.ZLog("Erreur dans PostSpoopyStatus", isError: true);
                 return false;
             }
             
