@@ -12,7 +12,7 @@ namespace Spoopy.Services
         public LocalApiService(ApiService apiService)
         {
             _apiService = apiService;
-            _baseURL = "https://localhost:7057/";
+            _baseURL = "https://localhost:7057/api/";
         }
 
         public async Task<bool> PostSpoopyStatus(SpoopyStatus status)
