@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -37,6 +33,13 @@ namespace Spoopy.Services
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync(url, model);
             response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> HttpPutAsync(string url, object model)
+        {
+            HttpResponseMessage responseMessage = await _httpClient.PutAsJsonAsync(url, model);
+            responseMessage.EnsureSuccessStatusCode();
+            return responseMessage.IsSuccessStatusCode;
         }
     }
 }

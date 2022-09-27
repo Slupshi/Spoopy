@@ -22,7 +22,7 @@ namespace Spoopy
         private ExternalInteractions _externalInteractions;
         private CommandService _commands;
         private ApiService _apiService;
-        private LocalApiService _localApiService;
+        private static LocalApiService _localApiService;
         private Utilities _utilities;
         private Timer _activitiesTimer;
         public static Stopwatch UptimeTimer;
@@ -98,9 +98,13 @@ namespace Spoopy
             return Task.CompletedTask;
         }
 
-        public static async Task ZLog(string message, bool isError = false)
+        public static async Task ZLog(string message, bool isError = false, bool isLogger = false)
         {
             await Properties.BotLogChannel.SendMessageAsync(Utilities.FormatToCode($"{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}"));
+            if (!isLogger)
+            {
+                await _localApiService.PostSpoopyLogs(new Models.SpoopyLogs(message, isError, DateTime.Now));
+            }
         }
 
         public async Task InstallCommandsAsync()

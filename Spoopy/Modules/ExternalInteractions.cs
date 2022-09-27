@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Spoopy.Models;
 using Spoopy.Services;
 using TwitterSharp.Response.RTweet;
 
@@ -14,9 +15,11 @@ namespace Spoopy.Modules
     {
         private Random _random = new Random();
         private TwitterService _twitterService;
-        public ExternalInteractions(TwitterService tweetService)
+        private LocalApiService _localApiService;
+        public ExternalInteractions(TwitterService tweetService, LocalApiService localApiService)
         {
             _twitterService = tweetService;
+            _localApiService = localApiService;
         }
 
         public async Task UwUAsync(SocketUser user, SocketVoiceState newVoiceState)
@@ -63,7 +66,10 @@ namespace Spoopy.Modules
             {
                 var rolesList = Properties.Banquise.Roles.ToList();
                 var activeUsers = Properties.Banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
-                
+
+                var roles = await _localApiService.GetBanquiseRoles();
+                List<SpoopyRole> spoopyRoles = roles == null ? null : roles.ToList();
+
                 foreach (var user in activeUsers)
                 {
                     if (user.Id == 434662109595435008) // 434662109595435008 : zozoID
@@ -94,12 +100,24 @@ namespace Spoopy.Modules
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
                             Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
+                            await _localApiService.PostBanquiseRole(new SpoopyRole(name: game.Name,
+                                                                                          memberCount: 0,
+                                                                                          createdAt: restRole.CreatedAt.DateTime));
                         }
                         else
                         {
                             if (user.Roles.FirstOrDefault(r => r.Name == role.Name) == null)
-                            {
+                            {                                                              
                                 await user.AddRoleAsync(role);
+                                if(spoopyRoles != null && spoopyRoles.Any())
+                                {
+                                    SpoopyRole spoopyRole = spoopyRoles.Where(s => s.Name == role.Name).FirstOrDefault();
+                                    if(spoopyRole != null)
+                                    {
+                                        spoopyRole.MemberCount++;
+                                        await _localApiService.PutBanquiseRole(spoopyRole);
+                                    }                                    
+                                }
                                 Console.WriteLine($"Rôle {role.Name} ajouté à {user.Username}");
                             }
                         }
@@ -108,6 +126,12 @@ namespace Spoopy.Modules
                 }
                 rolesList.ForEach(async r =>
                 {
+                    if(spoopyRoles != null && !spoopyRoles.Any(s => s.Name == r.Name))
+                    {
+                        await _localApiService.PostBanquiseRole(new SpoopyRole(name: r.Name,
+                                                                                           memberCount: r.Members.Count(),
+                                                                                           createdAt: r.CreatedAt.DateTime));
+                    }
                     if (!r.Members.Any() && !r.Name.Contains("Server Booster") && !r.Permissions.Administrator && r.Color.RawValue != 0)
                     {
                         await r.DeleteAsync();
