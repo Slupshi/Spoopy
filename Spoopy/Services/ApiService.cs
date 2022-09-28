@@ -41,5 +41,13 @@ namespace Spoopy.Services
             responseMessage.EnsureSuccessStatusCode();
             return responseMessage.IsSuccessStatusCode;
         }
+
+        public async Task<bool> HttpDeleteAsync(string url)
+        {
+            HttpResponseMessage responseMessage = await _httpClient.DeleteAsync(url);
+            responseMessage.EnsureSuccessStatusCode();
+            return responseMessage.IsSuccessStatusCode;
+        }
+
     }
 }
