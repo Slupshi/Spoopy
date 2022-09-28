@@ -67,7 +67,7 @@ namespace Spoopy.Modules
                 var rolesList = Properties.Banquise.Roles.ToList();
                 var activeUsers = Properties.Banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
 
-                var roles = await _localApiService.GetBanquiseRoles();
+                var roles = await _localApiService.GetBanquiseRolesAsync();
                 List<SpoopyRole> spoopyRoles = roles == null ? null : roles.ToList();
 
                 foreach (var user in activeUsers)
@@ -100,7 +100,7 @@ namespace Spoopy.Modules
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
                             Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
-                            await _localApiService.PostBanquiseRole(new SpoopyRole(name: game.Name,
+                            await _localApiService.PostBanquiseRoleAsync(new SpoopyRole(name: game.Name,
                                                                                           memberCount: 0,
                                                                                           createdAt: restRole.CreatedAt.DateTime));
                         }
@@ -115,7 +115,7 @@ namespace Spoopy.Modules
                                     if(spoopyRole != null)
                                     {
                                         spoopyRole.MemberCount++;
-                                        await _localApiService.PutBanquiseRole(spoopyRole);
+                                        await _localApiService.PutBanquiseRoleAsync(spoopyRole);
                                     }                                    
                                 }
                                 Console.WriteLine($"Rôle {role.Name} ajouté à {user.Username}");
@@ -128,7 +128,7 @@ namespace Spoopy.Modules
                 {
                     if(spoopyRoles != null && !spoopyRoles.Any(s => s.Name == r.Name))
                     {
-                        await _localApiService.PostBanquiseRole(new SpoopyRole(name: r.Name,
+                        await _localApiService.PostBanquiseRoleAsync(new SpoopyRole(name: r.Name,
                                                                                            memberCount: r.Members.Count(),
                                                                                            createdAt: r.CreatedAt.DateTime));
                     }

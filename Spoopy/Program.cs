@@ -103,7 +103,7 @@ namespace Spoopy
             await Properties.BotLogChannel.SendMessageAsync(Utilities.FormatToCode($"{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}"));
             if (!isLogger)
             {
-                await _localApiService.PostSpoopyLogs(new Models.SpoopyLogs(message, isError, DateTime.Now));
+                await _localApiService.PostSpoopyLogsAsync(new Models.SpoopyLogs(message, isError, DateTime.Now));
             }
         }
 
@@ -175,7 +175,7 @@ namespace Spoopy
         {
             await _externalInteractions.SetGameRoleAsync();
             
-            await _localApiService.PostSpoopyStatus(Utilities.GetSpoopyStatus());
+            await _localApiService.PostSpoopyStatusAsync(Utilities.GetSpoopyStatus());
         }
 
         private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)

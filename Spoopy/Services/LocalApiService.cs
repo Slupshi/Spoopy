@@ -18,7 +18,7 @@ namespace Spoopy.Services
 
         #region Status
 
-        public async Task<bool> PostSpoopyStatus(SpoopyStatus status)
+        public async Task<bool> PostSpoopyStatusAsync(SpoopyStatus status)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace Spoopy.Services
 
         #region Logs
 
-        public async Task<bool> PostSpoopyLogs(SpoopyLogs logs)
+        public async Task<bool> PostSpoopyLogsAsync(SpoopyLogs logs)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Spoopy.Services
 
         #region Roles
 
-        public async Task<IEnumerable<SpoopyRole>> GetBanquiseRoles()
+        public async Task<IEnumerable<SpoopyRole>> GetBanquiseRolesAsync()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace Spoopy.Services
             }
         }
 
-        public async Task<SpoopyRole> GetBanquiseRoleByName(string name)
+        public async Task<SpoopyRole> GetBanquiseRoleByNameAsync(string name)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace Spoopy.Services
             }
         }
 
-        public async Task<bool> PostBanquiseRole(SpoopyRole role)
+        public async Task<bool> PostBanquiseRoleAsync(SpoopyRole role)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace Spoopy.Services
             }
         }
 
-        public async Task<bool> PutBanquiseRole(SpoopyRole role)
+        public async Task<bool> PutBanquiseRoleAsync(SpoopyRole role)
         {
             try
             {
