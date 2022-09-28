@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AngleSharp.Text;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -439,6 +440,53 @@ namespace Spoopy.Modules
             }
         }
 
+
+        #endregion
+
+        #region Shuffle
+        /// <summary>
+        /// Mélange les lettres d'une chaine de charactères
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("shuffle", "Mélange les lettres d'une chaine de charactères")]
+        public static async Task Shuffle(SocketSlashCommand command)
+        {
+            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
+            try
+            {
+                await command.DeferAsync(ephemeral: !isVisible);
+                string entry = command.Data.Options.FirstOrDefault(x => x.Name == "entree")?.Value.ToString();
+                entry.Trim();
+
+                Random random = new Random();
+                string output = "";
+
+                var buffer = entry.ToLower().ToList();
+                int count = buffer.Count;
+                for(int i = 0; i < count; i++)
+                {
+                    int index = random.Next(buffer.Count);                    
+                    output += buffer.ElementAt(index);
+                    buffer.RemoveAt(index);
+                }
+
+                output = output.First().ToString().ToUpper() + output.Substring(1);
+
+                await command.ModifyOriginalResponseAsync((msg) =>
+                {
+                    msg.Content = $"**Entrée : {Format.Code(entry)}** {Environment.NewLine}**Sortie : {Format.Code(output)}**";
+                });
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans la commande Shuffle", isError: true);
+                await command.ModifyOriginalResponseAsync((msg) =>
+                {
+                    msg.Content = "**Erreur dans l'execution de cette commande";
+                });
+            }
+        }
 
         #endregion
 

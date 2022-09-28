@@ -293,6 +293,13 @@ namespace Spoopy
             spoopyStatus.WithName("spoopy");
             spoopyStatus.WithDescription("Obtenir le status du bot");
 
+            // Shuffle
+            var shuffleCommand = new SlashCommandBuilder();
+            shuffleCommand.WithName("shuffle");
+            shuffleCommand.WithDescription("Mélange les lettres d'une chaine de charactères");
+            shuffleCommand.AddOption("entree", ApplicationCommandOptionType.String, "La chaîne de charactères qui sera mélanger", isRequired: true);
+            shuffleCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
+
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
             pollCommand.WithName("sondage");
@@ -331,6 +338,7 @@ namespace Spoopy
                 await _client.CreateGlobalApplicationCommandAsync(avatarCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(randomCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(spoopyStatus.Build());
+                await _client.CreateGlobalApplicationCommandAsync(shuffleCommand.Build());
 
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());

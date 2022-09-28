@@ -81,6 +81,7 @@ namespace Spoopy
             {"avatar", SlashCommands.GetUserAvatarAsync },
             {"random", SlashCommands.RandomOrgAsync },
             {"spoopy", SlashCommands.PrintSpoopyStatus },
+            {"shuffle", SlashCommands.Shuffle },
             {"sondage", SlashCommands.CreatePoll },
             {"poll", SlashCommands.CreateComplexPoll },
             {"ban", SlashCommands.FakeBanAsync }
