@@ -152,7 +152,14 @@ namespace Spoopy.Modules
         {
             try
             {
-                await user.AddRoleAsync(Properties.TkiToiRole);
+                if (user.Guild == Properties.Banquise)
+                {
+                    await user.AddRoleAsync(Properties.TkiToiRole);
+                }
+                else if (user.Guild == Properties.TeykhoServer) 
+                {
+                    await user.AddRoleAsync(Properties.ViewerRole);
+                }
             }
             catch (Exception ex)
             {

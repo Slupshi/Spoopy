@@ -89,7 +89,7 @@ namespace Spoopy
             _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
             _activitiesTimer.Start();
 
-            await _externalInteractions.ReorderVocalChannel();
+            //await _externalInteractions.ReorderVocalChannel();
         }
 
         private Task Log(LogMessage msg)
@@ -184,11 +184,8 @@ namespace Spoopy
         }
 
         private async Task UserJoined(SocketGuildUser user)
-        {
-            if(user.Guild == Properties.Banquise)
-            {
-                await _externalInteractions.SetRoleOnGuildJoined(user);
-            }
+        {            
+            await _externalInteractions.SetRoleOnGuildJoined(user);            
         }
 
         private async Task PresenceUpdated(SocketUser user, SocketPresence pastPresence, SocketPresence newPresence)
@@ -331,6 +328,10 @@ namespace Spoopy
             fakeBanCommand.WithDescription("Ban une personne du serveur");
             fakeBanCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
 
+            var gameRoleCommand = new SlashCommandBuilder();
+            gameRoleCommand.WithName("game");
+            gameRoleCommand.WithDescription("Obtiens le role du jeu qui correspondant à ce channel !");
+
             try
             {
                 await _client.CreateGlobalApplicationCommandAsync(helpCommand.Build());
@@ -343,6 +344,8 @@ namespace Spoopy
                 await Properties.Banquise.CreateApplicationCommandAsync(pollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(complexPollCommand.Build());
                 await Properties.Banquise.CreateApplicationCommandAsync(fakeBanCommand.Build());
+
+                await Properties.TeykhoServer.CreateApplicationCommandAsync(gameRoleCommand.Build());
 
                 await Properties.TestServer.CreateApplicationCommandAsync(testCommand.Build());
             }

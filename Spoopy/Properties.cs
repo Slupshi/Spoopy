@@ -15,6 +15,10 @@ namespace Spoopy
 
         public static SocketGuild TestServer;
 
+        public static SocketGuild TeykhoServer;
+        public static SocketRole ViewerRole;
+        public static SocketRole MHWRole;
+
         public static SocketGuild Banquise;
         public static SocketRole UwuRole;
         public static SocketRole TkiToiRole;
@@ -40,6 +44,7 @@ namespace Spoopy
         public const long SlupID = 429352632138858506;
         public const long UwuID = 964621092562034718;
         public const long BanquiseID = 611568951406624768;
+        public const long TeykhoID = 1020030635294859397;
 
         public static readonly List<Emoji> ThumbEmojis = new() { new Emoji("👍"), new Emoji("👎") };
         public static readonly Dictionary<byte, Emoji> NumberEmoji = new()
@@ -84,8 +89,8 @@ namespace Spoopy
             {"shuffle", SlashCommands.Shuffle },
             {"sondage", SlashCommands.CreatePoll },
             {"poll", SlashCommands.CreateComplexPoll },
-            {"ban", SlashCommands.FakeBanAsync }
-
+            {"ban", SlashCommands.FakeBanAsync },
+            {"game", SlashCommands.GetGameRoleAsync },
         };
 
         public readonly static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
@@ -98,6 +103,11 @@ namespace Spoopy
             {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
         };
 
+        public static Dictionary<string, SocketRole> TeykhoGameRoleDico = new()
+        {
+            {"monster-hunter-world", MHWRole }
+        };
+
         public static Queue<string> BotActivities = new Queue<string>();
 
         #endregion
@@ -106,6 +116,7 @@ namespace Spoopy
         public static void SetPropertiesAtStartup(DiscordSocketClient client)
         {
             TestServer = client.GetGuild(1007315790283952188);
+            
             Banquise = client.GetGuild(BanquiseID);
             UwuRole = Banquise.GetRole(UwuID);
             TkiToiRole = Banquise.GetRole(611571904901414921);
@@ -115,6 +126,11 @@ namespace Spoopy
             YoutubeVideoChannel = (IMessageChannel)client.GetChannel(694662332953133148);
             TestChannel = (IMessageChannel)client.GetChannel(930095425292238879);
             HelloChannel = (IMessageChannel)client.GetChannel(611619367469449227);
+
+            TeykhoServer = client.GetGuild(TeykhoID);
+            ViewerRole = TeykhoServer.GetRole(1020035350187487252);
+            MHWRole = TeykhoServer.GetRole(1026167859036037163);
+            TeykhoGameRoleDico["monster-hunter-world"] = MHWRole;
         }
 
         public static void SetupBotActivities()

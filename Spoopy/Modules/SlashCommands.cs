@@ -676,7 +676,59 @@ namespace Spoopy.Modules
             }
         }
 
-        #endregion       
+        #endregion
+
+        //----------| TeykhoCommand |----------//
+
+        #region GameRole
+
+        public static async Task GetGameRoleAsync(SocketSlashCommand command)
+        {
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+
+                SocketGuildUser user = (SocketGuildUser)command.User;
+                string role = command.Channel.Name;
+
+                var roleToAdd = Properties.TeykhoGameRoleDico.FirstOrDefault(x => role.Contains(x.Key)).Value;
+                if (roleToAdd == null)
+                {
+                    await command.ModifyOriginalResponseAsync(msg =>
+                    {
+                        msg.Content = Format.Bold("Ce rôle n'existe pas");
+                    });
+                    return;
+                }
+                else if (user.Roles.Contains(roleToAdd))
+                {
+                    await command.ModifyOriginalResponseAsync(msg =>
+                    {
+                        msg.Content = Format.Bold("Tu as déjà ce rôle");
+                    });
+                    return;
+                }              
+
+                await user.AddRoleAsync(roleToAdd);
+
+                await command.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = Format.Bold("Role ajouté avec succès");
+                });
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans le GetGameRole", isError: true);
+                await command.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = Format.Bold("Erreur dans la commande, contactez Slupshi");
+                });
+            }
+            
+        }
+
+        #endregion
 
 
         public static async Task TestAsync(SocketSlashCommand command)
