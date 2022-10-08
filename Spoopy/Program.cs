@@ -328,9 +328,17 @@ namespace Spoopy
             fakeBanCommand.WithDescription("Ban une personne du serveur");
             fakeBanCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
 
+            // GameRole
             var gameRoleCommand = new SlashCommandBuilder();
             gameRoleCommand.WithName("game");
             gameRoleCommand.WithDescription("Obtiens le role du jeu qui correspondant à ce channel !");
+
+            // StartStream
+            var streamCommand = new SlashCommandBuilder();
+            streamCommand.WithName("stream");
+            streamCommand.WithDescription("Annonce un stream");
+            streamCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
+            streamCommand.AddOption("game", ApplicationCommandOptionType.String, "Le jeu au quel le stream est dédié", isRequired: true);
 
             try
             {
@@ -346,6 +354,7 @@ namespace Spoopy
                 await Properties.Banquise.CreateApplicationCommandAsync(fakeBanCommand.Build());
 
                 await Properties.TeykhoServer.CreateApplicationCommandAsync(gameRoleCommand.Build());
+                await Properties.TeykhoServer.CreateApplicationCommandAsync(streamCommand.Build());
 
                 await Properties.TestServer.CreateApplicationCommandAsync(testCommand.Build());
             }

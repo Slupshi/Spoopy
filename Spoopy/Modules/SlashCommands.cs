@@ -730,6 +730,35 @@ namespace Spoopy.Modules
 
         #endregion
 
+        #region StreamStart
+
+        public static async Task StartStreamAsync(SocketSlashCommand command)
+        {
+            try
+            {
+                await command.DeferAsync(ephemeral: true);
+
+                string game = command.Data.Options.FirstOrDefault(x => x.Name == "game")?.Value.ToString();
+
+                await Properties.StreamChannel.SendMessageAsync(Format.Bold($"Teykho est en stream sur {Format.Code(game)} @everyone"));
+                await command.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = Format.Bold("Commande éxécutée avec succès !");
+                });
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Program.ZLog("Erreur dans le StartStream", isError: true);
+                await command.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = Format.Bold("Erreur dans la commande, contactez Slupshi");
+                });
+            }
+        }
+
+        #endregion
+
 
         public static async Task TestAsync(SocketSlashCommand command)
         {

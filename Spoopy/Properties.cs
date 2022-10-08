@@ -18,6 +18,7 @@ namespace Spoopy
         public static SocketGuild TeykhoServer;
         public static SocketRole ViewerRole;
         public static SocketRole MHWRole;
+        public static IMessageChannel StreamChannel;
 
         public static SocketGuild Banquise;
         public static SocketRole UwuRole;
@@ -91,6 +92,7 @@ namespace Spoopy
             {"poll", SlashCommands.CreateComplexPoll },
             {"ban", SlashCommands.FakeBanAsync },
             {"game", SlashCommands.GetGameRoleAsync },
+            {"stream", SlashCommands.StartStreamAsync },
         };
 
         public readonly static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
@@ -131,6 +133,7 @@ namespace Spoopy
             ViewerRole = TeykhoServer.GetRole(1020035350187487252);
             MHWRole = TeykhoServer.GetRole(1026167859036037163);
             TeykhoGameRoleDico["monster-hunter-world"] = MHWRole;
+            StreamChannel = (IMessageChannel)TeykhoServer.GetChannel(1022093143094607873);
         }
 
         public static void SetupBotActivities()
