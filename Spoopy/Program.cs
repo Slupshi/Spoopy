@@ -158,7 +158,15 @@ namespace Spoopy
 
         private async Task HandleSlashCommandAsync(SocketSlashCommand command)
         {
-            await Properties.SlashCommandsDico.FirstOrDefault(x => x.Key == command.CommandName).Value.Invoke(command);
+            try
+            {
+                await Properties.SlashCommandsDico.FirstOrDefault(x => x.Key == command.CommandName).Value.Invoke(command);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await command.RespondAsync(Format.Bold("Cette commande n'existe pas"), ephemeral: true);
+            }            
         }
 
         private async Task ButtonExecuted(SocketMessageComponent arg)
