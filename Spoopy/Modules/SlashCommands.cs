@@ -740,7 +740,15 @@ namespace Spoopy.Modules
 
                 string game = command.Data.Options.FirstOrDefault(x => x.Name == "game")?.Value.ToString();
 
-                await Properties.StreamChannel.SendMessageAsync(Format.Bold($"Teykho est en stream sur {Format.Code(game)} @everyone"));
+                var openButton = new ButtonBuilder();
+                openButton.WithUrl("https://www.twitch.tv/teykhoo")
+                    .WithLabel("Regarder le stream sur Twitch")
+                    .WithStyle(ButtonStyle.Link);
+
+                var msgComponents = new ComponentBuilder().WithButton(openButton);
+
+                await Properties.StreamChannel.SendMessageAsync(Format.Bold($"Teykho est en stream sur {Format.Code(game)} @everyone"), components: msgComponents.Build());                
+
                 await command.ModifyOriginalResponseAsync(msg =>
                 {
                     msg.Content = Format.Bold("Commande éxécutée avec succès !");
