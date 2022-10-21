@@ -390,7 +390,7 @@ namespace Spoopy.Modules
         /// </summary>
         /// <returns></returns>
         [SlashCommand("spoopy", "Obtenir le status du bot")]
-        public static async Task PrintSpoopyStatus(SocketSlashCommand command)
+        public static async Task PrintSpoopyStatusAsync(SocketSlashCommand command)
         {            
             try
             {
@@ -434,7 +434,7 @@ namespace Spoopy.Modules
         /// </summary>
         /// <returns></returns>
         [SlashCommand("shuffle", "Mélange les lettres d'une chaine de charactères")]
-        public static async Task Shuffle(SocketSlashCommand command)
+        public static async Task ShuffleAsync(SocketSlashCommand command)
         {
             bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
             try
@@ -483,7 +483,7 @@ namespace Spoopy.Modules
         /// <param name="guild">Banquise</param>
         /// <returns></returns>
         [SlashCommand("sondage", "Créer un sondage avec Oui/Non comme réponses")]
-        public static async Task CreatePoll(SocketSlashCommand command)
+        public static async Task CreatePollAsync(SocketSlashCommand command)
         {
             try
             {
@@ -510,7 +510,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
-                await CheckUselessPolls();
+                await CheckUselessPollsAsync();
             }
             catch (Exception e)
             {
@@ -528,7 +528,7 @@ namespace Spoopy.Modules
         /// <param name="guild">Banquise</param>
         /// <returns></returns>
         [SlashCommand("poll", "Créer un sondage avec jusqu'à 9 propositions possibles")]
-        public static async Task CreateComplexPoll(SocketSlashCommand command)
+        public static async Task CreateComplexPollAsync(SocketSlashCommand command)
         {
             try
             {
@@ -565,7 +565,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
-                await CheckUselessPolls();
+                await CheckUselessPollsAsync();
             }
             catch (Exception e)
             {
@@ -576,7 +576,7 @@ namespace Spoopy.Modules
 
         }
 
-        private static async Task CheckUselessPolls()
+        private static async Task CheckUselessPollsAsync()
         {
             var messages = await Properties.PollChannel.GetMessagesAsync().FirstAsync();
             var hours = TimeSpan.FromHours(24);
