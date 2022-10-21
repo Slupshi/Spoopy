@@ -72,11 +72,8 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await scommand.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
-                {
-                    msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
-                });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand Help", isError: true);
+                await scommand.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand Help", isError: true);
             }
         }
 
@@ -276,7 +273,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand Statut", isError: true);
+                await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand Statut", isError: true);
             }
         }
 
@@ -338,7 +335,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand Avatar", isError: true);
+                await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand Avatar", isError: true);
             }
         }
 
@@ -389,7 +386,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand RandomOrg", isError: true);
+                await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand RandomOrg", isError: true);
             }
         }
 
@@ -431,7 +428,7 @@ namespace Spoopy.Modules
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
-                await Program.ZLog("Erreur dans le PrintSpoopyStatus", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le PrintSpoopyStatus", isError: true);
                 await command.ModifyOriginalResponseAsync((msg) =>
                 {
                     msg.Content = "**Erreur dans l'execution de cette commande**";
@@ -480,7 +477,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans la commande Shuffle", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans la commande Shuffle", isError: true);
                 await command.ModifyOriginalResponseAsync((msg) =>
                 {
                     msg.Content = "**Erreur dans l'execution de cette commande";
@@ -523,7 +520,7 @@ namespace Spoopy.Modules
                     await embed.PinAsync();
                 }
                 await embed.AddReactionsAsync(Properties.ThumbEmojis);
-                await Program.ZLog($"Sondage crée par {author.Username}");
+                await Utilities.SpoopyLogAsync($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
@@ -537,7 +534,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
+                await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
 
         }
@@ -581,7 +578,7 @@ namespace Spoopy.Modules
                     await embed.PinAsync();
                 }
                 await embed.AddReactionsAsync(emojis);
-                await Program.ZLog($"Sondage crée par {author.Username}");
+                await Utilities.SpoopyLogAsync($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
@@ -595,7 +592,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
+                await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
 
         }
@@ -672,7 +669,7 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
                 });
-                await Program.ZLog(message: "Une erreur est survenue avec SlashCommand FakeBan", isError: true);
+                await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand FakeBan", isError: true);
             }
         }
 
@@ -681,7 +678,11 @@ namespace Spoopy.Modules
         //----------| TeykhoCommand |----------//
 
         #region GameRole
-
+        /// <summary>
+        /// Obtiens le rôle associé à ce channel
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("game", "Obtiens le rôle associé à ce channel")]
         public static async Task GetGameRoleAsync(SocketSlashCommand command)
         {
             try
@@ -719,7 +720,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans le GetGameRole", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le GetGameRole", isError: true);
                 await command.ModifyOriginalResponseAsync(msg =>
                 {
                     msg.Content = Format.Bold("Erreur dans la commande, contactez Slupshi");
@@ -731,7 +732,11 @@ namespace Spoopy.Modules
         #endregion
 
         #region StreamStart
-
+        /// <summary>
+        /// Annonce un nouveau stream de Teykho
+        /// </summary>
+        /// <returns></returns>
+        [SlashCommand("stream", "Annonce un nouveau stream de Teykho")]
         public static async Task StartStreamAsync(SocketSlashCommand command)
         {
             try
@@ -757,7 +762,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans le StartStream", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le StartStream", isError: true);
                 await command.ModifyOriginalResponseAsync(msg =>
                 {
                     msg.Content = Format.Bold("Erreur dans la commande, contactez Slupshi");

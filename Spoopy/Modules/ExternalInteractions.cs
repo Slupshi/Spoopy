@@ -55,7 +55,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur UwU", isError:true);
+                await Utilities.SpoopyLogAsync("Erreur UwU", isError:true);
             }
             
         }
@@ -96,7 +96,7 @@ namespace Spoopy.Modules
                         {
                             if (game.Name.Contains("Launcher")) return;
                             RestRole restRole = await Properties.Banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: Properties.WhiteColor);
-                            await Program.ZLog($"Rôle {restRole.Name} créé avec succès");
+                            await Utilities.SpoopyLogAsync($"Rôle {restRole.Name} créé avec succès");
                             Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
                             await user.AddRoleAsync(restRole);
                             Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
@@ -135,7 +135,7 @@ namespace Spoopy.Modules
                     if (!r.Members.Any() && !r.Name.Contains("Server Booster") && !r.Permissions.Administrator && r.Color.RawValue != 0)
                     {
                         await r.DeleteAsync();
-                        await Program.ZLog($"Role {r.Name} supprimé avec succès");
+                        await Utilities.SpoopyLogAsync($"Role {r.Name} supprimé avec succès");
                     }
                 });
                 //await CheckRoleMembers();
@@ -143,7 +143,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                await Program.ZLog("Erreur SetGameRole", isError:true);
+                await Utilities.SpoopyLogAsync("Erreur SetGameRole", isError:true);
             }
 
         }
@@ -164,7 +164,7 @@ namespace Spoopy.Modules
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur SetRoleOnJoin", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur SetRoleOnJoin", isError: true);
             }
         }
 
@@ -187,7 +187,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans EmmerderZozo", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans EmmerderZozo", isError: true);
             }
             
         }
@@ -211,7 +211,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur CheckRole",isError:true);
+                await Utilities.SpoopyLogAsync("Erreur CheckRole",isError:true);
             }
            
         }
@@ -226,7 +226,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur CheckDMs", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur CheckDMs", isError: true);
             }
             
         }
@@ -259,7 +259,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans le newVideoEmbed", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le newVideoEmbed", isError: true);
             }
            
         }
@@ -334,7 +334,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans le tweetEmbed", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le tweetEmbed", isError: true);
             }
             
         }
@@ -359,7 +359,7 @@ namespace Spoopy.Modules
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog("Erreur dans le reorder des channels vocaux", isError: true);
+                await Utilities.SpoopyLogAsync("Erreur dans le reorder des channels vocaux", isError: true);
             }
              
 

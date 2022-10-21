@@ -13,12 +13,31 @@ namespace Spoopy
     public class Utilities
     {
         private static ApiService _apiService;
+        private static LocalApiService _localApiService;
         private static DiscordSocketClient _client;
 
-        public Utilities(ApiService apiService, DiscordSocketClient client)
+        public Utilities(ApiService apiService, LocalApiService localApiService,DiscordSocketClient client)
         {
             _apiService = apiService;
+            _localApiService = localApiService;
             _client = client;
+        }
+
+        public static async Task SpoopyLogAsync(string message, bool isError = false, bool isLogger = false)
+        {
+            await Properties.BotLogChannel.SendMessageAsync(Utilities.FormatToCode($"{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}"));
+            if (!isLogger)
+            {
+                await _localApiService.PostSpoopyLogsAsync(new SpoopyLogs(message, isError, DateTime.Now));
+            }
+        }
+
+        public static Action<MessageProperties> RespondToCommandErrorAsync()
+        {
+            return (MessageProperties msg) => 
+            {
+                msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+            };
         }
 
         public static string FormatToCode(string message) => $"```{message}```";

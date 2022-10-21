@@ -28,7 +28,7 @@ namespace Spoopy.Modules
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", ex.Message);
                 await modal.RespondAsync(text: Utilities.FormatToCode("Une erreur s'est produite lors de l'envoi de votre commentaire"), ephemeral: true);
-                await Program.ZLog("Une erreur s'est produite avec la modal de commentaires YT");
+                await Utilities.SpoopyLogAsync("Une erreur s'est produite avec la modal de commentaires YT");
             }          
             
         }

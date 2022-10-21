@@ -51,7 +51,7 @@ namespace Spoopy
             _externalInteractions = _services.GetService<ExternalInteractions>();
             _apiService = _services.GetService<ApiService>();
             _localApiService = _services.GetService<LocalApiService>();
-            _utilities = new Utilities(_apiService, _client);
+            _utilities = new Utilities(_apiService,_localApiService ,_client);
                 
             _commands = new CommandService();
             await InstallCommandsAsync();
@@ -96,16 +96,7 @@ namespace Spoopy
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
-        }
-
-        public static async Task ZLog(string message, bool isError = false, bool isLogger = false)
-        {
-            await Properties.BotLogChannel.SendMessageAsync(Utilities.FormatToCode($"{(isError ? "fix" : string.Empty)}{Environment.NewLine}{DateTime.Now.ToString("T")} | {message}"));
-            if (!isLogger)
-            {
-                await _localApiService.PostSpoopyLogsAsync(new Models.SpoopyLogs(message, isError, DateTime.Now));
-            }
-        }
+        }        
 
         public async Task InstallCommandsAsync()
         {
@@ -183,7 +174,7 @@ namespace Spoopy
         {
             await _externalInteractions.SetGameRoleAsync();
             
-            await _localApiService.PostSpoopyStatusAsync(Utilities.GetSpoopyStatus());
+            await _localApiService.PostSpoopyStatusAsync();
         }
 
         private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)

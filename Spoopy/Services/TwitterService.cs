@@ -80,7 +80,7 @@ namespace Spoopy.Services
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                await Program.ZLog(message: "Erreur dans la création d'embed Twitter", isError: true);
+                await Utilities.SpoopyLogAsync(message: "Erreur dans la création d'embed Twitter", isError: true);
                 return null;
             }
             

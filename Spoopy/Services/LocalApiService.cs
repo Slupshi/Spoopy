@@ -10,29 +10,41 @@ namespace Spoopy.Services
         private readonly ApiService _apiService;
         private string _baseURL;
 
+        private bool _isServiceEnabled;
+
         public LocalApiService(ApiService apiService)
         {
             _apiService = apiService;
             _baseURL = "https://localhost:7057/api/";
+
+            _isServiceEnabled = true;
         }
 
         #region Status
 
-        public async Task<bool> PostSpoopyStatusAsync(SpoopyStatus status)
+        public async Task<bool> PostSpoopyStatusAsync()
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Posting Status");
-                return await _apiService.HttpPostAsync($"{_baseURL}status/status", status);
+                try
+                {
+                    SpoopyStatus status = Utilities.GetSpoopyStatus();
+                    Console.WriteLine("Posting Status");
+                    return await _apiService.HttpPostAsync($"{_baseURL}status/status", status);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return false;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans PostSpoopyStatus", isError: true);
+                    return false;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return false;
-                await Program.ZLog("Erreur dans PostSpoopyStatus", isError: true);
-                return false;
-            }
-            
+            else return false;
         }
 
         #endregion
@@ -41,18 +53,27 @@ namespace Spoopy.Services
 
         public async Task<bool> PostSpoopyLogsAsync(SpoopyLogs logs)
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Posting Logs");
-                return await _apiService.HttpPostAsync($"{_baseURL}logs", logs);
+                try
+                {
+                    Console.WriteLine("Posting Logs");
+                    return await _apiService.HttpPostAsync($"{_baseURL}logs", logs);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return false;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans PostSpoopyLogs", isError: true, isLogger: true);
+                    return false;
+                }
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return false;
-                await Program.ZLog("Erreur dans PostSpoopyLogs", isError: true, isLogger: true);
-                return false;
-            }
+            else return false;
+            
         }
 
         #endregion
@@ -61,66 +82,98 @@ namespace Spoopy.Services
 
         public async Task<IEnumerable<SpoopyRole>> GetBanquiseRolesAsync()
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Getting Roles");
-                return await _apiService.HttpGetAsync<IEnumerable<SpoopyRole>>($"{_baseURL}roles");
+                try
+                {
+                    Console.WriteLine("Getting Roles");
+                    return await _apiService.HttpGetAsync<IEnumerable<SpoopyRole>>($"{_baseURL}roles");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return null;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans GetBanquiseRoleByName", isError: true);
+                    return null;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return null;
-                await Program.ZLog("Erreur dans GetBanquiseRoleByName", isError: true);
-                return null;
-            }
+            else return null;
         }
 
         public async Task<SpoopyRole> GetBanquiseRoleByNameAsync(string name)
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Getting Role by name");
-                return await _apiService.HttpGetAsync<SpoopyRole>($"{_baseURL}roles/name/{name}");
+                try
+                {
+                    Console.WriteLine("Getting Role by name");
+                    return await _apiService.HttpGetAsync<SpoopyRole>($"{_baseURL}roles/name/{name}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return null;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans GetBanquiseRoleByName", isError: true);
+                    return null;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return null;
-                await Program.ZLog("Erreur dans GetBanquiseRoleByName", isError: true);
-                return null;
-            }
+            else return null;
         }
 
         public async Task<bool> PostBanquiseRoleAsync(SpoopyRole role)
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Posting Role");
-                return await _apiService.HttpPostAsync($"{_baseURL}roles", role);
+                try
+                {
+                    Console.WriteLine("Posting Role");
+                    return await _apiService.HttpPostAsync($"{_baseURL}roles", role);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return false;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans PostBanquiseRole", isError: true);
+                    return false;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return false;
-                await Program.ZLog("Erreur dans PostBanquiseRole", isError: true);
-                return false;
-            }
+            else return false;            
         }
 
         public async Task<bool> PutBanquiseRoleAsync(SpoopyRole role)
         {
-            try
+            if (_isServiceEnabled)
             {
-                Console.WriteLine("Putting Role");
-                return await _apiService.HttpPutAsync($"{_baseURL}roles/{role.Id}", role);
+                try
+                {
+                    Console.WriteLine("Putting Role");
+                    return await _apiService.HttpPutAsync($"{_baseURL}roles/{role.Id}", role);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("No connection could be made because the target machine actively refused it."))
+                    {
+                        _isServiceEnabled = false;
+                        return false;
+                    }
+                    await Utilities.SpoopyLogAsync("Erreur dans PutBanquiseRole", isError: true);
+                    return false;
+                }
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.Message.Contains("No connection could be made because the target machine actively refused it.")) return false;
-                await Program.ZLog("Erreur dans PutBanquiseRole", isError: true);
-                return false;
-            }
+            else return false;
         }
 
         #endregion
