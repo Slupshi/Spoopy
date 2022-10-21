@@ -605,6 +605,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Ban quelqu'un définitivement du serveur
         /// </summary>
+        /// <param name="guild">Banquise</param>
         /// <returns></returns>
         [SlashCommand("ban", "Ban une personne du serveur")]
         public static async Task FakeBanAsync(SocketSlashCommand command)
@@ -657,6 +658,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Obtiens le rôle associé à ce channel
         /// </summary>
+        /// <param name="guild">Teykho</param>
         /// <returns></returns>
         [SlashCommand("game", "Obtiens le rôle associé à ce channel")]
         public static async Task GetGameRoleAsync(SocketSlashCommand command)
@@ -708,6 +710,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Annonce un nouveau stream de Teykho
         /// </summary>
+        /// <param name="guild">Teykho</param>
         /// <returns></returns>
         [SlashCommand("stream", "Annonce un nouveau stream de Teykho")]
         public static async Task StartStreamAsync(SocketSlashCommand command)
