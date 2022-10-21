@@ -30,6 +30,8 @@ namespace Spoopy
         public static IMessageChannel HelloChannel;
         public static IMessageChannel TestChannel;
 
+        public static SocketUser Slupshi;
+
         public static bool HadEmmerderZozoToday = false;
 
         #endregion
@@ -97,12 +99,14 @@ namespace Spoopy
 
         public readonly static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()
         {
-            {"ytCommentButton", ButtonHandler.OpenYTCommentsModal },
+            {"ytCommentButton", ButtonHandler.OpenYTCommentsModalAsync },
+            {"errorContactButton", ButtonHandler.OpenErrorContactModalAsync },
         };
 
         public readonly static Dictionary<string, Func<SocketModal,Task>> ModalHandlersDico = new()
         {
-            {"ytCommentModal", ModalHandler.YTCommentsModalSubmitted },
+            {"ytCommentModal", ModalHandler.YTCommentsModalSubmittedAsync },
+            {"errorContactModal", ModalHandler.ErrorContactModalSubmittedAsync },
         };
 
         public static Dictionary<string, SocketRole> TeykhoGameRoleDico = new()
@@ -134,6 +138,8 @@ namespace Spoopy
             MHWRole = TeykhoServer.GetRole(1026167859036037163);
             TeykhoGameRoleDico["monster-hunter-world"] = MHWRole;
             StreamChannel = (IMessageChannel)TeykhoServer.GetChannel(1022093143094607873);
+
+            Slupshi = client.GetUser(SlupID);
         }
 
         public static void SetupBotActivities()

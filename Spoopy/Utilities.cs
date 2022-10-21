@@ -32,13 +32,24 @@ namespace Spoopy
             }
         }
 
-        public static Action<MessageProperties> RespondToCommandErrorAsync()
+        public static Action<MessageProperties> RespondToSlashCommandErrorAsync()
         {
+            var button = new ButtonBuilder();
+            button.WithCustomId($"errorContactButton")
+                .WithLabel("Contacter le dev !")
+                .WithStyle(ButtonStyle.Primary)
+                .WithEmote(new Emoji("✏"));
+
+            var msgComponents = new ComponentBuilder().WithButton(button);
+
             return (MessageProperties msg) => 
             {
                 msg.Content = Format.Bold("Une erreur s'est produite avec l'éxécution de cette commande");
+                msg.Components = msgComponents.Build();
             };
         }
+
+        public static DiscordSocketClient GetClient() => _client;
 
         public static string FormatToCode(string message) => $"```{message}```";
 
@@ -97,10 +108,5 @@ namespace Spoopy
                                    createdAt: infos.CreatedAt.DateTime,
                                    owner: infos.Owner);         
         }
-    }
-
-    public class TimeZoneModel
-    {
-        public string UTC_offset { get; set; }
     }
 }

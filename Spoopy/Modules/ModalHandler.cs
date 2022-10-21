@@ -8,7 +8,7 @@ namespace Spoopy.Modules
 {
     public class ModalHandler
     {
-        public static async Task YTCommentsModalSubmitted(SocketModal modal)
+        public static async Task YTCommentsModalSubmittedAsync(SocketModal modal)
         {
             try
             {
@@ -26,11 +26,30 @@ namespace Spoopy.Modules
             }
             catch(Exception ex)
             {
-                Console.WriteLine("**Une erreur s'est produite : {0}**", ex.Message);
+                Console.WriteLine("Une erreur s'est produite : {0}", ex.Message);
                 await modal.RespondAsync(text: Utilities.FormatToCode("Une erreur s'est produite lors de l'envoi de votre commentaire"), ephemeral: true);
                 await Utilities.SpoopyLogAsync("Une erreur s'est produite avec la modal de commentaires YT");
             }          
             
+        }
+
+        public static async Task ErrorContactModalSubmittedAsync(SocketModal modal)
+        {
+            try
+            {
+                var messageText = (modal.Data.Components as SocketMessageComponentData[])[0].Value;
+
+                var user = Properties.Slupshi;
+
+                await user.CreateDMChannelAsync();
+                await user.SendMessageAsync(Utilities.FormatToCode(messageText));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Une erreur s'est produite : {0}", ex.Message);
+                await modal.RespondAsync(text: Utilities.FormatToCode("Une erreur s'est produite lors de l'envoi de votre commentaire"), ephemeral: true);
+                await Utilities.SpoopyLogAsync("Une erreur s'est produite avec la modal de contact d'erreur");
+            }
         }
     }
 }

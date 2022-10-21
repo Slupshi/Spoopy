@@ -8,7 +8,7 @@ namespace Spoopy.Modules
 {
     public class ButtonHandler
     {
-        public static async Task OpenYTCommentsModal(SocketMessageComponent arg)
+        public static async Task OpenYTCommentsModalAsync(SocketMessageComponent arg)
         {
             try
             {
@@ -28,11 +28,37 @@ namespace Spoopy.Modules
             }
             catch(Exception ex)
             {
-                Console.WriteLine("**Une erreur s'est produite : {0}**", ex.Message);
+                Console.WriteLine("Une erreur s'est produite : {0}", ex.Message);
                 await arg.RespondAsync(Utilities.FormatToCode("Une erreur s'est produite, veuillez réessayer ultérieurement"), ephemeral: true);
                 await Utilities.SpoopyLogAsync("Une erreur s'est produite avec la modal de commentaires YT");
             }
             
+        }
+
+        public static async Task OpenErrorContactModalAsync(SocketMessageComponent arg)
+        {
+            try
+            {
+                var input = new TextInputBuilder();
+                input.WithCustomId("errorContactInput")
+                    .WithRequired(true)
+                    .WithStyle(TextInputStyle.Paragraph)
+                    .WithLabel("Message")
+                    .WithPlaceholder("Pouvez-vous préciser le détails de l'erreur ?");
+
+                var modal = new ModalBuilder();
+                modal.WithCustomId($"errorContactModal")
+                    .WithTitle("Contacter le dev !")
+                    .AddTextInput(input);
+
+                await arg.RespondWithModalAsync(modal.Build());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Une erreur s'est produite : {0}", ex.Message);
+                await arg.RespondAsync(Utilities.FormatToCode("Une erreur s'est produite, veuillez réessayer ultérieurement"), ephemeral: true);
+                await Utilities.SpoopyLogAsync("Une erreur s'est produite avec la modal de contact d'erreur");
+            }
         }
     }
 }

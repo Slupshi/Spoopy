@@ -72,7 +72,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await scommand.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await scommand.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand Help", isError: true);
             }
         }
@@ -269,7 +269,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand Statut", isError: true);
             }
         }
@@ -328,7 +328,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand Avatar", isError: true);
             }
         }
@@ -376,7 +376,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand RandomOrg", isError: true);
             }
         }
@@ -420,7 +420,7 @@ namespace Spoopy.Modules
             {
                 Console.WriteLine(e.Message);
                 await Utilities.SpoopyLogAsync("Erreur dans le PrintSpoopyStatus", isError: true);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
 
             }
         }
@@ -466,7 +466,7 @@ namespace Spoopy.Modules
             {
                 Console.WriteLine(ex.Message);
                 await Utilities.SpoopyLogAsync("Erreur dans la commande Shuffle", isError: true);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
             }
         }
 
@@ -515,7 +515,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
 
@@ -570,7 +570,7 @@ namespace Spoopy.Modules
             catch (Exception e)
             {
                 Console.WriteLine("**Une erreur s'est produite : {0}**", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
 
@@ -644,7 +644,7 @@ namespace Spoopy.Modules
             catch(Exception e)
             {
                 Console.WriteLine("Une erreur s'est produite : {0}", e.Message);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync(message: "Une erreur est survenue avec SlashCommand FakeBan", isError: true);
             }
         }
@@ -697,7 +697,7 @@ namespace Spoopy.Modules
             {
                 Console.WriteLine(ex.Message);
                 await Utilities.SpoopyLogAsync("Erreur dans le GetGameRole", isError: true);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
             }
             
         }
@@ -736,7 +736,7 @@ namespace Spoopy.Modules
             {
                 Console.WriteLine(ex.Message);
                 await Utilities.SpoopyLogAsync("Erreur dans le StartStream", isError: true);
-                await command.ModifyOriginalResponseAsync(Utilities.RespondToCommandErrorAsync());
+                await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
             }
         }
 
