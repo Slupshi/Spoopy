@@ -43,6 +43,8 @@ namespace Spoopy.Modules
 
                 await user.CreateDMChannelAsync();
                 await user.SendMessageAsync(Utilities.FormatToCode(messageText));
+
+                await modal.RespondAsync(text: Utilities.FormatToCode("Votre commentaires à bien été envoyé au dev !"), ephemeral: true);
             }
             catch (Exception ex)
             {
