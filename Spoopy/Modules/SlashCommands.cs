@@ -658,7 +658,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Obtiens le rôle associé à ce channel
         /// </summary>
-        /// <param name="guild">Teykho</param>
+        /// <param name="guild">TeykhoServer</param>
         /// <returns></returns>
         [SlashCommand("game", "Obtiens le rôle associé à ce channel")]
         public static async Task GetGameRoleAsync(SocketSlashCommand command)
@@ -710,7 +710,7 @@ namespace Spoopy.Modules
         /// <summary>
         /// Annonce un nouveau stream de Teykho
         /// </summary>
-        /// <param name="guild">Teykho</param>
+        /// <param name="guild">TeykhoServer</param>
         /// <returns></returns>
         [SlashCommand("stream", "Annonce un nouveau stream de Teykho")]
         public static async Task StartStreamAsync(SocketSlashCommand command)

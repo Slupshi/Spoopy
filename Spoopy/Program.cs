@@ -341,6 +341,16 @@ namespace Spoopy
 
             try
             {
+                var applicationCommands = await _client.GetGlobalApplicationCommandsAsync();
+
+                if(applicationCommands != null && applicationCommands.Any())
+                {
+                    foreach (var applicationCommand in applicationCommands)
+                    {
+                        await applicationCommand.DeleteAsync();
+                    }
+                }                
+
                 await _client.CreateGlobalApplicationCommandAsync(helpCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(statusCommand.Build());
                 await _client.CreateGlobalApplicationCommandAsync(avatarCommand.Build());
