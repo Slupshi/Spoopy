@@ -43,11 +43,15 @@ namespace Spoopy
         public static Color WhiteColor { get => new Color(255, 255, 255); }
         public static Color GreenColor { get => new Color(19, 121, 16); }
         public static Color RedColor { get => new Color(219, 78, 78); }
-
-        public const long SlupID = 429352632138858506;
+                
         public const long UwuID = 964621092562034718;
+
         public const long BanquiseID = 611568951406624768;
         public const long TeykhoID = 1020030635294859397;
+
+        public const long SlupID = 429352632138858506;
+        public const long ZozoID = 434662109595435008;
+        public const long KeyuFuuID = 451665479912914954;
 
         public static readonly List<Emoji> ThumbEmojis = new() { new Emoji("👍"), new Emoji("👎") };
         public static readonly Dictionary<byte, Emoji> NumberEmoji = new()
@@ -114,9 +118,11 @@ namespace Spoopy
             {"monster-hunter-world", MHWRole }
         };
 
-        public static Dictionary<SocketGuildUser, string> TeykhoStreamers = new()
+        public static Dictionary<long, string> TeykhoStreamers = new()
         {
-
+            {SlupID, "slupshi" },
+            {ZozoID, "teykhoo" },
+            {KeyuFuuID, "keyufuu" },
         };
 
         public static Queue<string> BotActivities = new Queue<string>();
