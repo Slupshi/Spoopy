@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Diagnostics;
+using System.Media;
 
 namespace Spoopy
 {
@@ -88,6 +89,9 @@ namespace Spoopy
             _activitiesTimer.Interval = 20000;
             _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
             _activitiesTimer.Start();
+
+            SoundPlayer soundPlayer= new SoundPlayer(@"D:\Video Edited\Effect\Ding.wav");
+            soundPlayer.Play();
 
             //await _externalInteractions.ReorderVocalChannel();
         }
