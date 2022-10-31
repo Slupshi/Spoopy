@@ -114,6 +114,11 @@ namespace Spoopy
             {"monster-hunter-world", MHWRole }
         };
 
+        public static Dictionary<SocketGuildUser, string> TeykhoStreamers = new()
+        {
+
+        };
+
         public static Queue<string> BotActivities = new Queue<string>();
 
         #endregion
