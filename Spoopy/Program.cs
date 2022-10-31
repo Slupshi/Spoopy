@@ -45,13 +45,13 @@ namespace Spoopy
 
         public async Task RunBotAsync()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents =  Properties.GatewayPrivleges});
+            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents =  Properties.GatewayPrivileges});
             _client.Log += Log;
 
             _externalInteractions = _services.GetService<ExternalInteractions>();
             _apiService = _services.GetService<ApiService>();
             _localApiService = _services.GetService<LocalApiService>();
-            _utilities = new Utilities(_apiService,_localApiService ,_client);
+            _utilities = _services.GetService<Utilities>();
                 
             _commands = new CommandService();
             await InstallCommandsAsync();
