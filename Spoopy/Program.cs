@@ -338,6 +338,7 @@ namespace Spoopy
             streamCommand.WithDescription("Annonce un stream");
             streamCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
             streamCommand.AddOption("game", ApplicationCommandOptionType.String, "Le jeu au quel le stream est dédié", isRequired: true);
+            streamCommand.AddOption("streamer", ApplicationCommandOptionType.User, "Le streameur", isRequired: true);
 
             try
             {

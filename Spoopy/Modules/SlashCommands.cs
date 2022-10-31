@@ -720,6 +720,7 @@ namespace Spoopy.Modules
                 await command.DeferAsync(ephemeral: true);
 
                 string game = command.Data.Options.FirstOrDefault(x => x.Name == "game")?.Value.ToString();
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "streamer")?.Value;
 
                 var openButton = new ButtonBuilder();
                 openButton.WithUrl("https://www.twitch.tv/teykhoo")
@@ -728,7 +729,7 @@ namespace Spoopy.Modules
 
                 var msgComponents = new ComponentBuilder().WithButton(openButton);
 
-                await Properties.StreamChannel.SendMessageAsync(Format.Bold($"Teykho est en stream sur {Format.Code(game)} @everyone"), components: msgComponents.Build());                
+                await Properties.StreamChannel.SendMessageAsync(Format.Bold($"{Format.UsernameAndDiscriminator(user, true)} est en stream sur {Format.Code(game)} @everyone"), components: msgComponents.Build());                
 
                 await command.ModifyOriginalResponseAsync(msg =>
                 {
