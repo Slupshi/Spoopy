@@ -712,7 +712,7 @@ namespace Spoopy.Modules
         /// </summary>
         /// <param name="guild">TeykhoServer</param>
         /// <returns></returns>
-        [SlashCommand("stream", "Annonce un nouveau stream de Teykho")]
+        [SlashCommand("stream", "Annonce un nouveau stream")]
         public static async Task StartStreamAsync(SocketSlashCommand command)
         {
             try
