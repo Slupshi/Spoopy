@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
@@ -60,90 +61,88 @@ namespace Spoopy.Modules
             
         }
 
-        public async Task SetGameRoleAsync()
+        public async Task SetGameRoleAsync(SocketUser user)
         {
             try
             {
-                var rolesList = Properties.Banquise.Roles.ToList();
-                var activeUsers = Properties.Banquise.Users.Where(u => u.Activities.Count > 0 && u.IsBot == false).ToList();
+                SocketGuildUser banquiseUser = Properties.Banquise.Users.FirstOrDefault(x => x.Id == user.Id && !user.IsBot);
+                if (banquiseUser == null) return;
 
-                var roles = await _localApiService.GetBanquiseRolesAsync();
-                List<SpoopyRole> spoopyRoles = roles == null ? null : roles.ToList();
+                IActivity game = banquiseUser.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
+                if (game == null) return;
 
-                foreach (var user in activeUsers)
+                if (Properties.Banquise.Roles.ToList().Any(role => role.Name.Contains(game.Name) || game.Name.Contains(role.Name)))
                 {
-                    if (user.Id == 434662109595435008) // 434662109595435008 : zozoID
-                    {                        
-                        if (!Properties.HadEmmerderZozoToday)
-                        {
-                            if(user.Activities.FirstOrDefault(a => a.Name == "VALORANT") != null)
-                            {
-                                await EmmerderZozoAsync(user, "VALORANT");
-                            }
-                            else if(user.Activities.FirstOrDefault(a => a.Name.Contains("Destiny")) != null)
-                            {
-                                await EmmerderZozoAsync(user, "Destiny");
-                            }
-                            
-                            Properties.HadEmmerderZozoToday = true;
-                        }
-                    }
-                    var game = user.Activities.FirstOrDefault(a => a.Type == ActivityType.Playing);
-                    if (game != null)
+                    SocketRole role = Properties.Banquise.Roles.FirstOrDefault(role => role.Name.Contains(game.Name) || game.Name.Contains(role.Name));
+                    await banquiseUser.AddRoleAsync(role);
+                }
+                else
+                {
+                    if (!game.Name.ToLower().Contains("launcher"))
                     {
-                        SocketRole role = rolesList.FirstOrDefault(r => r.Name.Contains(game.Name) || game.Name.Contains(r.Name));
-                        if (role == null)
+                        RestRole role = await Properties.Banquise.CreateRoleAsync(name: game.Name,
+                                                                  color: Properties.WhiteColor,
+                                                                  isMentionable: true);
+                        await Utilities.SpoopyLogAsync($"Role Crée : {role.Name}");
+                        await banquiseUser.AddRoleAsync(role);
+                    }                    
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                await Utilities.SpoopyLogAsync("Erreur SetGameRole", isError: true);
+            }    
+        }
+
+        public async Task UpdateGameRoleAsync()
+        {
+            try
+            {
+                Console.WriteLine("===== Updating DB Roles =====");
+                List<SocketRole> banquiseRoles = Properties.Banquise.Roles.ToList();
+                IEnumerable<SpoopyRole> roles = await _localApiService.GetBanquiseRolesAsync();
+                if(roles != null)
+                {
+                    List<SpoopyRole> dbRoles = roles.ToList();
+                    if(banquiseRoles.Count < dbRoles.Count)
+                    {
+                        foreach (SpoopyRole dbRole in dbRoles)
                         {
-                            if (game.Name.Contains("Launcher")) return;
-                            RestRole restRole = await Properties.Banquise.CreateRoleAsync(name: game.Name, isMentionable: true, color: Properties.WhiteColor);
-                            await Utilities.SpoopyLogAsync($"Rôle {restRole.Name} créé avec succès");
-                            Console.WriteLine($"Rôle {restRole.Name} créé avec succès");
-                            await user.AddRoleAsync(restRole);
-                            Console.WriteLine($"Rôle {restRole.Name} ajouté à {user.Username}");
-                            await _localApiService.PostBanquiseRoleAsync(new SpoopyRole(name: game.Name,
-                                                                                          memberCount: 0,
-                                                                                          createdAt: restRole.CreatedAt.DateTime));
+                            if (!banquiseRoles.Any(banquiseRole => banquiseRole.Name == dbRole.Name))
+                            {
+                                await _localApiService.DeleteBanquiseRoleAsync(dbRole);
+                            }                            
+                        }
+                    }                    
+                    foreach(SocketRole banquiseRole in banquiseRoles)
+                    {
+                        if(dbRoles.Any(dbRole => dbRole.Name == banquiseRole.Name))
+                        {
+                            SpoopyRole dbRole = dbRoles.FirstOrDefault(x => x.Name == banquiseRole.Name);
+                            if(dbRole.MemberCount != banquiseRole.Members.Count())
+                            {
+                                dbRole.MemberCount = banquiseRole.Members.Count();
+                                await _localApiService.PutBanquiseRoleAsync(dbRole);
+                            }
                         }
                         else
                         {
-                            if (user.Roles.FirstOrDefault(r => r.Name == role.Name) == null)
-                            {                                                              
-                                await user.AddRoleAsync(role);
-                                if(spoopyRoles != null && spoopyRoles.Any())
-                                {
-                                    SpoopyRole spoopyRole = spoopyRoles.Where(s => s.Name == role.Name).FirstOrDefault();
-                                    if(spoopyRole != null)
-                                    {
-                                        spoopyRole.MemberCount++;
-                                        await _localApiService.PutBanquiseRoleAsync(spoopyRole);
-                                    }                                    
-                                }
-                                Console.WriteLine($"Rôle {role.Name} ajouté à {user.Username}");
-                            }
+                            SpoopyRole newDbRole = new SpoopyRole(
+                                name: banquiseRole.Name, 
+                                memberCount: banquiseRole.Members.Count(),
+                                createdAt: banquiseRole.CreatedAt.Date
+                                );
+                            await _localApiService.PostBanquiseRoleAsync(newDbRole);
                         }
                     }
-                    
                 }
-                rolesList.ForEach(async r =>
-                {
-                    if(spoopyRoles != null && !spoopyRoles.Any(s => s.Name == r.Name))
-                    {
-                        await _localApiService.PostBanquiseRoleAsync(new SpoopyRole(name: r.Name,
-                                                                                           memberCount: r.Members.Count(),
-                                                                                           createdAt: r.CreatedAt.DateTime));
-                    }
-                    if (!r.Members.Any() && !r.Name.Contains("Server Booster") && !r.Permissions.Administrator && r.Color.RawValue != 0)
-                    {
-                        await r.DeleteAsync();
-                        await Utilities.SpoopyLogAsync($"Role {r.Name} supprimé avec succès");
-                    }
-                });
-                //await CheckRoleMembers();
+                Console.WriteLine("===== DB Roles Updated =====");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                await Utilities.SpoopyLogAsync("Erreur SetGameRole", isError:true);
+                await Utilities.SpoopyLogAsync("Erreur UpdateGameRole", isError:true);
             }
 
         }

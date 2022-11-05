@@ -176,9 +176,12 @@ namespace Spoopy
 
         private async Task LatencyUpdated(int previousLatency, int newLatency)
         {
-            await _externalInteractions.SetGameRoleAsync();
-            
-            await _localApiService.PostSpoopyStatusAsync();
+            if(Properties.isLocalApiRunning)
+            {
+                await _externalInteractions.UpdateGameRoleAsync();
+
+                await _localApiService.PostSpoopyStatusAsync();
+            }            
         }
 
         private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState previousVoiceState, SocketVoiceState newVoiceState)
@@ -193,7 +196,7 @@ namespace Spoopy
 
         private async Task PresenceUpdated(SocketUser user, SocketPresence pastPresence, SocketPresence newPresence)
         {
-            
+            await _externalInteractions.SetGameRoleAsync(user);
         }
 
 

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Spoopy.Modules;
+using Spoopy.Services;
 
 namespace Spoopy
 {
@@ -32,7 +34,7 @@ namespace Spoopy
 
         public static SocketUser Slupshi;
 
-        public static bool HadEmmerderZozoToday = false;
+        public static bool isLocalApiRunning;
 
         #endregion
 
@@ -151,6 +153,8 @@ namespace Spoopy
             StreamChannel = (IMessageChannel)TeykhoServer.GetChannel(1022093143094607873);
 
             Slupshi = client.GetUser(SlupID);
+
+            isLocalApiRunning = LocalApiService.Ping();
         }
 
         public static void SetupBotActivities()

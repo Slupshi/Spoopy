@@ -19,5 +19,7 @@ namespace Spoopy.Models
             MemberCount = memberCount;
             CreatedAt = createdAt;
         }
+
+        public override string ToString() => $"{Id} - {Name} ({MemberCount})";
     }
 }
