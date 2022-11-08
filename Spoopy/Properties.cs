@@ -85,22 +85,50 @@ namespace Spoopy
 
         #endregion
 
+        #region CommandsNames
+
+        public const string TestSlashCommandName = "test";
+        public const string HelpSlashCommandName = "help";
+        public const string StatusSlashCommandName = "status";
+        public const string AvatarSlashCommandName = "avatar";
+        public const string RandomSlashCommandName = "random";
+        public const string SpoopyStatusSlashCommandName = "spoopy";
+        public const string ShuffleSlashCommandName = "shuffle";
+        public const string SondageSlashCommandName = "sondage";
+        public const string PollSlashCommandName = "poll";
+        public const string FakeBanSlashCommandName = "ban";
+        public const string GameSlashCommandName = "game";
+        public const string StreamSlashCommandName = "stream";
+
+        public const string UserAvatarUserCommandName = "User Avatar";
+
+        #endregion
+
         #region Dictionaries
 
         public readonly static Dictionary<string, Func<SocketSlashCommand, Task>> SlashCommandsDico = new()
         {
-            {"test", SlashCommands.TestAsync },
-            {"help", SlashCommands.HelpAsync },
-            {"status", SlashCommands.StatusAsync },
-            {"avatar", SlashCommands.GetUserAvatarAsync },
-            {"random", SlashCommands.RandomOrgAsync },
-            {"spoopy", SlashCommands.PrintSpoopyStatusAsync },
-            {"shuffle", SlashCommands.ShuffleAsync },
-            {"sondage", SlashCommands.CreatePollAsync },
-            {"poll", SlashCommands.CreateComplexPollAsync },
-            {"ban", SlashCommands.FakeBanAsync },
-            {"game", SlashCommands.GetGameRoleAsync },
-            {"stream", SlashCommands.StartStreamAsync },
+            {TestSlashCommandName, SlashCommands.TestAsync },
+            {HelpSlashCommandName, SlashCommands.HelpAsync },
+            {StatusSlashCommandName, SlashCommands.StatusAsync },
+            {AvatarSlashCommandName, SlashCommands.GetUserAvatarAsync },
+            {RandomSlashCommandName, SlashCommands.RandomOrgAsync },
+            {SpoopyStatusSlashCommandName, SlashCommands.PrintSpoopyStatusAsync },
+            {ShuffleSlashCommandName, SlashCommands.ShuffleAsync },
+            {SondageSlashCommandName, SlashCommands.CreatePollAsync },
+            {PollSlashCommandName, SlashCommands.CreateComplexPollAsync },
+            {FakeBanSlashCommandName, SlashCommands.FakeBanAsync },
+            {GameSlashCommandName, SlashCommands.GetGameRoleAsync },
+            {StreamSlashCommandName, SlashCommands.StartStreamAsync },
+        };
+
+        public readonly static Dictionary<string, Func<SocketUserCommand, Task>> UserCommandsDico = new()
+        {
+            {"User Avatar", UserCommands.GetUserAvatarAsync },
+        };
+
+        public readonly static Dictionary<string, Func<SocketMessageCommand, Task>> MessageCommandsDico = new()
+        {
         };
 
         public readonly static Dictionary<string, Func<SocketMessageComponent,Task>> ButtonHandlersDico = new()

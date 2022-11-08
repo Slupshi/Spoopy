@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Diagnostics;
 using System.Media;
+using CliWrap;
 
 namespace Spoopy
 {
@@ -76,8 +77,11 @@ namespace Spoopy
         {
             Properties.SetPropertiesAtStartup(_client);
             await CreateSlashCommands();
+            await CreateContextMenuCommands();
 
             _client.SlashCommandExecuted += HandleSlashCommandAsync;
+            _client.UserCommandExecuted += HandleUserCommandExecuted;
+            _client.MessageCommandExecuted += HandleMessageCommandExecuted;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
             _client.UserJoined += UserJoined;
             _client.LatencyUpdated += LatencyUpdated;
@@ -164,6 +168,32 @@ namespace Spoopy
             }            
         }
 
+        private async Task HandleUserCommandExecuted(SocketUserCommand arg)
+        {
+            try
+            {
+                await Properties.UserCommandsDico.FirstOrDefault(x => x.Key == arg.CommandName).Value.Invoke(arg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await arg.RespondAsync(Format.Bold("Cette commande n'existe pas"), ephemeral: true);
+            }
+        }
+
+        private async Task HandleMessageCommandExecuted(SocketMessageCommand arg)
+        {
+            try
+            {
+                await Properties.MessageCommandsDico.FirstOrDefault(x => x.Key == arg.CommandName).Value.Invoke(arg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await arg.RespondAsync(Format.Bold("Cette commande n'existe pas"), ephemeral: true);
+            }
+        }
+
         private async Task ButtonExecuted(SocketMessageComponent arg)
         {
             await Properties.ButtonHandlersDico.FirstOrDefault(x => arg.Data.CustomId.Contains(x.Key)).Value.Invoke(arg);
@@ -215,24 +245,24 @@ namespace Spoopy
         {
             // Test
             var testCommand = new SlashCommandBuilder();
-            testCommand.WithName("test");
+            testCommand.WithName(Properties.TestSlashCommandName);
             testCommand.WithDescription("A ne pas utiliser");
             testCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
 
             // Help
             var helpCommand = new SlashCommandBuilder();
-            helpCommand.WithName("help");
+            helpCommand.WithName(Properties.HelpSlashCommandName);
             helpCommand.WithDescription("De l'aide pour les gens perdus !");
 
             // Status
             var statusCommand = new SlashCommandBuilder();
-            statusCommand.WithName("status");
+            statusCommand.WithName(Properties.StatusSlashCommandName);
             statusCommand.WithDescription("Pour stalk les gens du serveur");
             statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée (Vous même par défaut)", isRequired: false);
 
             // Avatar
             var avatarCommand = new SlashCommandBuilder();
-            avatarCommand.WithName("avatar");
+            avatarCommand.WithName(Properties.AvatarSlashCommandName);
             avatarCommand.WithDescription("Récupère l'avatar d'un membre du serveur");
             avatarCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne dont l'avatar sera prélevé (Vous même par défaut)", isRequired: false);
             avatarCommand.AddOption(name: "size",
@@ -285,7 +315,7 @@ namespace Spoopy
 
             // RandomOrg
             var randomCommand = new SlashCommandBuilder();
-            randomCommand.WithName("random");
+            randomCommand.WithName(Properties.RandomSlashCommandName);
             randomCommand.WithDescription("Selectionne un nombre random entre le nombre de départ et de fin");
             randomCommand.AddOption("départ", ApplicationCommandOptionType.Integer, "Le nombre de départ | 1 par défaut", isRequired: false, minValue: 1);
             randomCommand.AddOption("fin", ApplicationCommandOptionType.Integer, "Le nombre de fin", isRequired: true, minValue: 2);
@@ -293,19 +323,19 @@ namespace Spoopy
 
             // SpoopyStatus
             var spoopyStatus = new SlashCommandBuilder();
-            spoopyStatus.WithName("spoopy");
+            spoopyStatus.WithName(Properties.SpoopyStatusSlashCommandName);
             spoopyStatus.WithDescription("Obtenir le status du bot");
 
             // Shuffle
             var shuffleCommand = new SlashCommandBuilder();
-            shuffleCommand.WithName("shuffle");
+            shuffleCommand.WithName(Properties.ShuffleSlashCommandName);
             shuffleCommand.WithDescription("Mélange les lettres d'une chaine de charactères");
             shuffleCommand.AddOption("entree", ApplicationCommandOptionType.String, "La chaîne de charactères qui sera mélanger", isRequired: true);
             shuffleCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
 
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
-            pollCommand.WithName("sondage");
+            pollCommand.WithName(Properties.SondageSlashCommandName);
             pollCommand.WithDescription("Création de sondage");
             pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
             pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué (False par défaut)", isRequired: false);
@@ -313,7 +343,7 @@ namespace Spoopy
 
             // Complex Poll
             var complexPollCommand = new SlashCommandBuilder();
-            complexPollCommand.WithName("poll");
+            complexPollCommand.WithName(Properties.PollSlashCommandName);
             complexPollCommand.WithDescription("Création de sondage à choix multiples");
             complexPollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true)
                 .AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false)
@@ -330,18 +360,18 @@ namespace Spoopy
 
             // FakeBan
             var fakeBanCommand = new SlashCommandBuilder();
-            fakeBanCommand.WithName("ban");
+            fakeBanCommand.WithName(Properties.FakeBanSlashCommandName);
             fakeBanCommand.WithDescription("Ban une personne du serveur");
             fakeBanCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
 
             // GameRole
             var gameRoleCommand = new SlashCommandBuilder();
-            gameRoleCommand.WithName("game");
+            gameRoleCommand.WithName(Properties.GameSlashCommandName);
             gameRoleCommand.WithDescription("Obtiens le role du jeu qui correspondant à ce channel !");
 
             // StartStream
             var streamCommand = new SlashCommandBuilder();
-            streamCommand.WithName("stream");
+            streamCommand.WithName(Properties.StreamSlashCommandName);
             streamCommand.WithDescription("Annonce un stream");
             streamCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
             streamCommand.AddOption("game", ApplicationCommandOptionType.String, "Le jeu au quel le stream est dédié", isRequired: true);
@@ -382,6 +412,21 @@ namespace Spoopy
                 Console.WriteLine(json);
             }
         }       
+        private async Task CreateContextMenuCommands()
+        {
+            var avatarUserCommand = new UserCommandBuilder();
+            //var avatarMessageCommand = new MessageCommandBuilder();
 
+            avatarUserCommand.WithName(Properties.UserAvatarUserCommandName);
+            //avatarMessageCommand.WithName("avatar");
+
+            await _client.BulkOverwriteGlobalApplicationCommandsAsync(new ApplicationCommandProperties[]
+            {
+                //avatarMessageCommand.Build(),
+                avatarUserCommand.Build(),
+            });
+
+
+        }
     }
 }
