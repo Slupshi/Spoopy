@@ -98,7 +98,7 @@ namespace Spoopy
             SoundPlayer soundPlayer= new SoundPlayer(@"D:\Video Edited\Effect\Ding.wav"); // Only on my PC
             soundPlayer.Play();
 
-            await QuartzScheduler.StartPollJob(DateTime.Now.AddMinutes(1));
+            //await QuartzScheduler.StartPollJob(DateTime.Now.AddMinutes(1));
 
             //await _externalInteractions.ReorderVocalChannel();
         }
