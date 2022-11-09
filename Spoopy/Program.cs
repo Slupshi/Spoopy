@@ -14,6 +14,7 @@ using System.Timers;
 using System.Diagnostics;
 using System.Media;
 using CliWrap;
+using Spoopy.Jobs;
 
 namespace Spoopy
 {
@@ -94,8 +95,10 @@ namespace Spoopy
             _activitiesTimer.Elapsed += _activitiesTimer_Elapsed;
             _activitiesTimer.Start();
 
-            SoundPlayer soundPlayer= new SoundPlayer(@"D:\Video Edited\Effect\Ding.wav");
+            SoundPlayer soundPlayer= new SoundPlayer(@"D:\Video Edited\Effect\Ding.wav"); // Only on my PC
             soundPlayer.Play();
+
+            await QuartzScheduler.StartPollJob(DateTime.Now.AddMinutes(1));
 
             //await _externalInteractions.ReorderVocalChannel();
         }
