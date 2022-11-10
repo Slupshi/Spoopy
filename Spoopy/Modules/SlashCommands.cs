@@ -511,7 +511,7 @@ namespace Spoopy.Modules
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
 
-                await QuartzScheduler.StartBasicPollJob(DateTime.Now.Add(TimeSpan.FromMinutes(duration)), (long)embed.Id);
+                await QuartzScheduler.StartBasicPollJob(DateTime.Now.Add(TimeSpan.FromHours(duration)), (long)embed.Id);
             }
             catch (Exception e)
             {
