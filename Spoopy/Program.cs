@@ -98,8 +98,6 @@ namespace Spoopy
             SoundPlayer soundPlayer= new SoundPlayer(@"D:\Video Edited\Effect\Ding.wav"); // Only on my PC
             soundPlayer.Play();
 
-            //await QuartzScheduler.StartPollJob(DateTime.Now.AddMinutes(1));
-
             //await _externalInteractions.ReorderVocalChannel();
         }
 
@@ -342,7 +340,56 @@ namespace Spoopy
             pollCommand.WithDescription("Création de sondage");
             pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
             pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué (False par défaut)", isRequired: false);
-            pollCommand.AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non (False par défaut)", isRequired: false);
+            pollCommand.AddOption("duration", ApplicationCommandOptionType.Integer, "Défini la durée d'un sondage, en heures (24h par défaut)", isRequired: false
+            //    ,choices: new ApplicationCommandOptionChoiceProperties[]
+            //{
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "30sec",
+            //        Value = TimeSpan.FromSeconds(30),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "15 minutes",
+            //        Value = TimeSpan.FromMinutes(15),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "30 minutes",
+            //        Value = TimeSpan.FromMinutes(30),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "1 heure",
+            //        Value = TimeSpan.FromHours(1),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "2 heures",
+            //        Value = TimeSpan.FromHours(2),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "6 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "12 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "24 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "1 semaine",
+            //        Value = TimeSpan.FromDays(7),
+            //    },
+            //}
+            );
 
             // Complex Poll
             var complexPollCommand = new SlashCommandBuilder();

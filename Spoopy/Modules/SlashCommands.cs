@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AngleSharp.Text;
 using Discord;
 using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
 using Namotion.Reflection;
+using Spoopy.Jobs;
 using Spoopy.Models;
 
 namespace Spoopy.Modules
@@ -490,7 +493,7 @@ namespace Spoopy.Modules
                 await command.DeferAsync(ephemeral: true);
                 string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
                 bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
-                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
+                int duration = (command.Data.Options.FirstOrDefault(x => x.Name == "duration")?.Value) == null ? 24 : Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == "duration")?.Value);
                 SocketUser author = command.User;
 
                 EmbedBuilder embedBuilder = new();
@@ -499,18 +502,15 @@ namespace Spoopy.Modules
                                         .WithThumbnailUrl(author.GetAvatarUrl())
                                         .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
                                         .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
-                var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-                if (isPersistant)
-                {
-                    await embed.PinAsync();
-                }
+                IUserMessage embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
                 await embed.AddReactionsAsync(Properties.ThumbEmojis);
                 await Utilities.SpoopyLogAsync($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
-                await CheckUselessPollsAsync();
+
+                await QuartzScheduler.StartBasicPollJob(DateTime.Now.Add(TimeSpan.FromMinutes(duration)), (long)embed.Id);
             }
             catch (Exception e)
             {
@@ -518,7 +518,6 @@ namespace Spoopy.Modules
                 await command.ModifyOriginalResponseAsync(Utilities.RespondToSlashCommandErrorAsync());
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand SimplePoll", isError: true);
             }
-
         }
 
         // 2-9 Choices Poll
@@ -565,7 +564,6 @@ namespace Spoopy.Modules
                 {
                     msg.Content = Utilities.FormatToCode("Sondage crée dans le channel \"sondage\"");
                 });
-                await CheckUselessPollsAsync();
             }
             catch (Exception e)
             {
@@ -574,28 +572,6 @@ namespace Spoopy.Modules
                 await Utilities.SpoopyLogAsync("Une erreur est survenue avec SlashCommand ComplexPoll", isError: true);
             }
 
-        }
-
-        private static async Task CheckUselessPollsAsync()
-        {
-            var messages = await Properties.PollChannel.GetMessagesAsync().FirstAsync();
-            var hours = TimeSpan.FromHours(24);
-            foreach (var message in messages)
-            {
-                if (message.Content.Contains("pinned"))
-                {
-                    await message.DeleteAsync();
-                }
-                else
-                {
-                    var time = DateTime.Now - message.Timestamp;
-                    if (time > hours && !message.IsPinned)
-                    {
-                        await message.DeleteAsync();
-                    }
-                }
-
-            }
         }
 
         #endregion
