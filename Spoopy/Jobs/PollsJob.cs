@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Quartz;
+using Spoopy.Variables;
 
 namespace Spoopy.Jobs
 {
@@ -23,7 +24,7 @@ namespace Spoopy.Jobs
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithTitle($"Résultat du {pollEmbed.Title}");
                 embed.WithDescription($"{Format.Bold("Question :")} {pollEmbed.Description}");
-                embed.WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                embed.WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.QuestionMarkURL);
                 embed.WithColor(new Color(27, 37, 70));
                 embed.WithThumbnailUrl(pollEmbed.Thumbnail.Value.Url);
 
@@ -71,7 +72,7 @@ namespace Spoopy.Jobs
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithTitle($"Résultat du {pollEmbed.Title}");
                 embed.WithDescription($"{Format.Bold("Question :")} {pollEmbed.Description}");
-                embed.WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                embed.WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.QuestionMarkURL);
                 embed.WithColor(new Color(27, 37, 70));
                 embed.WithThumbnailUrl(pollEmbed.Thumbnail.Value.Url);
 

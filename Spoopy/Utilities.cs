@@ -7,6 +7,7 @@ using Spoopy.Models;
 using Discord.WebSocket;
 using System.Diagnostics;
 using Discord;
+using Spoopy.Variables;
 
 namespace Spoopy
 {
@@ -53,7 +54,7 @@ namespace Spoopy
 
         public static string FormatToCode(string message) => $"```{message}```";
 
-        public static string GetCustomTimestamp() => $"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Properties.Culture)} ";
+        public static string GetCustomTimestamp() => $"{DateTime.Now.ToString(@"HH\:mm")} • {DateTime.Now.ToString("dd MMMM, yyyy", Constantes.Culture)} ";
 
         public static string DeleteUrlFromText(string text)
         {
@@ -74,9 +75,9 @@ namespace Spoopy
         {
             string response = isUpperCase ? "De " : "de ";
             char firstLetter = char.ToUpperInvariant(nextWord.First());
-            if(Properties.Vowels.Any(x=> x == firstLetter))
+            if(Constantes.Vowels.Any(x=> x == firstLetter))
             {
-                if(!(firstLetter == 'Y' && Properties.Vowels.Any(x => x == char.ToUpperInvariant(nextWord.ElementAt(1)))))
+                if(!(firstLetter == 'Y' && Constantes.Vowels.Any(x => x == char.ToUpperInvariant(nextWord.ElementAt(1)))))
                 {
                     response = isUpperCase ? "D'" : "d'";
                 }

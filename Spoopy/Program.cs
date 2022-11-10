@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Media;
 using CliWrap;
 using Spoopy.Jobs;
+using Spoopy.Variables;
 
 namespace Spoopy
 {
@@ -48,7 +49,7 @@ namespace Spoopy
 
         public async Task RunBotAsync()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents =  Properties.GatewayPrivileges});
+            _client = new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug, GatewayIntents = Constantes.GatewayPrivileges});
             _client.Log += Log;
 
             _externalInteractions = _services.GetService<ExternalInteractions>();
@@ -246,27 +247,27 @@ namespace Spoopy
         {
             // Test
             var testCommand = new SlashCommandBuilder();
-            testCommand.WithName(Properties.TestSlashCommandName);
+            testCommand.WithName(CommandsConstantes.TestSlashCommandName);
             testCommand.WithDescription("A ne pas utiliser");
             testCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
 
             // Help
             var helpCommand = new SlashCommandBuilder();
-            helpCommand.WithName(Properties.HelpSlashCommandName);
+            helpCommand.WithName(CommandsConstantes.HelpSlashCommandName);
             helpCommand.WithDescription("De l'aide pour les gens perdus !");
 
             // Status
             var statusCommand = new SlashCommandBuilder();
-            statusCommand.WithName(Properties.StatusSlashCommandName);
+            statusCommand.WithName(CommandsConstantes.StatusSlashCommandName);
             statusCommand.WithDescription("Pour stalk les gens du serveur");
-            statusCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne stalkée (Vous même par défaut)", isRequired: false);
+            statusCommand.AddOption(CommandsConstantes.CommandParameterUsername, ApplicationCommandOptionType.User, "La personne stalkée (Vous même par défaut)", isRequired: false);
 
             // Avatar
             var avatarCommand = new SlashCommandBuilder();
-            avatarCommand.WithName(Properties.AvatarSlashCommandName);
+            avatarCommand.WithName(CommandsConstantes.AvatarSlashCommandName);
             avatarCommand.WithDescription("Récupère l'avatar d'un membre du serveur");
-            avatarCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne dont l'avatar sera prélevé (Vous même par défaut)", isRequired: false);
-            avatarCommand.AddOption(name: "size",
+            avatarCommand.AddOption(CommandsConstantes.CommandParameterUsername, ApplicationCommandOptionType.User, "La personne dont l'avatar sera prélevé (Vous même par défaut)", isRequired: false);
+            avatarCommand.AddOption(name: CommandsConstantes.CommandParameterSize,
                type: ApplicationCommandOptionType.Integer,
                description: "La taille de l'image en pixel (512x512 par défaut)",
                isRequired: false,
@@ -316,31 +317,31 @@ namespace Spoopy
 
             // RandomOrg
             var randomCommand = new SlashCommandBuilder();
-            randomCommand.WithName(Properties.RandomSlashCommandName);
+            randomCommand.WithName(CommandsConstantes.RandomSlashCommandName);
             randomCommand.WithDescription("Selectionne un nombre random entre le nombre de départ et de fin");
-            randomCommand.AddOption("départ", ApplicationCommandOptionType.Integer, "Le nombre de départ | 1 par défaut", isRequired: false, minValue: 1);
-            randomCommand.AddOption("fin", ApplicationCommandOptionType.Integer, "Le nombre de fin", isRequired: true, minValue: 2);
-            randomCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
+            randomCommand.AddOption(CommandsConstantes.CommandParameterStart, ApplicationCommandOptionType.Integer, "Le nombre de départ | 1 par défaut", isRequired: false, minValue: 1);
+            randomCommand.AddOption(CommandsConstantes.CommandParameterEnd, ApplicationCommandOptionType.Integer, "Le nombre de fin", isRequired: true, minValue: 2);
+            randomCommand.AddOption(CommandsConstantes.CommandParameterVisible, ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
 
             // SpoopyStatus
             var spoopyStatus = new SlashCommandBuilder();
-            spoopyStatus.WithName(Properties.SpoopyStatusSlashCommandName);
+            spoopyStatus.WithName(CommandsConstantes.SpoopyStatusSlashCommandName);
             spoopyStatus.WithDescription("Obtenir le status du bot");
 
             // Shuffle
             var shuffleCommand = new SlashCommandBuilder();
-            shuffleCommand.WithName(Properties.ShuffleSlashCommandName);
+            shuffleCommand.WithName(CommandsConstantes.ShuffleSlashCommandName);
             shuffleCommand.WithDescription("Mélange les lettres d'une chaine de charactères");
-            shuffleCommand.AddOption("entree", ApplicationCommandOptionType.String, "La chaîne de charactères qui sera mélanger", isRequired: true);
-            shuffleCommand.AddOption("visible", ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
+            shuffleCommand.AddOption(CommandsConstantes.CommandParameterStart, ApplicationCommandOptionType.String, "La chaîne de charactères qui sera mélanger", isRequired: true);
+            shuffleCommand.AddOption(CommandsConstantes.CommandParameterVisible, ApplicationCommandOptionType.Boolean, "Détermine si la réponse est visible par tout le monde", isRequired: false);
 
             // Basic Poll
             var pollCommand = new SlashCommandBuilder();
-            pollCommand.WithName(Properties.SondageSlashCommandName);
+            pollCommand.WithName(CommandsConstantes.SondageSlashCommandName);
             pollCommand.WithDescription("Création de sondage");
-            pollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
-            pollCommand.AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué (False par défaut)", isRequired: false);
-            pollCommand.AddOption("duration", ApplicationCommandOptionType.Integer, "Défini la durée d'un sondage, en heures (24h par défaut)", isRequired: false
+            pollCommand.AddOption(CommandsConstantes.CommandParameterQuestion, ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true);
+            pollCommand.AddOption(CommandsConstantes.CommandParameterEveryone, ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué (False par défaut)", isRequired: false);
+            pollCommand.AddOption(CommandsConstantes.CommandParameterDuration, ApplicationCommandOptionType.Integer, "Défini la durée d'un sondage, en heures (24h par défaut)", isRequired: false
             //    ,choices: new ApplicationCommandOptionChoiceProperties[]
             //{
             //    new ApplicationCommandOptionChoiceProperties
@@ -393,11 +394,10 @@ namespace Spoopy
 
             // Complex Poll
             var complexPollCommand = new SlashCommandBuilder();
-            complexPollCommand.WithName(Properties.PollSlashCommandName);
+            complexPollCommand.WithName(CommandsConstantes.PollSlashCommandName);
             complexPollCommand.WithDescription("Création de sondage à choix multiples");
-            complexPollCommand.AddOption("question", ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true)
-                .AddOption("everyone", ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false)
-                .AddOption("persistant", ApplicationCommandOptionType.Boolean, "Défini si un sondage est infini ou non", isRequired: false)
+            complexPollCommand.AddOption(CommandsConstantes.CommandParameterQuestion, ApplicationCommandOptionType.String, "La question qui sera posée", isRequired: true)
+                .AddOption(CommandsConstantes.CommandParameterEveryone, ApplicationCommandOptionType.Boolean, "Défini si un @everyone est effectué", isRequired: false)
                 .AddOption("proposition1", ApplicationCommandOptionType.String, "Proposition n°1", isRequired: true)
                 .AddOption("proposition2", ApplicationCommandOptionType.String, "Proposition n°2", isRequired: true)
                 .AddOption("proposition3", ApplicationCommandOptionType.String, "Proposition n°3", isRequired: false)
@@ -407,25 +407,75 @@ namespace Spoopy
                 .AddOption("proposition7", ApplicationCommandOptionType.String, "Proposition n°7", isRequired: false)
                 .AddOption("proposition8", ApplicationCommandOptionType.String, "Proposition n°8", isRequired: false)
                 .AddOption("proposition9", ApplicationCommandOptionType.String, "Proposition n°9", isRequired: false);
+            complexPollCommand.AddOption(CommandsConstantes.CommandParameterDuration, ApplicationCommandOptionType.Integer, "Défini la durée d'un sondage, en heures (24h par défaut)", isRequired: false
+            //    ,choices: new ApplicationCommandOptionChoiceProperties[]
+            //{
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "30sec",
+            //        Value = TimeSpan.FromSeconds(30),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "15 minutes",
+            //        Value = TimeSpan.FromMinutes(15),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "30 minutes",
+            //        Value = TimeSpan.FromMinutes(30),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "1 heure",
+            //        Value = TimeSpan.FromHours(1),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "2 heures",
+            //        Value = TimeSpan.FromHours(2),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "6 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "12 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "24 heures",
+            //        Value = TimeSpan.FromHours(6),
+            //    },
+            //    new ApplicationCommandOptionChoiceProperties
+            //    {
+            //        Name = "1 semaine",
+            //        Value = TimeSpan.FromDays(7),
+            //    },
+            //}
+            );
 
             // FakeBan
             var fakeBanCommand = new SlashCommandBuilder();
-            fakeBanCommand.WithName(Properties.FakeBanSlashCommandName);
+            fakeBanCommand.WithName(CommandsConstantes.FakeBanSlashCommandName);
             fakeBanCommand.WithDescription("Ban une personne du serveur");
-            fakeBanCommand.AddOption("username", ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
+            fakeBanCommand.AddOption(CommandsConstantes.CommandParameterUsername, ApplicationCommandOptionType.User, "La personne qui sera ban", isRequired: false);
 
             // GameRole
             var gameRoleCommand = new SlashCommandBuilder();
-            gameRoleCommand.WithName(Properties.GameSlashCommandName);
+            gameRoleCommand.WithName(CommandsConstantes.GameSlashCommandName);
             gameRoleCommand.WithDescription("Obtiens le role du jeu qui correspondant à ce channel !");
 
             // StartStream
             var streamCommand = new SlashCommandBuilder();
-            streamCommand.WithName(Properties.StreamSlashCommandName);
+            streamCommand.WithName(CommandsConstantes.StreamSlashCommandName);
             streamCommand.WithDescription("Annonce un stream");
             streamCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
-            streamCommand.AddOption("game", ApplicationCommandOptionType.String, "Le jeu au quel le stream est dédié", isRequired: true);
-            streamCommand.AddOption("streamer", ApplicationCommandOptionType.User, "Le streameur", isRequired: true);
+            streamCommand.AddOption(CommandsConstantes.StreamStartCommandParameterGame, ApplicationCommandOptionType.String, "Le jeu au quel le stream est dédié", isRequired: true);
+            streamCommand.AddOption(CommandsConstantes.StreamStartCommandParameterStreamer, ApplicationCommandOptionType.User, "Le streameur", isRequired: true);
 
             try
             {
@@ -467,7 +517,7 @@ namespace Spoopy
             var avatarUserCommand = new UserCommandBuilder();
             //var avatarMessageCommand = new MessageCommandBuilder();
 
-            avatarUserCommand.WithName(Properties.UserAvatarUserCommandName);
+            avatarUserCommand.WithName(CommandsConstantes.UserAvatarUserCommandName);
             //avatarMessageCommand.WithName("avatar");
 
             await _client.BulkOverwriteGlobalApplicationCommandsAsync(new ApplicationCommandProperties[]

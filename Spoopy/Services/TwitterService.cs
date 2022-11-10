@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Spoopy.Variables;
 using TwitterSharp.Client;
 using TwitterSharp.Request.AdvancedSearch;
 using TwitterSharp.Request.Option;
@@ -42,7 +43,7 @@ namespace Spoopy.Services
                     .WithUrl("https://twitter.com/" + tweet.Author.Username + $"/status/{tweet.Id}")
                     .WithThumbnailUrl(tweet.Author.ProfileImageUrl)
                     .WithDescription(Utilities.DeleteUrlFromText(tweet.Text))
-                    .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Properties.Culture)} ", iconUrl: Properties.TwitterLogoURL)
+                    .WithFooter($"Publié à {tweetTime.ToString(@"hh\:mm")} le {tweet.CreatedAt.Value.Date.ToString("dd MMMM, yyyy", Constantes.Culture)} ", iconUrl: Constantes.TwitterLogoURL)
                     .AddField("Replys : ", $"`{tweet.PublicMetrics.ReplyCount}`", inline: true)
                     .AddField("RTs : ", $"`{tweet.PublicMetrics.RetweetCount}`", inline: true)
                     .AddField("Likes : ", $"`{tweet.PublicMetrics.LikeCount}`", inline: true);

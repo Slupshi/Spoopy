@@ -8,6 +8,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Spoopy.Models;
 using Spoopy.Services;
+using Spoopy.Variables;
 using TwitterSharp.Response.RTweet;
 
 namespace Spoopy.Modules
@@ -29,7 +30,7 @@ namespace Spoopy.Modules
             {
                 if (newVoiceState.VoiceChannel == null)
                 {
-                    if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    if ((user as IGuildUser).RoleIds.Any(r => r == Constantes.UwuID))
                     {
                         await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
                     }
@@ -40,14 +41,14 @@ namespace Spoopy.Modules
 
                 if (isUwU)
                 {
-                    if (!(user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    if (!(user as IGuildUser).RoleIds.Any(r => r == Constantes.UwuID))
                     {
                         await (user as IGuildUser).AddRoleAsync(Properties.UwuRole);
                     }
                 }
                 else
                 {
-                    if ((user as IGuildUser).RoleIds.Any(r => r == Properties.UwuID))
+                    if ((user as IGuildUser).RoleIds.Any(r => r == Constantes.UwuID))
                     {
                         await (user as IGuildUser).RemoveRoleAsync(Properties.UwuRole);
                     }
@@ -81,7 +82,7 @@ namespace Spoopy.Modules
                     if (!game.Name.ToLower().Contains("launcher"))
                     {
                         RestRole role = await Properties.Banquise.CreateRoleAsync(name: game.Name,
-                                                                  color: Properties.WhiteColor,
+                                                                  color: Constantes.WhiteColor,
                                                                   isMentionable: true);
                         await Utilities.SpoopyLogAsync($"Role Crée : {role.Name}");
                         await banquiseUser.AddRoleAsync(role);
@@ -165,55 +166,7 @@ namespace Spoopy.Modules
                 Console.WriteLine(ex.Message);
                 await Utilities.SpoopyLogAsync("Erreur SetRoleOnJoin", isError: true);
             }
-        }
-
-        public async Task EmmerderZozoAsync(SocketGuildUser user, string gameName)
-        {
-            try
-            {
-                string message;
-                if (gameName == "VALORANT")
-                {
-                    message = "Ils sont bien les skins dans ton shop aujourd'hui ? =D";
-                }
-                else
-                {
-                    message = "Sale drogué";
-                }
-                await user.CreateDMChannelAsync();
-                await user.SendMessageAsync(Format.Bold(message));
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Utilities.SpoopyLogAsync("Erreur dans EmmerderZozo", isError: true);
-            }
-            
-        }
-
-        public async Task CheckRoleMembersAsync()
-        {
-            try
-            {
-                foreach (SocketRole role in Properties.Banquise.Roles)
-                {
-                    if (role.Members.ToList().Count > 1 && role.Members.ToList().Count < 3 && role.Color == Properties.WhiteColor)
-                    {
-                        await role.ModifyAsync(r => r.Color = Properties.GreenColor);
-                    }
-                    else if (role.Members.ToList().Count > 3 && (role.Color == Properties.WhiteColor || role.Color == Properties.GreenColor))
-                    {
-                        await role.ModifyAsync(r => r.Color = Properties.RedColor);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Utilities.SpoopyLogAsync("Erreur CheckRole",isError:true);
-            }
-           
-        }
+        }    
 
         public async Task CheckDMsAsync(SocketUserMessage message)
         {
@@ -240,7 +193,7 @@ namespace Spoopy.Modules
                     .WithUrl(message.GetJumpUrl())
                     .WithThumbnailUrl(message.Author.GetAvatarUrl())
                     .WithColor(Color.Red)
-                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.YoutubeLogoURL)
+                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.YoutubeLogoURL)
                     .WithDescription("N'hésites pas à mettre un petit like stp !\nTu peux aussi donner ton avis en utilisant un des bouton si dessous")
                     .AddField("Lien :", Format.Bold($"[Clique ici !]({message.CleanContent})"), inline: true)
                     .AddField("Titre :", Format.Bold(Format.Code($"{message.Embeds.First().Title}")), inline: true);
@@ -309,7 +262,7 @@ namespace Spoopy.Modules
             }
             #endregion TriggerWords
 
-            if (message.Attachments.Count > 0 && message.Author.Id == Properties.SlupID)
+            if (message.Attachments.Count > 0 && message.Author.Id == Constantes.SlupID)
             {
                 MessageReference messageRef = new MessageReference(messageId: message.Id);
                 await message.Channel.SendMessageAsync("**Les sources de ce message ne sont surement pas valide**", messageReference: messageRef);
@@ -328,7 +281,7 @@ namespace Spoopy.Modules
                 await message.DeleteAsync();
                 var botResponse = await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
 
-                await botResponse.AddReactionsAsync(Properties.ThumbEmojis);
+                await botResponse.AddReactionsAsync(Constantes.ThumbEmojis);
             }
             catch(Exception ex)
             {

@@ -12,6 +12,7 @@ using Discord.WebSocket;
 using Namotion.Reflection;
 using Spoopy.Jobs;
 using Spoopy.Models;
+using Spoopy.Variables;
 
 namespace Spoopy.Modules
 {
@@ -33,7 +34,7 @@ namespace Spoopy.Modules
                 var embedHelp = new EmbedBuilder();
                 embedHelp.WithTitle(Format.Underline("Voici de l'aide jeune Padawan"))
                             .WithColor(Color.DarkBlue)
-                            .WithFooter("Généré automatiquement", iconUrl: Properties.InfoIconURL);
+                            .WithFooter("Généré automatiquement", iconUrl: Constantes.InfoIconURL);
 
                 bool guildField = false;
 
@@ -93,7 +94,7 @@ namespace Spoopy.Modules
             try
             {
                 await command.DeferAsync(ephemeral: true);
-                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterUsername)?.Value;
                 if (user == null)
                     user = (SocketGuildUser)command.User;
 
@@ -170,7 +171,7 @@ namespace Spoopy.Modules
                                 }
                                 embedGame.WithTitle($"Joue à {richGameInfo.Name}")
                                          .WithColor(Color.LightGrey)
-                                         .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.ControllerIconURL);
+                                         .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.ControllerIconURL);
 
                                 if (richGameInfo.LargeAsset != null && richGameInfo.Details != null && richGameInfo.State != null)
                                 {
@@ -226,7 +227,7 @@ namespace Spoopy.Modules
                                     .AddField("Titre :", Format.Code(spotifyInfo.TrackTitle))
                                     .AddField("Auteur :", Format.Code(string.Join("` **|** `", spotifyInfo.Artists)))
                                     .AddField("Album :", Format.Code(spotifyInfo.AlbumTitle))
-                                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.SpotifyLogoURL);
+                                    .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.SpotifyLogoURL);
                                 var elapsed = spotifyInfoElapsed / spotifyInfoDuration;
                                 int elalpsedBarLenght = (int)(30 * elapsed);
                                 string elapsedBar = "";
@@ -297,8 +298,8 @@ namespace Spoopy.Modules
             {
                 await command.DeferAsync(ephemeral: true);
 
-                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
-                var size = command.Data.Options.FirstOrDefault((x) => x.Name == "size")?.Value;
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterUsername)?.Value;
+                var size = command.Data.Options.FirstOrDefault((x) => x.Name == CommandsConstantes.CommandParameterSize)?.Value;
 
                 if(user == null)
                     user = (SocketGuildUser)command.User;
@@ -347,15 +348,15 @@ namespace Spoopy.Modules
         [SlashCommand("random", "Selectionne un nombre random")]
         public static async Task RandomOrgAsync(SocketSlashCommand command)
         {
-            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
+            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterVisible)?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterVisible)?.Value);
             try
             {
                 await command.DeferAsync(ephemeral: !isVisible);
 
-                int start = (command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value) == null ? 1 : Convert.ToInt32((command.Data.Options.FirstOrDefault(x => x.Name == "départ")?.Value));
+                int start = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterStart)?.Value) == null ? 1 : Convert.ToInt32((command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterStart)?.Value));
                 start = start == 0 ? 1 : start;
 
-                int end = Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == "fin")?.Value);
+                int end = Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterEnd)?.Value);
 
                 if (end <= start)
                 {
@@ -439,11 +440,11 @@ namespace Spoopy.Modules
         [SlashCommand("shuffle", "Mélange les lettres d'une chaine de charactères")]
         public static async Task ShuffleAsync(SocketSlashCommand command)
         {
-            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "visible")?.Value);
+            bool isVisible = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterVisible)?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterVisible)?.Value);
             try
             {
                 await command.DeferAsync(ephemeral: !isVisible);
-                string entry = command.Data.Options.FirstOrDefault(x => x.Name == "entree")?.Value.ToString();
+                string entry = command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterStart)?.Value.ToString();
                 entry.Trim();
 
                 Random random = new Random();
@@ -491,9 +492,9 @@ namespace Spoopy.Modules
             try
             {
                 await command.DeferAsync(ephemeral: true);
-                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
-                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
-                int duration = (command.Data.Options.FirstOrDefault(x => x.Name == "duration")?.Value) == null ? 24 : Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == "duration")?.Value);
+                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterQuestion)?.Value);
+                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterEveryone)?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterEveryone)?.Value);
+                int duration = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterDuration)?.Value) == null ? 24 : Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterDuration)?.Value);
                 SocketUser author = command.User;
 
                 EmbedBuilder embedBuilder = new();
@@ -501,9 +502,9 @@ namespace Spoopy.Modules
                                         .WithTitle($"Sondage de {author.Username}")
                                         .WithThumbnailUrl(author.GetAvatarUrl())
                                         .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.QuestionMarkURL);
                 IUserMessage embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-                await embed.AddReactionsAsync(Properties.ThumbEmojis);
+                await embed.AddReactionsAsync(Constantes.ThumbEmojis);
                 await Utilities.SpoopyLogAsync($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
                 {
@@ -532,9 +533,9 @@ namespace Spoopy.Modules
             try
             {
                 await command.DeferAsync(ephemeral: true);
-                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == "question")?.Value);
-                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "everyone")?.Value);
-                bool isPersistant = (command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == "persistant")?.Value);
+                string question = (string)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterQuestion)?.Value);
+                bool isEveryone = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterEveryone)?.Value) == null ? false : (bool)(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterEveryone)?.Value);
+                int duration = (command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterDuration)?.Value) == null ? 24 : Convert.ToInt32(command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterDuration)?.Value);
                 SocketUser author = command.User;
 
                 var options = command.Data.Options.Where(x => x.Name.Contains("proposition")).ToList();
@@ -544,20 +545,16 @@ namespace Spoopy.Modules
                                         .WithTitle($"Sondage de {author.Username}")
                                         .WithThumbnailUrl(author.GetAvatarUrl())
                                         .WithDescription($"{question} {(question.Contains("?") ? string.Empty : "?")}")
-                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Properties.QuestionMarkURL);
+                                        .WithFooter(Utilities.GetCustomTimestamp(), iconUrl: Constantes.QuestionMarkURL);
                 List<Emoji> emojis = new List<Emoji>();
                 foreach (var option in options)
                 {
                     string number = option.Name.Split('n').LastOrDefault();
-                    embedBuilder.AddField($"{Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
+                    embedBuilder.AddField($"{Constantes.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
 
-                    emojis.Add(Properties.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
+                    emojis.Add(Constantes.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
                 }
                 var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
-                if (isPersistant)
-                {
-                    await embed.PinAsync();
-                }
                 await embed.AddReactionsAsync(emojis);
                 await Utilities.SpoopyLogAsync($"Sondage crée par {author.Username}");
                 await command.ModifyOriginalResponseAsync(delegate (MessageProperties msg)
@@ -592,7 +589,7 @@ namespace Spoopy.Modules
 
                 bool userWasNull = false;
 
-                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "username")?.Value;
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.CommandParameterUsername)?.Value;
                 SocketGuildUser author = (SocketGuildUser)command.User;
 
                 if (user == null)
@@ -695,8 +692,8 @@ namespace Spoopy.Modules
             {
                 await command.DeferAsync(ephemeral: true);
 
-                string game = command.Data.Options.FirstOrDefault(x => x.Name == "game")?.Value.ToString();
-                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == "streamer")?.Value;
+                string game = command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.StreamStartCommandParameterGame)?.Value.ToString();
+                SocketGuildUser user = (SocketGuildUser)command.Data.Options.FirstOrDefault(x => x.Name == CommandsConstantes.StreamStartCommandParameterStreamer)?.Value;
 
                 string link = Properties.TeykhoStreamers.FirstOrDefault(x => x.Key == (long)user.Id).Value;
 

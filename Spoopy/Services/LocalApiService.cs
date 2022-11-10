@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Discord;
 using Spoopy.Models;
+using Spoopy.Variables;
 
 namespace Spoopy.Services
 {
