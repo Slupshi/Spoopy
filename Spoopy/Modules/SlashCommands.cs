@@ -550,9 +550,9 @@ namespace Spoopy.Modules
                 foreach (var option in options)
                 {
                     string number = option.Name.Split('n').LastOrDefault();
-                    embedBuilder.AddField($"{Constantes.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
+                    embedBuilder.AddField($"{Constantes.NumberEmojis.FirstOrDefault(x => x.Key.ToString() == number).Value} Proposition n°{number}", option.Value);
 
-                    emojis.Add(Constantes.NumberEmoji.FirstOrDefault(x => x.Key.ToString() == number).Value);
+                    emojis.Add(Constantes.NumberEmojis.FirstOrDefault(x => x.Key.ToString() == number).Value);
                 }
                 var embed = await Properties.PollChannel.SendMessageAsync(text: $"{(isEveryone ? "@everyone" : string.Empty)}", embed: embedBuilder.Build());
                 await embed.AddReactionsAsync(emojis);
